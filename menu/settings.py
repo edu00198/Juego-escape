@@ -10,9 +10,14 @@ def settings_menu(window):
     clock = pygame.time.Clock()
     BASE_DIR = os.path.dirname(__file__)
 
-    # Fondo gris oscuro
-    fondo = pygame.Surface((ANCHO_PANTALLA, ALTO_PANTALLA))
-    fondo.fill((40, 40, 40))
+    # Fondo
+    ruta_fondo = os.path.join(BASE_DIR, "assets", "settings_fondo.png")
+    if os.path.exists(ruta_fondo):
+        fondo = pygame.image.load(ruta_fondo).convert()
+        fondo = pygame.transform.scale(fondo, (ANCHO_PANTALLA, ALTO_PANTALLA))
+    else:
+        fondo = pygame.Surface((ANCHO_PANTALLA, ALTO_PANTALLA))
+        fondo.fill((40, 40, 40))  
 
     # Botón Back
     ruta_back = os.path.join(BASE_DIR, "assets", "back.png")

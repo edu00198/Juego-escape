@@ -1,6 +1,6 @@
 import pygame
 import os
-from ..configuracion import VELOCIDAD_JUGADOR, ANCHO_PANTALLA, ALTO_PANTALLA, VELOCIDAD_ANIMACION
+from configuracion import VELOCIDAD_JUGADOR, ANCHO_PANTALLA, ALTO_PANTALLA, VELOCIDAD_ANIMACION
 
 class Jugador:
     def __init__(self, x, y, ancho, alto, escala=1.0):
@@ -58,10 +58,10 @@ class Jugador:
         teclas = pygame.key.get_pressed()
         moviendo = False
 
-        izquierda = teclas[pygame.K_a]
-        derecha = teclas[pygame.K_d]
-        arriba = teclas[pygame.K_w]
-        abajo = teclas[pygame.K_s]
+        izquierda = teclas[pygame.K_LEFT]
+        derecha   = teclas[pygame.K_RIGHT]
+        arriba    = teclas[pygame.K_UP]
+        abajo     = teclas[pygame.K_DOWN]
 
 
         if izquierda:
