@@ -1,6 +1,6 @@
 import pygame
 import os
-from ..configuracion import VELOCIDAD_JUGADOR, ANCHO_PANTALLA, ALTO_PANTALLA, VELOCIDAD_ANIMACION
+from configuracion import VELOCIDAD_JUGADOR, ANCHO_PANTALLA, ALTO_PANTALLA, VELOCIDAD_ANIMACION
 
 class Jugador:
     def __init__(self, x, y, ancho, alto, escala=1.0):

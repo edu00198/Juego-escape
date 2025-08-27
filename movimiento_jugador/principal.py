@@ -2,6 +2,7 @@ import pygame
 import os
 from configuracion import ANCHO_PANTALLA, ALTO_PANTALLA, BLANCO, ESCALA_JUGADOR
 from .jugador import Jugador
+from .colisiones import colisiones, detectar_colision, dibujar_colisiones
 
 def ejecutar_juego():
     pygame.init()
@@ -34,8 +35,10 @@ def ejecutar_juego():
                 ejecutando = False
 
         jugador.manejar_teclas()
+        pantalla.fill((0,0,0))
+        dibujar_colisiones(pantalla)
+        pygame.display.flip()
 
-        
         if fondo:
             pantalla.blit(fondo, (0, 0))
         else:
