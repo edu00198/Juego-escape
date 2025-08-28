@@ -5,7 +5,9 @@ from configuracion import ANCHO_PANTALLA, ALTO_PANTALLA, BLANCO, ESCALA_JUGADOR
 from .jugador import Jugador
 from menu.button import Button
 from menu.settings import settings_menu
-
+from movimiento_jugador.jugador import Jugador
+from movimiento_jugador.colisiones import colisiones, puerta
+from fondos import fondo
 
 def pause_menu(window):
     """
@@ -73,19 +75,22 @@ def pause_menu(window):
         clock.tick(60)
 
 
+
 def ejecutar_juego():
     pygame.init()
     pantalla = pygame.display.set_mode((ANCHO_PANTALLA, ALTO_PANTALLA))
-    pygame.display.set_caption("movimiento_jugador")
+    pygame.display.set_caption("Juego Escape")
 
-    from configuracion import fondo_1
+    # Fondo
     try:
-        fondo = pygame.image.load(fondo_1).convert()
+        fondo = pygame.image.load(fondo_1).convert()  # fondo_1 viene de configuracion.py
         fondo = pygame.transform.scale(fondo, (ANCHO_PANTALLA, ALTO_PANTALLA))
     except Exception as e:
         print(f"No se pudo cargar el fondo: {e}")
         fondo = None
 
+
+    # Jugador
     ancho_jugador = 50
     alto_jugador = 50
     pos_x = (ANCHO_PANTALLA - ancho_jugador) // 2
@@ -97,16 +102,23 @@ def ejecutar_juego():
 
     while ejecutando:
         reloj.tick(60)
+
+        # Eventos
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
                 ejecutando = False
             elif evento.type == pygame.KEYDOWN:
                 if evento.key == pygame.K_ESCAPE:
-                    # Llamar al menú de pausa
                     pause_menu(pantalla)
 
-        # Manejar movimiento del jugador
+        # Movimiento del jugador con colisiones
+        teclas = pygame.key.get_pressed()
         jugador.manejar_teclas()
+
+
+        # Chequear puerta
+        if jugador.rect.colliderect(puerta):
+            print("Tocó la puerta!")
 
         # Dibujar fondo
         if fondo:
@@ -116,6 +128,11 @@ def ejecutar_juego():
 
         # Dibujar jugador
         jugador.dibujar(pantalla)
+
+        # Dibujar colisiones y puerta (debug)
+        for rect in colisiones:
+            pygame.draw.rect(pantalla, (0, 255, 0), rect, 2)
+        pygame.draw.rect(pantalla, (0, 0, 255), puerta, 2)
 
         pygame.display.flip()
 

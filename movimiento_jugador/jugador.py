@@ -1,6 +1,7 @@
 import pygame
 import os
 from configuracion import VELOCIDAD_JUGADOR, ANCHO_PANTALLA, ALTO_PANTALLA, VELOCIDAD_ANIMACION
+from movimiento_jugador.colisiones import colisiones
 
 class Jugador:
     def __init__(self, x, y, ancho, alto, escala=1.0):
@@ -78,14 +79,21 @@ class Jugador:
             if arriba:
                 self.rect.y -= self.velocidad
                 self.direccion = "arriba"
+                if self.rect.collidelist(colisiones) != -1:  # chocó con alguna
+                    self.rect.y += self.velocidad  # lo devolvemos
                 moviendo = True
             elif abajo:
                 self.rect.y += self.velocidad
                 self.direccion = "abajo"
+                if self.rect.collidelist(colisiones) != -1:
+
+                    self.rect.y -= self.velocidad
                 moviendo = True
         else:
             if arriba:
                 self.rect.y -= self.velocidad
+                if self.rect.collidelist(colisiones) != -1:  # chocó con alguna
+                    self.rect.y += self.velocidad  # lo devolvemos
                 moviendo = True
             elif abajo:
                 self.rect.y += self.velocidad

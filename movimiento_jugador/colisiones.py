@@ -1,9 +1,6 @@
 """este codigo define las colisiones"""
 import pygame
-from .jugador import Jugador  # Importo la clase, no una instancia
-
-def detectar_colision(rect1, rect2):
-    return rect1.colliderect(rect2)
+  
 
 
 # Lista de rectángulos de colisión

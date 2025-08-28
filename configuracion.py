@@ -4,9 +4,9 @@ incluyendo las dimensiones de la ventana del juego, los colores y la velocidad d
 """
 
 
-from fondos.fondo import fondo_prueba
+from fondos.fondo import fondo_1
 
-fondo_1 = fondo_prueba
+fondo_1 = fondo_1
 
 
 # Colores en formato RGB
