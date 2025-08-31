@@ -70,7 +70,7 @@ def get_font(size):
     return pygame.font.Font(ruta_fuente, size)
 
 
-def menu():
+def menus():
     from configuracion import ANCHO_PANTALLA, ALTO_PANTALLA
     """Función para mostrar el menú principal del juego."""
     pygame.init()
@@ -97,7 +97,7 @@ def menu():
     # Crear botones
     start_button = Button(ruta_start, (400, 500), scale=1.25, text=None)
     exit_button = Button(ruta_exit, (800, 500), scale=1.25, text=None)
-    options_button = Button(ruta_options_normal, (1225, 40), scale=0.75, text=None)
+    options_button = Button(ruta_options_normal, (1200, 40), scale=0.75, text=None)
 
     # Cargar imágenes como Surface
     img_options_normal = pygame.image.load(ruta_options_normal).convert_alpha()
