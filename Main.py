@@ -7,11 +7,11 @@ from menu.menuzaso import menus
 
 def main():
     
-    #main_intro()   # Ejecuta la intro del juego
-    #time.sleep(1)  # Pausa breve entre la intro y el menu
-    #press_any_key_screen()
+    main_intro()   # Ejecuta la intro del juego
+    time.sleep(1)  # Pausa breve entre la intro y el menu
+    press_any_key_screen()
     
-    #menus()         # Muestra el menú principal
+    menus()         # Muestra el menú principal
     
     principal.ejecutar_juego()
 
