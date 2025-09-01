@@ -13,7 +13,7 @@ from menu.menuzaso import menus
 def pause_menu(window):
     """
     Menú de pausa que aparece al presionar ESC.
-    Botones: Reanudar, Salir, Ayuda, Configuración
+    Botones: Reanudar, Salir, Ayuda, Configuraciónaaaaaaaaaa
     """
     screen = pygame.display.set_mode((ANCHO_PANTALLA, ALTO_PANTALLA))
     pygame.display.set_caption("Pantalla de carga")
