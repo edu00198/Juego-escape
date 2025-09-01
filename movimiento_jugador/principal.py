@@ -7,44 +7,51 @@ from menu.button import Button
 from menu.settings import settings_menu
 from movimiento_jugador.jugador import Jugador
 from movimiento_jugador.colisiones import colisiones, puerta
-from fondos.fondo import fondo_1,  fondo_2
+from fondos.fondo import fondo_1,  f1_opciones
 from menu.menuzaso import menus
 
-def pause_menu(window):
+
+
+def pause_menu(pantalla):
     """
     Menú de pausa que aparece al presionar ESC.
     Botones: Reanudar, Salir, Ayuda, Configuración
     """
-    screen = pygame.display.set_mode((ANCHO_PANTALLA, ALTO_PANTALLA))
-    pygame.display.set_caption("Pantalla de carga")
-    clock = pygame.time.Clock()
-    
+    pygame.init()
+    pantalla = pygame.display.set_mode((ANCHO_PANTALLA, ALTO_PANTALLA))
+    pygame.display.set_caption("Opciones")
 
-    # Fondo blur
-    BASE_DIR = os.path.dirname(__file__)
-    ruta_fondo = os.path.join(BASE_DIR, "menu","assets", "ioptions.png")
-    background = pygame.image.load(ruta_fondo).convert()
-    background = pygame.transform.scale(background, (ANCHO_PANTALLA, ALTO_PANTALLA))
+    # Fondo
+    try:
+        fondo = pygame.image.load(f1_opciones).convert()  # f1_opciones viene de configuracion.py
+        fondo = pygame.transform.scale(fondo, (ANCHO_PANTALLA, ALTO_PANTALLA))
+    except Exception as e:
+        print(f"No se pudo cargar el fondo: {e}")
+        fondo = None
 
-    # Crear botones
+    # Crear botones (asumo que la clase Button está definida en otro lado)
     btn_width = 300
     btn_height = 60
     spacing = 20
     start_y = (ALTO_PANTALLA - (btn_height * 4 + spacing * 3)) // 2
+    clock = pygame.time.Clock()
+    if fondo:
+        pantalla.blit(fondo, (0, 0))
+    else:
+        pantalla.fill(BLANCO)
 
     reanudar_button = Button(None, (ANCHO_PANTALLA//2, start_y), text="REANUDAR")
-    salir_button = Button(None, (ANCHO_PANTALLA//2, start_y + (btn_height + spacing)), text="SALIR")
-    ayuda_button = Button(None, (ANCHO_PANTALLA//2, start_y + 2*(btn_height + spacing)), text="AYUDA")
     config_button = Button(None, (ANCHO_PANTALLA//2, start_y + 3*(btn_height + spacing)), text="CONFIGURACION")
+    ayuda_button = Button(None, (ANCHO_PANTALLA//2, start_y + 2*(btn_height + spacing)), text="AYUDA")
+    salir_button = Button(None, (ANCHO_PANTALLA//2, start_y + (btn_height + spacing)), text="SALIR")
 
-    buttons = [reanudar_button, salir_button, ayuda_button, config_button]
+    buttons = [reanudar_button,config_button, ayuda_button,salir_button]
     selected_index = 0
     buttons[selected_index].hover_effect = True
 
     paused = True
-    while paused:
-        screen.blit(background, (0, 0))
 
+    while paused:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -61,18 +68,19 @@ def pause_menu(window):
                     clicked_button = buttons[selected_index]
                     if clicked_button == reanudar_button:
                         return
+                    elif clicked_button == config_button:
+                        settings_menu(pantalla)
+                    elif clicked_button == ayuda_button:
+                        print("")
                     elif clicked_button == salir_button:
                         menus()
-                    elif clicked_button == ayuda_button:
-                        print("Mostrar ayuda...")
-                    elif clicked_button == config_button:
-                        settings_menu(window)
 
-        # Actualizar botones
+        # Actualizar y dibujar botones
         for i, btn in enumerate(buttons):
-            btn.hover_effect = (i == selected_index)
+            btn.selected = (i == selected_index)  # <<--- esto reemplaza hover_effect
             btn.update()
-            btn.draw(window)
+            btn.draw(pantalla)
+
 
         pygame.display.flip()
         clock.tick(60)
@@ -100,11 +108,11 @@ def ejecutar_juego():
     pos_y = (ALTO_PANTALLA - alto_jugador) // 2
     jugador = Jugador(pos_x, pos_y, ancho_jugador, alto_jugador, escala=ESCALA_JUGADOR)
 
-    reloj = pygame.time.Clock()
+    clock = pygame.time.Clock()
     ejecutando = True
 
     while ejecutando:
-        reloj.tick(60)
+        clock.tick(60)
 
         # Eventos
         for evento in pygame.event.get():

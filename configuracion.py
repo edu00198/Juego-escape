@@ -4,10 +4,10 @@ incluyendo las dimensiones de la ventana del juego, los colores y la velocidad d
 """
 
 
-from fondos.fondo import fondo_1
+from fondos.fondo import fondo_1,f1_opciones
 
 fondo_1 = fondo_1
-
+f1_opciones=f1_opciones
 
 # Colores en formato RGB
 BLANCO = (255, 255, 255)
