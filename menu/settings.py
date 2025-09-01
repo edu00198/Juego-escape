@@ -18,7 +18,7 @@ def settings_menu(window):
         fondo = pygame.Surface((ANCHO_PANTALLA, ALTO_PANTALLA))
         fondo.fill((40, 40, 40))  
 
-    # Botón Back (solo imagen, no clic)
+    # Botón Back (solo imagen)
     ruta_back = os.path.join(BASE_DIR, "assets", "back.png")
     back_button = Button(ruta_back, (1250, 30), scale=0.3)
 
@@ -62,7 +62,7 @@ def settings_menu(window):
                     elif event.key == pygame.K_RETURN:
                         active_setting = settings[selected_index]
                 else:
-                    # Control de VOLUMEN
+                    # Control de VOLUMEN con flechas
                     if active_setting == "VOLUMEN":
                         if event.key == pygame.K_RIGHT:
                             volume_value = min(100, volume_value + 5)
@@ -82,9 +82,9 @@ def settings_menu(window):
             x, y = buttons_pos[i]
 
             if active_setting == name:
-                color = (255, 0, 0)  # dentro del menú → rojo
+                color = (255, 0, 0)  # activo → rojo
             else:
-                color = (255, 255, 255)
+                color = (255, 255, 255)  # inactivo → blanco
 
             text_surf = font.render(name, True, color)
             text_rect = text_surf.get_rect(center=(x, y))
@@ -98,14 +98,11 @@ def settings_menu(window):
 
         # --- Apartado VOLUMEN ---
         if active_setting == "VOLUMEN":
-            # Barra
             pygame.draw.rect(window, (200, 200, 200), slider_rect, 2)
             pygame.draw.line(window, (150, 150, 150),
                              (slider_rect.left, slider_rect.centery),
                              (slider_rect.right, slider_rect.centery), 4)
-            # Knob
             pygame.draw.rect(window, (255, 0, 0), slider_knob)
-            # Texto porcentaje
             vol_text = font.render(f"{volume_value}%", True, (255, 255, 255))
             window.blit(vol_text, (slider_rect.right + 40, slider_rect.y - 12))
 
