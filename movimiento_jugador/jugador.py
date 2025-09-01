@@ -1,3 +1,4 @@
+#jugador
 import pygame
 import os
 from configuracion import VELOCIDAD_JUGADOR, ANCHO_PANTALLA, ALTO_PANTALLA, VELOCIDAD_ANIMACION
@@ -5,12 +6,31 @@ from movimiento_jugador.colisiones import colisiones
 
 class Jugador:
     def __init__(self, x, y, ancho, alto, escala=1.0):
-        # Rectángulo del jugador
-        self.rect = pygame.Rect(x, y, int(ancho*escala), int(alto*escala))
+
         self.velocidad = VELOCIDAD_JUGADOR
         self.escala = escala
 
-        # Cargar animaciones
+        # Posición visual del sprite (sin desplazamiento manual)
+        self.sprite_pos = pygame.Vector2(x, y)
+
+        # Crear el rectángulo de colisión con offset relativo al sprite
+        offset_x = 53  # mueve la hitbox a la derecha
+        offset_y = 50   # mueve la hitbox hacia abajo
+
+        # Tamaño base del rectángulo
+        hitbox_ancho = int(ancho * escala)
+        hitbox_alto = int(alto * escala)
+
+        # Crear la hitbox desplazada y ajustada
+        self.rect = pygame.Rect(
+            self.sprite_pos.x + offset_x,
+            self.sprite_pos.y + offset_y,
+            hitbox_ancho,
+            hitbox_alto
+        )
+        self.rect.inflate_ip(-30, -20)  # achica la hitbox horizontal y verticalmente
+
+        # Animaciones (como ya tenías)
         self.animaciones = {
             "idle_abajo": self.cargar_sprites("idle_personaje_lvl1_con_sombra", "idle_abajo"),
             "idle_arriba": self.cargar_sprites("idle_personaje_lvl1_con_sombra", "idle_arriba"),
@@ -29,12 +49,14 @@ class Jugador:
         self.contador_tiempo = 0
         self.velocidad_animacion = VELOCIDAD_ANIMACION
 
+
         # Escalar sprites si la escala no es 1
         if self.escala != 1.0:
             for clave, lista in self.animaciones.items():
                 self.animaciones[clave] = [pygame.transform.scale(img, 
-                                           (int(img.get_width()*escala), int(img.get_height()*escala))) 
+                                           (int(img.get_width() * escala), int(img.get_height() * escala))) 
                                            for img in lista]
+
 
     def cargar_sprites(self, carpeta_principal, subcarpeta):
         ruta_base = os.path.join(os.path.dirname(os.path.dirname(__file__)), "sprites", carpeta_principal, subcarpeta)
@@ -64,40 +86,82 @@ class Jugador:
         arriba    = teclas[pygame.K_UP]
         abajo     = teclas[pygame.K_DOWN]
 
-
         if izquierda:
+            pos_anterior = self.rect.x
             self.rect.x -= self.velocidad
+            self.sprite_pos.x -= self.velocidad
             self.direccion = "izquierda"
             moviendo = True
-            
+
+            for colision in colisiones:
+                if self.rect.colliderect(colision):
+                    self.rect.x = pos_anterior
+                    self.sprite_pos.x += self.velocidad
+                    break
+
         elif derecha:
+            pos_anterior = self.rect.x
             self.rect.x += self.velocidad
+            self.sprite_pos.x += self.velocidad
             self.direccion = "derecha"
             moviendo = True
 
+            for colision in colisiones:
+                if self.rect.colliderect(colision):
+                    self.rect.x = pos_anterior
+                    self.sprite_pos.x -= self.velocidad
+                    break
+
         if not izquierda and not derecha:
             if arriba:
+                pos_anterior = self.rect.y
                 self.rect.y -= self.velocidad
+                self.sprite_pos.y -= self.velocidad
                 self.direccion = "arriba"
-                if self.rect.collidelist(colisiones) != -1:  # chocó con alguna
-                    self.rect.y += self.velocidad  # lo devolvemos
                 moviendo = True
-            elif abajo:
-                self.rect.y += self.velocidad
-                self.direccion = "abajo"
-                if self.rect.collidelist(colisiones) != -1:
 
-                    self.rect.y -= self.velocidad
+                for colision in colisiones:
+                    if self.rect.colliderect(colision):
+                        self.rect.y = pos_anterior
+                        self.sprite_pos.y += self.velocidad
+                        break
+
+            elif abajo:
+                pos_anterior = self.rect.y
+                self.rect.y += self.velocidad
+                self.sprite_pos.y += self.velocidad
+                self.direccion = "abajo"
                 moviendo = True
+
+                for colision in colisiones:
+                    if self.rect.colliderect(colision):
+                        self.rect.y = pos_anterior
+                        self.sprite_pos.y -= self.velocidad
+                        break
         else:
             if arriba:
+                pos_anterior = self.rect.y
                 self.rect.y -= self.velocidad
-                if self.rect.collidelist(colisiones) != -1:  # chocó con alguna
-                    self.rect.y += self.velocidad  # lo devolvemos
+                self.sprite_pos.y -= self.velocidad
                 moviendo = True
+
+                for colision in colisiones:
+                    if self.rect.colliderect(colision):
+                        self.rect.y = pos_anterior
+                        self.sprite_pos.y += self.velocidad
+                        break
+
             elif abajo:
+                pos_anterior = self.rect.y
                 self.rect.y += self.velocidad
+                self.sprite_pos.y += self.velocidad
                 moviendo = True
+
+                for colision in colisiones:
+                    if self.rect.colliderect(colision):
+                        self.rect.y = pos_anterior
+                        self.sprite_pos.y -= self.velocidad
+                        break
 
         self.estado = "run" if moviendo else "idle"
         clave_animacion = f"{self.estado}_{self.direccion}"
@@ -107,7 +171,6 @@ class Jugador:
                 self.animacion_actual = self.animaciones[clave_animacion]
                 self.frame_actual = 0
 
-        # Limitar jugador en pantalla
         self.rect.left = max(self.rect.left, 0)
         self.rect.right = min(self.rect.right, ANCHO_PANTALLA)
         self.rect.top = max(self.rect.top, 0)
@@ -117,10 +180,19 @@ class Jugador:
         if not self.animacion_actual:
             return
 
+        # Actualizar el frame de animación
         self.contador_tiempo += 1
         if self.contador_tiempo >= self.velocidad_animacion:
             self.frame_actual = (self.frame_actual + 1) % len(self.animacion_actual)
             self.contador_tiempo = 0
 
+        # Obtener el sprite actual
         imagen = self.animacion_actual[self.frame_actual]
-        pantalla.blit(imagen, self.rect)
+
+        # Dibujar el sprite en su posición visual
+        pantalla.blit(imagen, self.sprite_pos)
+
+        # Dibujar la hitbox (verde) para debug
+        pygame.draw.rect(pantalla, (0, 255, 0), self.rect, 2)
+
+

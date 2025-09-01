@@ -1,3 +1,4 @@
+#principal
 import pygame
 import sys
 import os
@@ -78,13 +79,12 @@ def pause_menu(window):
         clock.tick(60)
 
 
-
 def ejecutar_juego():
     pygame.init()
     pantalla = pygame.display.set_mode((ANCHO_PANTALLA, ALTO_PANTALLA))
     pygame.display.set_caption("Juego Escape")
 
-    # Fondo
+    # Fondo 1
     try:
         fondo = pygame.image.load(fondo_1).convert()  # fondo_1 viene de configuracion.py
         fondo = pygame.transform.scale(fondo, (ANCHO_PANTALLA, ALTO_PANTALLA))
@@ -93,9 +93,8 @@ def ejecutar_juego():
         fondo = None
 
 
-    # Jugador
-    ancho_jugador = 50
-    alto_jugador = 50
+    ancho_jugador = 26
+    alto_jugador = 32
     pos_x = (ANCHO_PANTALLA - ancho_jugador) // 2
     pos_y = (ALTO_PANTALLA - alto_jugador) // 2
     jugador = Jugador(pos_x, pos_y, ancho_jugador, alto_jugador, escala=ESCALA_JUGADOR)
@@ -115,13 +114,25 @@ def ejecutar_juego():
                     pause_menu(pantalla)
 
         # Movimiento del jugador con colisiones
-        teclas = pygame.key.get_pressed()
+        
         jugador.manejar_teclas()
+
+        
+        for rect in colisiones:
+            pygame.draw.rect(pantalla, (255, 0, 0), rect, 2)  # dibuja cada rect en la pantalla
+            pygame.draw.rect(pantalla, (0, 0, 255), puerta, 2)  # dibuja la puerta en verde
+
 
 
         # Chequear puerta
         if jugador.rect.colliderect(puerta):
-            print("Tocó la puerta!")
+            # Fondo 2
+            try:
+                fondo = pygame.image.load(fondo_2).convert()  # fondo_1 viene de configuracion.py
+                fondo = pygame.transform.scale(fondo, (ANCHO_PANTALLA, ALTO_PANTALLA))
+            except Exception as e:
+                print(f"No se pudo cargar el fondo: {e}")
+                fondo = None
 
         # Dibujar fondo
         if fondo:
@@ -132,11 +143,7 @@ def ejecutar_juego():
         # Dibujar jugador
         jugador.dibujar(pantalla)
 
-        # Dibujar colisiones y puerta (debug)
-        for rect in colisiones:
-            pygame.draw.rect(pantalla, (0, 255, 0), rect, 2)
-        pygame.draw.rect(pantalla, (0, 0, 255), puerta, 2)
-
+      
         pygame.display.flip()
 
     pygame.quit()
