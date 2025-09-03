@@ -9,8 +9,9 @@ from movimiento_jugador.jugador import Jugador
 from movimiento_jugador.colisiones import colisiones, puerta
 from mapas.fondo import mapa1, mapa2
 from .menu_pausa import pause_menu
+from .mapa_2 import ejecutar_mapa2
 
-def ejecutar_juego():
+def ejecutar_mapa1():
     pygame.init()
     pantalla = pygame.display.set_mode((ANCHO_PANTALLA, ALTO_PANTALLA))
     pygame.display.set_caption("Juego Escape")
@@ -59,8 +60,7 @@ def ejecutar_juego():
         if jugador.rect.colliderect(puerta):
             # Fondo 2
             try:
-                fondo = pygame.image.load(mapa2).convert()  # fondo_1 viene de configuracion.py
-                fondo = pygame.transform.scale(fondo, (ANCHO_PANTALLA, ALTO_PANTALLA))
+                ejecutar_mapa2()
             except Exception as e:
                 print(f"No se pudo cargar el fondo: {e}")
                 fondo = None
@@ -81,4 +81,4 @@ def ejecutar_juego():
 
 
 if __name__ == "__main__":
-    ejecutar_juego()
+    ejecutar_mapa1()

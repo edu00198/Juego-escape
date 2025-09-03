@@ -15,7 +15,7 @@ def pause_menu(pantalla, mapa_actual=1):
     """
     pygame.init()
     pantalla = pygame.display.set_mode((ANCHO_PANTALLA, ALTO_PANTALLA))
-    pygame.display.set_caption("Opciones")
+    pygame.display.set_caption("OPCIONES")
 
     # Fondo según el mapa
     try:
