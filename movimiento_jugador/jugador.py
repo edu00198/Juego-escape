@@ -78,13 +78,18 @@ class Jugador:
 
         return imagenes
 
+            # mapa2.py
+  
+
     def manejar_teclas(self):
         teclas = pygame.key.get_pressed()
         moviendo = False
 
-        if mapa_actual == 1:
+        from configuracion import mapa_actual
+
+        if mapa_actual.mapa_actual == "mapa1":
             colisiones = colisiones_mapa_1
-        elif mapa_actual == 2:
+        elif mapa_actual.mapa_actual == "mapa2":
             colisiones = colisiones_mapa_2
 
 
@@ -195,9 +200,11 @@ class Jugador:
 
         # Obtener el sprite actual
         imagen = self.animacion_actual[self.frame_actual]
-
-        # Dibujar el sprite en su posición visual
-        pantalla.blit(imagen, self.sprite_pos)
+        try:
+            # Dibujar el sprite en su posición visual
+            pantalla.blit(imagen, self.sprite_pos)
+        except Exception as e:
+            print(e)
 
         # Dibujar la hitbox (verde) para debug
         pygame.draw.rect(pantalla, (0, 255, 0), self.rect, 2)

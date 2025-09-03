@@ -1,11 +1,5 @@
 """este codigo define las colisiones"""
 import pygame
-
-import os
-
-  
-
-
 # Lista de rectángulos de colisión
 colisiones_mapa_1 = [
     pygame.Rect(0, 0, 320, 270), #cuadrado arriba a la derecha/ celda
@@ -26,18 +20,28 @@ colisiones_mapa_1 = [
 puerta_1 = pygame.Rect(660, 15, 90, 115)  # Definición de la puerta
 
 colisiones_mapa_2 = [
-        pygame.Rect(0, 0, 1200, 70),       # borde superior
-        pygame.Rect(0, 70, 60, 650),      # borde izq
+        pygame.Rect(0, 0, 1250, 190),       # borde superior
+        pygame.Rect(0, 70, 60, 600),      # borde izq
 
+        pygame.Rect(60, 590, 570, 90),      # borde inferior izq
+        pygame.Rect(780, 590, 500, 90),      # borde inferior der
+        pygame.Rect(500, 675, 400, 30),      # borde inferior puerta
+
+        pygame.Rect(1220, 190, 60, 200),    # borde derecha superior
+        pygame.Rect(1220, 300, 60, 200),    # borde derecha puerta
         
      ]     # parte atras puerta
 
-puerta_2 = pygame.Rect(255, 255, 60, 60)
+puerta_2_salida = pygame.Rect(255, 255, 60, 60)
+puerta_2_entrada= pygame.Rect(630, 640, 150, 90)  # Definición de la puerta
+
+
 import pygame
 import sys
 import os
-from mapas.fondo import mapa1, mapa2
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
+from mapas.fondo import mapa2
 
 def probar_colisiones():
     # Inicializar Pygame
@@ -61,7 +65,8 @@ def probar_colisiones():
     reloj = pygame.time.Clock()
 
     # Rectángulo de la puerta
-    puerta_1 = pygame.Rect(660, 0, 90, 115)
+    
+
 
     # Bucle principal
     while True:
@@ -81,11 +86,12 @@ def probar_colisiones():
             pygame.draw.rect(pantalla, (255, 0, 0), rect, 2)  # Rojo
 
         # Dibujar la puerta
-        pygame.draw.rect(pantalla, (0, 0, 255), puerta_1, 2)  # Azul
+        pygame.draw.rect(pantalla, (0, 0, 255), puerta_2_entrada, 2)  # Azul
+        pygame.draw.rect(pantalla, (0, 55, 200), puerta_2_salida, 2)  # Azul
 
         # Actualizar pantalla
         pygame.display.flip()
         reloj.tick(60)
 
 
-probar_colisiones
+probar_colisiones()

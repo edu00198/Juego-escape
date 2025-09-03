@@ -2,11 +2,11 @@
 import pygame
 import sys
 import os
-from configuracion import ANCHO_PANTALLA, ALTO_PANTALLA, BLANCO, ESCALA_JUGADOR, mapa_actual
+from configuracion import ANCHO_PANTALLA, ALTO_PANTALLA, BLANCO, ESCALA_JUGADOR
 from movimiento_jugador.jugador import Jugador
 from menu.button import Button
 from movimiento_jugador.jugador import Jugador
-from movimiento_jugador.colisiones import colisiones, puerta
+from movimiento_jugador.colisiones import colisiones_mapa_1, puerta_1
 from mapas.fondo import mapa1, mapa2
 from .menu_pausa import pause_menu
 from .mapa_2 import ejecutar_mapa2
@@ -52,27 +52,32 @@ def ejecutar_mapa1():
         jugador.manejar_teclas()
 
         
-        for rect in colisiones:
+        for rect in colisiones_mapa_1:
             pygame.draw.rect(pantalla, (255, 0, 0), rect, 2)  # dibuja cada rect en la pantalla
-            pygame.draw.rect(pantalla, (0, 0, 255), puerta, 2)  # dibuja la puerta en verde
+            pygame.draw.rect(pantalla, (0, 0, 255), puerta_1, 2)  # dibuja la puerta en verde
 
 
 
         # Chequear puerta
-        if jugador.rect.colliderect(puerta):
+        if jugador.rect.colliderect(puerta_1):
             # Fondo 2
             try:
-                mapa_actual = 2
+                
+
                 ejecutar_mapa2()
             except Exception as e:
                 print(f"No se pudo cargar el fondo: {e}")
                 fondo = None
 
         # Dibujar fondo
-        if fondo:
-            pantalla.blit(fondo, (0, 0))
-        else:
-            pantalla.fill(BLANCO)
+        try:
+            if fondo:
+                pantalla.blit(fondo, (0, 0))
+            else:
+                pantalla.fill(BLANCO)
+        except Exception as e:
+            print(e)
+
 
         # Dibujar jugador
         jugador.dibujar(pantalla)

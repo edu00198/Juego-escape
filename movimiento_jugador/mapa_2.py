@@ -2,24 +2,27 @@ import pygame
 import sys
 import os
 from configuracion import ANCHO_PANTALLA, ALTO_PANTALLA, BLANCO, ESCALA_JUGADOR
-from .jugador import Jugador
 from menu.button import Button
 from movimiento_jugador.jugador import Jugador
-from movimiento_jugador.colisiones import colisiones, puerta
+from movimiento_jugador.colisiones import colisiones_mapa_2, puerta_2_entrada, puerta_2_salida
 from mapas.fondo import mapa2
 from .menu_pausa import pause_menu
 
 
 def ejecutar_mapa2():
+        # mapa2.py
+    from configuracion import mapa_actual
+
+    # Cambiar el mapa actual
+    mapa_actual.mapa_actual = "mapa2"
+
     pygame.init()
     pantalla = pygame.display.set_mode((ANCHO_PANTALLA, ALTO_PANTALLA))
     pygame.display.set_caption("Juego Escape")
 
-    mapa_actual = 2
-
     # Fondo 2
     try:
-        fondo = pygame.image.load(mapa2).convert()  # fondo_1 viene de configuracion.py
+        fondo = pygame.image.load(mapa2).convert()  # fondo_2 viene de configuracion.py
         fondo = pygame.transform.scale(fondo, (ANCHO_PANTALLA, ALTO_PANTALLA))
     except Exception as e:
         print(f"No se pudo cargar el fondo: {e}")
@@ -51,10 +54,10 @@ def ejecutar_mapa2():
         jugador.manejar_teclas()
 
         
-        for rect in colisiones:
+        for rect in colisiones_mapa_2:
             pygame.draw.rect(pantalla, (255, 0, 0), rect, 2)  # dibuja cada rect en la pantalla
-            pygame.draw.rect(pantalla, (0, 0, 255), puerta, 2)  # dibuja la puerta en verde
-
+            pygame.draw.rect(pantalla, (0, 0, 255), puerta_2_entrada, 2)  # dibuja la puerta en verde
+            pygame.draw.rect(pantalla, (0, 0, 255), puerta_2_entrada, 2) 
 
 
 

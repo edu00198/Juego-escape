@@ -11,6 +11,12 @@ mapa2 = mapa2
 m1_opciones=m1_opciones
 m2_opciones=m2_opciones
 
+# game_state.py
+class GameState:
+    def __init__(self):
+        self.mapa_actual = "mapa1"
+
+mapa_actual = GameState()
 
 # Colores en formato RGB
 BLANCO = (255, 255, 255)
