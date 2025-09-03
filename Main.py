@@ -13,6 +13,6 @@ def main():
     
     menus()         # Muestra el menú principal
     
-    mapa_1.ejecutar_juego()
+    mapa_1.ejecutar_mapa1()
 
 main()
