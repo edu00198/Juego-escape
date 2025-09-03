@@ -94,4 +94,4 @@ def probar_colisiones():
         reloj.tick(60)
 
 
-probar_colisiones()
+#probar_colisiones()
