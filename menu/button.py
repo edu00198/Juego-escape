@@ -51,7 +51,11 @@ class Button:
 
     def update(self):
         """Interpola suavemente la escala hacia el tamaño objetivo."""
-        target_scale = self.hover_scale if (self.hover_effect and self.is_hover()) else self.base_scale
+        # Si el botón está seleccionado -> usar hover_scale
+        if getattr(self, "selected", False):
+            target_scale = self.hover_scale
+        else:
+            target_scale = self.base_scale
 
         # interpolación lineal hacia el target
         self.current_scale += (target_scale - self.current_scale) * self.scale_speed
@@ -59,6 +63,7 @@ class Button:
         # actualizar imagen y rect
         self.current_image = self.get_scaled_image(self.current_scale)
         self.rect = self.current_image.get_rect(center=self.pos)
+
 
     def is_hover(self):
         return self.rect.collidepoint(pygame.mouse.get_pos())

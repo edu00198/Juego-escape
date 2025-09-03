@@ -64,6 +64,13 @@ def loading_screen(window):
     return True
 
 
+import pygame
+import sys
+import os
+from .button import Button
+from .settings import settings_menu
+
+
 def get_font(size):
     BASE_DIR = os.path.dirname(__file__)  # carpeta donde está este .py
     ruta_fuente = os.path.join(BASE_DIR, "assets", "font.ttf")
@@ -72,7 +79,7 @@ def get_font(size):
 
 def menus():
     from configuracion import ANCHO_PANTALLA, ALTO_PANTALLA
-    """Función para mostrar el menú principal del juego."""
+    """Función para mostrar el menú principal del juego (solo con flechas)."""
     pygame.init()
     window = pygame.display.set_mode((ANCHO_PANTALLA, ALTO_PANTALLA))
     pygame.display.set_caption("MENÚ")
@@ -88,75 +95,54 @@ def menus():
         fondo = pygame.Surface((ANCHO_PANTALLA, ALTO_PANTALLA))
         fondo.fill((50, 50, 50))
 
-    # Rutas de imágenes
+    # Botones (con las posiciones que ya tenías)
     ruta_start = os.path.join(BASE_DIR, "assets", "DEFINITIVO.png")
     ruta_exit = os.path.join(BASE_DIR, "assets", "salir.png")
-    ruta_options_normal = os.path.join(BASE_DIR, "assets", "options.png")
-    ruta_options_hover = os.path.join(BASE_DIR, "assets", "algo.png")
+    ruta_options = os.path.join(BASE_DIR, "assets", "options.png")
 
-    # Crear botones
-    start_button = Button(ruta_start, (400, 500), scale=1.25, text=None)
-    exit_button = Button(ruta_exit, (800, 500), scale=1.25, text=None)
-    options_button = Button(ruta_options_normal, (1200, 40), scale=0.75, text=None)
+    start_button = Button(ruta_start if os.path.exists(ruta_start) else None,
+                          (400, 500), scale=1.25, text=None)
+    exit_button = Button(ruta_exit if os.path.exists(ruta_exit) else None,
+                         (800, 500), scale=1.25, text=None)
+    options_button = Button(ruta_options if os.path.exists(ruta_options) else None,
+                            (1200, 40), scale=0.75, text=None)
 
-    # Cargar imágenes como Surface
-    img_options_normal = pygame.image.load(ruta_options_normal).convert_alpha()
-    img_options_hover = pygame.image.load(ruta_options_hover).convert_alpha()
-
-    # Posiciones iniciales
-    hover_anterior = False
-    offset_hover = -50  # Desplazamiento hacia la izquierda
-    original_pos = options_button.rect.topleft  # Guarda posición original
+    buttons = [start_button, exit_button, options_button]
+    selected_index = 0
+    buttons[selected_index].selected = True
 
     while True:
-        # Dibujar elementos
-        window.blit(fondo, (0, 0))
-        events = pygame.event.get()
-        for event in events:
+        for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
 
-        MENU_TEXT = get_font(100).render("", True, "#cfd8dc")
-        MENU_TEXT_2 = get_font(100).render("", True, "#cfd8dc")
-        MENU_RECT = MENU_TEXT.get_rect(center=(640, 125))
-        MENU_RECT_2 = MENU_TEXT_2.get_rect(center=(640, 250))
+            if event.type == pygame.KEYDOWN:
+                if event.key in [pygame.K_DOWN, pygame.K_RIGHT]:
+                    selected_index = (selected_index + 1) % len(buttons)
+                elif event.key in [pygame.K_UP, pygame.K_LEFT]:
+                    selected_index = (selected_index - 1) % len(buttons)
+                elif event.key == pygame.K_RETURN:
+                    # Acción según el botón seleccionado
+                    if buttons[selected_index] == start_button:
+                        print("Iniciar juego")
+                        return
+                    elif buttons[selected_index] == exit_button:
+                        pygame.quit()
+                        sys.exit()
+                    elif buttons[selected_index] == options_button:
+                        pygame.event.clear()
+                        settings_menu(window)
+                        pygame.event.clear()
 
-        if start_button.is_clicked(events):
-            print("Iniciar juego")
-            return
+        # Dibujar fondo
+        window.blit(fondo, (0, 0))
 
-        if exit_button.is_clicked(events):
-            pygame.quit()
-            sys.exit()
-
-        if options_button.is_clicked(events):
-            pygame.event.clear()
-            settings_menu(window)
-            pygame.event.clear()
-
-        # Hover sobre botón de opciones
-        if options_button.rect.collidepoint(pygame.mouse.get_pos()):
-            if not hover_anterior:
-                options_button.original_image = img_options_hover
-                options_button.rect.topleft = (original_pos[0] + offset_hover, original_pos[1])
-                hover_anterior = True
-        else:
-            if hover_anterior:
-                options_button.original_image = img_options_normal
-                options_button.rect.topleft = original_pos
-                hover_anterior = False
-
-        window.blit(MENU_TEXT, MENU_RECT)
-        window.blit(MENU_TEXT_2, MENU_RECT_2)
-
-        start_button.update()
-        exit_button.update()
-        options_button.update()
-
-        start_button.draw(window)
-        exit_button.draw(window)
-        options_button.draw(window)
+        # Actualizar y dibujar botones
+        for i, btn in enumerate(buttons):
+            btn.selected = (i == selected_index)
+            btn.update()
+            btn.draw(window)
 
         pygame.display.flip()
         clock.tick(60)

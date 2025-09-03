@@ -3,7 +3,6 @@ import sys
 import os
 from .button import Button
 
-
 def settings_menu(window):
     from configuracion import ANCHO_PANTALLA, ALTO_PANTALLA
     ANCHO_PANTALLA, ALTO_PANTALLA = window.get_size()
@@ -11,7 +10,7 @@ def settings_menu(window):
     BASE_DIR = os.path.dirname(__file__)
 
     # Fondo
-    ruta_fondo = os.path.join(BASE_DIR, "assets", "settings_fondo.png")
+    ruta_fondo = os.path.join(BASE_DIR, "assets", "options_fondo.png")
     if os.path.exists(ruta_fondo):
         fondo = pygame.image.load(ruta_fondo).convert()
         fondo = pygame.transform.scale(fondo, (ANCHO_PANTALLA, ALTO_PANTALLA))
@@ -19,39 +18,25 @@ def settings_menu(window):
         fondo = pygame.Surface((ANCHO_PANTALLA, ALTO_PANTALLA))
         fondo.fill((40, 40, 40))  
 
-<<<<<<< HEAD
-    # Botón Back (solo imagen)
-=======
-    # Botón Back
->>>>>>> 8275473a99cf906fb0c7be558649b2e8ee03e9cb
-    ruta_back = os.path.join(BASE_DIR, "assets", "back.png")
-    back_button = Button(ruta_back, (1250, 30), scale=0.3)
 
     # Fuente
     font = pygame.font.SysFont("Consolas", 36, bold=True)
 
     # Opciones de menú
     settings = ["VOLUMEN", "RESOLUCION", "CONTROLES", "HELP"]
-    start_y = 150
-    gap = 140
-    buttons_pos = [(150, start_y + i * gap) for i in range(len(settings))]
+    start_y = ALTO_PANTALLA - 100
+    gap = 250
+    buttons_pos = [(150 + i * gap, start_y) for i in range(len(settings))]
+    selected_index = 0
     active_setting = None
 
     # --- Volumen ---
     volume_value = 100
-    slider_rect = pygame.Rect(450, 150, 300, 8)      # barra
-    slider_knob = pygame.Rect(0, 0, 20, 30)          # perilla
+    slider_rect = pygame.Rect(450, 150, 300, 8)
+    slider_knob = pygame.Rect(0, 0, 20, 30)
     slider_knob.center = (slider_rect.right, slider_rect.centery)
-    dragging = False
-
-    # Botones de mute/full
-    ruta_vol_full = os.path.join(BASE_DIR, "assets", "vol_full.png")
-    ruta_mute = os.path.join(BASE_DIR, "assets", "mute.png")
-    vol_button_full = Button(ruta_vol_full, (910, 150), scale=0.35, hover_effect=False)
-    vol_button_mute = Button(ruta_mute, (870, 150), scale=0.1, hover_effect=False)
 
     while True:
-        mouse_pos = pygame.mouse.get_pos()
         events = pygame.event.get()
 
         # --- EVENTOS ---
@@ -60,115 +45,122 @@ def settings_menu(window):
                 pygame.quit()
                 sys.exit()
 
-            # Botón volver
-            if back_button.is_clicked(events):
-                return
+            if event.type == pygame.KEYDOWN:
 
-            # Detectar clic en las opciones del menú
-            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                for i, name in enumerate(settings):
-                    x, y = buttons_pos[i]
-                    text_surf = font.render(name, True, (255, 255, 255))
-                    text_rect = text_surf.get_rect(topleft=(x, y - text_surf.get_height() // 2))
-                    if text_rect.collidepoint(event.pos):
-                        active_setting = name
+                # Escape → volver al menú principal o salir del ajuste
+                if event.key == pygame.K_ESCAPE:
+                    if active_setting is None:
+                        return   # salís de settings por completo
+                    else:
+                        active_setting = None  # salís del ajuste actual
 
-            # --- Si estamos en VOLUMEN ---
-            if active_setting == "VOLUMEN":
-                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                    # Click en knob → empezar drag
-                    if slider_knob.collidepoint(event.pos):
-                        dragging = True
-
-                    # Click en icono volumen full → mute
-                    elif vol_button_full.is_clicked([event]):
-                        volume_value = 0
-                        slider_knob.centerx = slider_rect.left
-
-                    # Click en icono mute → volumen full
-                    elif vol_button_mute.is_clicked([event]):
-                        volume_value = 100
-                        slider_knob.centerx = slider_rect.right
-            
-
-                if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
-                    dragging = False
-
-                if event.type == pygame.MOUSEMOTION and dragging:
-                    # Mover knob dentro de los límites de la barra
-                    new_x = max(slider_rect.left, min(mouse_pos[0], slider_rect.right))
-                    slider_knob.centerx = new_x
-                    # Calcular valor según la posición
-                    volume_value = int(((new_x - slider_rect.left) / slider_rect.w) * 100)
-
-<<<<<<< HEAD
+                # --- Si NO estoy dentro de un ajuste ---
                 if active_setting is None:
-                    # Navegación entre botones
                     if event.key == pygame.K_RIGHT:
                         selected_index = (selected_index + 1) % len(settings)
                     elif event.key == pygame.K_LEFT:
                         selected_index = (selected_index - 1) % len(settings)
                     elif event.key == pygame.K_RETURN:
                         active_setting = settings[selected_index]
-                else:
-                    # Control de VOLUMEN con flechas
-                    if active_setting == "VOLUMEN":
-                        if event.key == pygame.K_RIGHT:
-                            volume_value = min(100, volume_value + 5)
-                        elif event.key == pygame.K_LEFT:
-                            volume_value = max(0, volume_value - 5)
-                        slider_knob.centerx = slider_rect.left + int((volume_value / 100) * slider_rect.w)
-=======
->>>>>>> 8275473a99cf906fb0c7be558649b2e8ee03e9cb
+
+                # --- Si estoy en VOLUMEN ---
+                elif active_setting == "VOLUMEN":
+                    if event.key == pygame.K_RIGHT:
+                        volume_value = min(100, volume_value + 5)
+                    elif event.key == pygame.K_LEFT:
+                        volume_value = max(0, volume_value - 5)
+                    slider_knob.centerx = slider_rect.left + int((volume_value / 100) * slider_rect.w)
+
+                # --- Si estoy en RESOLUCION ---
+                elif active_setting == "RESOLUCION":
+                    if event.key == pygame.K_UP:
+                        selected_res = (selected_res - 1) % (len(resoluciones) + 1)  # incluye "APLICAR"
+                    elif event.key == pygame.K_DOWN:
+                        selected_res = (selected_res + 1) % (len(resoluciones) + 1)
+                    elif event.key == pygame.K_RETURN:
+                        if selected_res < len(resoluciones):
+                            res_index = selected_res  # marcar resolución elegida
+                        else:
+                            # Opción "APLICAR"
+                            ancho, alto = map(int, resoluciones[res_index].split("x"))
+                            window = pygame.display.set_mode((ancho, alto))
+                            ANCHO_PANTALLA, ALTO_PANTALLA = ancho, alto
 
         # --- DIBUJADO ---
         window.blit(fondo, (0, 0))
 
-        # Botón Back
-        back_button.update()
-        back_button.draw(window)
-
-        # Dibujar lista de ajustes
+        # Dibujar botones
         for i, name in enumerate(settings):
             x, y = buttons_pos[i]
-<<<<<<< HEAD
 
             if active_setting == name:
                 color = (255, 0, 0)  # activo → rojo
             else:
                 color = (255, 255, 255)  # inactivo → blanco
-=======
-            color = (255, 0, 0) if active_setting == name else (255, 255, 255)
->>>>>>> 8275473a99cf906fb0c7be558649b2e8ee03e9cb
 
             text_surf = font.render(name, True, color)
-            text_rect = text_surf.get_rect(topleft=(x, y - text_surf.get_height() // 2))
+            text_rect = text_surf.get_rect(center=(x, y))
             window.blit(text_surf, text_rect.topleft)
 
-            # Subrayado si el mouse está encima
-            if text_rect.collidepoint(mouse_pos):
-                pygame.draw.line(window, color,
+            # Subrayado verde si seleccionado pero no activo
+            if selected_index == i and active_setting != name:
+                pygame.draw.line(window, (0, 255, 0),
                                  (text_rect.x, text_rect.bottom + 5),
-                                 (text_rect.right, text_rect.bottom + 5), 2)
+                                 (text_rect.right, text_rect.bottom + 5), 3)
 
-        # Línea separadora
-        pygame.draw.line(window, (80, 80, 80), (420, 130), (420, 650), 4)
 
         # --- Apartado VOLUMEN ---
-        if active_setting == "VOLUMEN":
-            pygame.draw.rect(window, (200, 200, 200), slider_rect, 2)
-            pygame.draw.line(window, (150, 150, 150),
-                             (slider_rect.left, slider_rect.centery),
-                             (slider_rect.right, slider_rect.centery), 4)
-            pygame.draw.rect(window, (255, 0, 0), slider_knob)
-            vol_text = font.render(f"{volume_value}%", True, (255, 255, 255))
-            window.blit(vol_text, (slider_rect.right + 40, slider_rect.y - 12))
+        if active_setting == "RESOLUCION":
+            # Margen superior general para la lista (resoluciones)
+            offset_y = 250  # la lista y demás quedan igual
 
-            # Mostrar icono correspondiente
-            if volume_value == 100:
-                vol_button_full.draw(window)
-            elif volume_value == 0:
-                vol_button_mute.draw(window)
+            # Texto principal centrado y en rojo (lo bajamos un poco más)
+            res_text = font.render("AJUSTE LA RESOLUCION", True, (255, 0, 0))
+            title_rect = res_text.get_rect(center=(ANCHO_PANTALLA // 2, offset_y - 30))  # subimos la lista pero bajamos título
+            window.blit(res_text, title_rect)
+
+            # Lista de resoluciones disponibles
+            resoluciones = ["1920x1080", "1280x720", "800x600"]
+            if "res_index" not in locals():
+                res_index = 1
+            if "selected_res" not in locals():
+                selected_res = res_index
+
+            # Dibujar opciones
+            start_y = offset_y + 80  # posición inicial de la lista
+            spacing = 50
+
+            for i, res in enumerate(resoluciones):
+                color = (255, 255, 255)
+                text = font.render(res, True, color)
+                text_rect = text.get_rect(center=(ANCHO_PANTALLA // 2, start_y + i * spacing))
+                window.blit(text, text_rect)
+
+                if i == res_index:
+                    tick = font.render("✔", True, (0, 255, 0))
+                    window.blit(tick, (text_rect.right + 20, text_rect.y))
+
+                if i == selected_res:
+                    pygame.draw.line(window, (0, 255, 0),
+                                    (text_rect.x, text_rect.bottom + 5),
+                                    (text_rect.right, text_rect.bottom + 5), 3)
+
+            # Botón APLICAR (lo subimos un poco)
+            aplicar_color = (0, 0, 255) if selected_res == len(resoluciones) else (255, 255, 255)
+            aplicar_text = font.render("APLICAR", True, aplicar_color)
+            aplicar_rect = aplicar_text.get_rect(center=(ANCHO_PANTALLA // 2, start_y + len(resoluciones) * spacing + 60))  # antes era +80
+            window.blit(aplicar_text, aplicar_rect)
+
+
+        # --- Apartado CONTROLES ---
+        if active_setting == "CONTROLES":
+            ctrl_text = font.render("Configura controles aquí", True, (255, 255, 255))
+            window.blit(ctrl_text, (450, 200))
+
+        # --- Apartado HELP ---
+        if active_setting == "HELP":
+            help_text = font.render("Ayuda del juego", True, (255, 255, 255))
+            window.blit(help_text, (450, 200))
 
         pygame.display.flip()
         clock.tick(60)
