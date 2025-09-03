@@ -9,12 +9,15 @@ from movimiento_jugador.colisiones import colisiones, puerta
 from mapas.fondo import mapa2
 from .menu_pausa import pause_menu
 
+
 def ejecutar_mapa2():
     pygame.init()
     pantalla = pygame.display.set_mode((ANCHO_PANTALLA, ALTO_PANTALLA))
     pygame.display.set_caption("Juego Escape")
 
-    # Fondo 1
+    mapa_actual = 2
+
+    # Fondo 2
     try:
         fondo = pygame.image.load(mapa2).convert()  # fondo_1 viene de configuracion.py
         fondo = pygame.transform.scale(fondo, (ANCHO_PANTALLA, ALTO_PANTALLA))

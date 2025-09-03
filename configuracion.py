@@ -4,11 +4,13 @@ incluyendo las dimensiones de la ventana del juego, los colores y la velocidad d
 """
 
 
-from mapas.fondo import mapa1,m1_opciones,m2_opciones
+from mapas.fondo import mapa1,m1_opciones,mapa2,m2_opciones
 
 mapa1 = mapa1
+mapa2 = mapa2
 m1_opciones=m1_opciones
 m2_opciones=m2_opciones
+
 
 # Colores en formato RGB
 BLANCO = (255, 255, 255)

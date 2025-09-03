@@ -2,7 +2,8 @@
 import pygame
 import os
 from configuracion import VELOCIDAD_JUGADOR, ANCHO_PANTALLA, ALTO_PANTALLA, VELOCIDAD_ANIMACION
-from movimiento_jugador.colisiones import colisiones
+from movimiento_jugador.colisiones import colisiones_mapa_1 , colisiones_mapa_2
+
 
 class Jugador:
     def __init__(self, x, y, ancho, alto, escala=1.0):
@@ -80,6 +81,12 @@ class Jugador:
     def manejar_teclas(self):
         teclas = pygame.key.get_pressed()
         moviendo = False
+
+        if mapa_actual == 1:
+            colisiones = colisiones_mapa_1
+        elif mapa_actual == 2:
+            colisiones = colisiones_mapa_2
+
 
         izquierda = teclas[pygame.K_LEFT]
         derecha   = teclas[pygame.K_RIGHT]
