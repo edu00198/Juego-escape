@@ -2,8 +2,7 @@
 import pygame
 import os
 from configuracion import VELOCIDAD_JUGADOR, ANCHO_PANTALLA, ALTO_PANTALLA, VELOCIDAD_ANIMACION
-from movimiento_jugador.colisiones import colisiones_mapa_1 , colisiones_mapa_2
-
+from mapas.mapa1 import conseguir_colisiones
 
 class Jugador:
     def __init__(self, x, y, ancho, alto, escala=1.0):
@@ -31,6 +30,7 @@ class Jugador:
         )
         self.rect.inflate_ip(-30, -20)  # achica la hitbox horizontal y verticalmente
 
+        print("Iniciando carga de animaciones...")
         # Animaciones (como ya tenías)
         self.animaciones = {
             "idle_abajo": self.cargar_sprites("idle_personaje_lvl1_con_sombra", "idle_abajo"),
@@ -42,6 +42,8 @@ class Jugador:
             "run_izquierda": self.cargar_sprites("run_personaje_lvl1_con_sombra", "run_izquierda"),
             "run_derecha": self.cargar_sprites("run_personaje_lvl1_con_sombra", "run_derecha")
         }
+        print("Animaciones cargadas:", list(self.animaciones.keys()))
+        print("Número de frames en idle_abajo:", len(self.animaciones["idle_abajo"]) if "idle_abajo" in self.animaciones else 0)
 
         self.direccion = "abajo"
         self.estado = "idle"
@@ -63,6 +65,7 @@ class Jugador:
         ruta_base = os.path.join(os.path.dirname(os.path.dirname(__file__)), "sprites", carpeta_principal, subcarpeta)
         imagenes = []
 
+        print(f"Intentando cargar sprites desde: {ruta_base}")
         if not os.path.exists(ruta_base):
             print(f"[ADVERTENCIA] Carpeta no encontrada: {ruta_base}")
             return imagenes
@@ -87,10 +90,12 @@ class Jugador:
 
         from configuracion import mapa_actual
 
-        if mapa_actual.mapa_actual == "mapa1":
-            colisiones = colisiones_mapa_1
-        elif mapa_actual.mapa_actual == "mapa2":
-            colisiones = colisiones_mapa_2
+        colisiones= conseguir_colisiones()
+
+        #if mapa_actual.mapa_actual == "mapa1":
+        #    colisiones = colisiones_mapa_1
+        #elif mapa_actual.mapa_actual == "mapa2":
+        #    colisiones = colisiones_mapa_2
 
 
         izquierda = teclas[pygame.K_LEFT]
@@ -188,9 +193,13 @@ class Jugador:
         self.rect.top = max(self.rect.top, 0)
         self.rect.bottom = min(self.rect.bottom, ALTO_PANTALLA)
 
-    def dibujar(self, pantalla):
+    def dibujar(self, pantalla, offset_x=0, offset_y=0):
         if not self.animacion_actual:
+            print("No hay animación actual disponible")
             return
+
+        # Debug: imprimir información de posición
+        print(f"Posición del jugador: sprite_pos=({self.sprite_pos.x}, {self.sprite_pos.y}), offset=({offset_x}, {offset_y})")
 
         # Actualizar el frame de animación
         self.contador_tiempo += 1
@@ -200,13 +209,13 @@ class Jugador:
 
         # Obtener el sprite actual
         imagen = self.animacion_actual[self.frame_actual]
-        try:
-            # Dibujar el sprite en su posición visual
-            pantalla.blit(imagen, self.sprite_pos)
-        except Exception as e:
-            print(e)
+        print(f"Tamaño del sprite actual: {imagen.get_size()}")
 
-        # Dibujar la hitbox (verde) para debug
-        pygame.draw.rect(pantalla, (0, 255, 0), self.rect, 2)
+        # Dibujar el sprite con desplazamiento
+        pantalla.blit(imagen, (self.sprite_pos.x + offset_x, self.sprite_pos.y + offset_y))
+
+        # Dibujar la hitbox (verde) con desplazamiento
+        hitbox_offset = self.rect.move(offset_x, offset_y)
+        pygame.draw.rect(pantalla, (0, 255, 0), hitbox_offset, 2)
 
 
