@@ -1,8 +1,9 @@
 #jugador
 import pygame
 import os
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from configuracion import VELOCIDAD_JUGADOR, ANCHO_PANTALLA, ALTO_PANTALLA, VELOCIDAD_ANIMACION
-from mapas.mapa1 import conseguir_colisiones
 
 class Jugador:
     def __init__(self, x, y, ancho, alto, escala=1.0):
@@ -15,7 +16,7 @@ class Jugador:
 
         # Crear el rectángulo de colisión con offset relativo al sprite
         offset_x = 53  # mueve la hitbox a la derecha
-        offset_y = 50   # mueve la hitbox hacia abajo
+        offset_y = 110   # mueve la hitbox hacia abajo
 
         # Tamaño base del rectángulo
         hitbox_ancho = int(ancho * escala)
@@ -90,7 +91,7 @@ class Jugador:
 
         from configuracion import mapa_actual
 
-        colisiones= conseguir_colisiones()
+        from mapas.mapa1_data import colisiones_escaladas as colisiones
 
         #if mapa_actual.mapa_actual == "mapa1":
         #    colisiones = colisiones_mapa_1

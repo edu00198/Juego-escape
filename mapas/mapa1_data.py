@@ -2,9 +2,14 @@
 import pygame
 import sys
 import os
-# Inicializar Pygame
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from configuracion import ANCHO_PANTALLA, ALTO_PANTALLA, ESCALA_JUGADOR
+from movimiento_jugador.jugador import Jugador
+
 pygame.init()
-# Mismo contenido que pegaste antes, pero en sintaxis Python
+
 l_decoraciones = [
    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
@@ -96,30 +101,28 @@ l_hitbox_mapa_1 = [
   [1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1],
   [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
 ]
-# Configuración de pantalla
 DESIRED_SCREEN_WIDTH = 1280
 DESIRED_SCREEN_HEIGHT = 720
-TILE_SIZE = 16  # Cambiado a 16
+TILE_SIZE = 16 
 MAP_WIDTH = 20
 MAP_HEIGHT = 11
-# Calcular tamaño real del mapa (con TILE_SIZE=16)
-MAP_REAL_WIDTH = MAP_WIDTH * TILE_SIZE  # 20 * 16 = 320
-MAP_REAL_HEIGHT = MAP_HEIGHT * TILE_SIZE  # 11 * 16 = 176
-# Calcular factor de escalado para llenar la pantalla
-SCALE_X = DESIRED_SCREEN_WIDTH / MAP_REAL_WIDTH  # 1280 / 320 = 4.0
-SCALE_Y = DESIRED_SCREEN_HEIGHT / MAP_REAL_HEIGHT  # 720 / 176 ≈ 4.09
-# Usar el mismo factor de escalado para ambos ejes para mantener la proporción
-SCALE_FACTOR = min(SCALE_X, SCALE_Y)  # 4.0
-# Calcular tamaño escalado
-SCALED_WIDTH = int(MAP_REAL_WIDTH * SCALE_FACTOR)  # 320 * 4 = 1280
-SCALED_HEIGHT = int(MAP_REAL_HEIGHT * SCALE_FACTOR)  # 176 * 4 = 704
-# Calcular offset para centrar el mapa
+
+MAP_REAL_WIDTH = MAP_WIDTH * TILE_SIZE
+MAP_REAL_HEIGHT = MAP_HEIGHT * TILE_SIZE
+
+SCALE_X = DESIRED_SCREEN_WIDTH / MAP_REAL_WIDTH
+SCALE_Y = DESIRED_SCREEN_HEIGHT / MAP_REAL_HEIGHT
+
+SCALE_FACTOR = min(SCALE_X, SCALE_Y)
+
+SCALED_WIDTH = int(MAP_REAL_WIDTH * SCALE_FACTOR)
+SCALED_HEIGHT = int(MAP_REAL_HEIGHT * SCALE_FACTOR)
+
 OFFSET_X = (DESIRED_SCREEN_WIDTH - SCALED_WIDTH) // 2
 OFFSET_Y = (DESIRED_SCREEN_HEIGHT - SCALED_HEIGHT) // 2
-# Crear pantalla con el tamaño deseado
-pantalla = pygame.display.set_mode((DESIRED_SCREEN_WIDTH, DESIRED_SCREEN_HEIGHT))
-pygame.display.set_caption("Mapa estilo1 matris")
-# Cargar tilesets
+
+pantalla = pygame.display.set_mode((1280, 720))
+
 def cargar_tileset(path_relativo, tile_size):
     carpeta_actual = os.path.dirname(__file__)
     ruta_completa = os.path.join(carpeta_actual, path_relativo)
@@ -133,15 +136,9 @@ def cargar_tileset(path_relativo, tile_size):
     ancho, alto = imagen.get_size()
     tiles = []
     
-    # Calcular cuántos tiles completos hay en cada dimensión
     num_tiles_x = ancho // tile_size
     num_tiles_y = alto // tile_size
-    
-    print(f"Cargando tileset: {ruta_completa}")
-    print(f"Tamaño de la imagen: {ancho}x{alto}")
-    print(f"Tamaño del tile: {tile_size}x{tile_size}")
-    print(f"Tiles a cargar: {num_tiles_x} x {num_tiles_y} = {num_tiles_x * num_tiles_y}")
-    
+
     for y in range(num_tiles_y):
         for x in range(num_tiles_x):
             rect = pygame.Rect(x * tile_size, y * tile_size, tile_size, tile_size)
@@ -159,7 +156,7 @@ tilesets = {
     "l_fire": cargar_tileset("imagenes/45c9c5be-c636-42b7-62d6-b8a104bf6200.png", TILE_SIZE),
     "l_hitbox": cargar_tileset("imagenes/45c9c5be-c636-42b7-62d6-b8a104bf6200.png", TILE_SIZE),
 }
-# Diccionario de capas
+
 layersData = {
     "l_piso": l_piso,
     "l_paredes": l_paredes,
@@ -168,7 +165,7 @@ layersData = {
     "l_decoraciones": l_decoraciones,
     "l_fire": l_fire,
 }
-# Renderizar una capa
+
 def render_layer(superficie, tilesData, tileset):
     for y, fila in enumerate(tilesData):
         for x, symbol in enumerate(fila):
@@ -179,7 +176,7 @@ def render_layer(superficie, tilesData, tileset):
                     superficie.blit(tile, (x * TILE_SIZE, y * TILE_SIZE))
                 else:
                     print(f"Advertencia: Tile con índice {tile_index} no encontrado en el tileset. Posición: ({x}, {y})")
-# Generar fondo como en JS
+
 def generar_fondo():
     fondo = pygame.Surface((MAP_REAL_WIDTH, MAP_REAL_HEIGHT), pygame.SRCALPHA)
     for layer_name, tilesData in layersData.items():
@@ -187,18 +184,17 @@ def generar_fondo():
         if tileset:
             render_layer(fondo, tilesData, tileset)
     return fondo
-# Generar fondo en tamaño original
+
 fondo_mapa = generar_fondo()
-# Escalar el mapa al tamaño deseado
+
 fondo_escalado = pygame.transform.scale(fondo_mapa, (SCALED_WIDTH, SCALED_HEIGHT))
 
-# Generar rects de colisión escalados
+
 def generar_colisiones_escaladas(hitbox_matrix, tile_size, scale_factor, offset_x, offset_y):
     colisiones = []
     for y, fila in enumerate(hitbox_matrix):
         for x, valor in enumerate(fila):
-            if valor == 1:  # Si hay colisión
-                # Calcular posición y tamaño del tile original
+            if valor == 1:
                 rect_original = pygame.Rect(
                     x * tile_size, 
                     y * tile_size, 
@@ -206,7 +202,6 @@ def generar_colisiones_escaladas(hitbox_matrix, tile_size, scale_factor, offset_
                     tile_size
                 )
                 
-                # Escalar el rect
                 rect_escalado = pygame.Rect(
                     offset_x + rect_original.x * scale_factor,
                     offset_y + rect_original.y * scale_factor,
@@ -226,44 +221,9 @@ colisiones_escaladas = generar_colisiones_escaladas(
     OFFSET_Y
 )
 
-def conseguir_puerta():
-    return puerta_1
-
-def conseguir_colisiones(fondo=None):
-    return colisiones_escaladas
-
-# Definir la puerta (ajusta la posición según tu mapa)
 puerta_1 = pygame.Rect(
-    OFFSET_X + 18 * TILE_SIZE * SCALE_FACTOR,  # Posición x del tile 18
-    OFFSET_Y + 8 * TILE_SIZE * SCALE_FACTOR,   # Posición y del tile 8
+    OFFSET_X + 10 * TILE_SIZE * SCALE_FACTOR,  # posicion x (10)
+    OFFSET_Y + 1 * TILE_SIZE * SCALE_FACTOR,   # posición y del tile 8
     TILE_SIZE * 2 * SCALE_FACTOR,              # Ancho (2 tiles)
-    TILE_SIZE * SCALE_FACTOR                   # Alto (1 tile)
+    TILE_SIZE * 2 * SCALE_FACTOR                   # 1 tile de alto
 )
-
-# Bucle principal
-clock = pygame.time.Clock()
-running = True
-while running:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-    
-    # Limpiar pantalla
-    pantalla.fill((0, 0, 0))
-    
-    # Dibujar el mapa escalado y centrado
-    pantalla.blit(fondo_escalado, (OFFSET_X, OFFSET_Y))
-    
-    # Dibujar colisiones (para depuración)
-    for colision in colisiones_escaladas:
-        pygame.draw.rect(pantalla, (255, 0, 0), colision, 2)  # Rojo = colisiones
-    
-    # Dibujar puerta (para depuración)
-    pygame.draw.rect(pantalla, (0, 0, 255), puerta_1, 2)  # Azul = puerta
-    
-    # Actualizar pantalla
-    pygame.display.flip()
-    clock.tick(60)
-
-pygame.quit()
-sys.exit()
