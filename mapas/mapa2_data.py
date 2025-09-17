@@ -102,7 +102,7 @@ l_hitbox_mapa_2 = [
   [1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,1],
   [1,1,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,1],
   [1,1,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,1]
-];
+]
 
 DESIRED_SCREEN_WIDTH = 1280
 DESIRED_SCREEN_HEIGHT = 720
@@ -155,7 +155,7 @@ tilesets = {
     "l_paredes": cargar_tileset("imagenes/paredes.png", TILE_SIZE),
     "l_objetos": cargar_tileset("imagenes/d5783a2d-84fa-433a-5e07-73cbb3197d00.png", TILE_SIZE),
     "l_roturs_en_las_paredes": cargar_tileset("imagenes/4bd1f88f-bae1-45cb-9eb2-ae60f831a400.png", TILE_SIZE),
-    "l_decoraciones": cargar_tileset("imagenes/d5783a2d-84fa-433a-5e07-73cbb3197d00.png", TILE_SIZE),
+    "l_decoraciones": cargar_tileset("imagenes/4bd1f88f-bae1-45cb-9eb2-ae60f831a400.png", TILE_SIZE),
     "l_fire": cargar_tileset("imagenes/45c9c5be-c636-42b7-62d6-b8a104bf6200.png", TILE_SIZE),
     "l_hitbox": cargar_tileset("imagenes/45c9c5be-c636-42b7-62d6-b8a104bf6200.png", TILE_SIZE),
 }

@@ -30,7 +30,10 @@ def ejecutar_mapa1():
     pos_x = (fondo_mapa.get_width() * escala - ancho_jugador) // 2
     pos_y = (fondo_mapa.get_height() * escala - alto_jugador) // 2
 
-    jugador = Jugador(pos_x, pos_y, ancho_jugador, alto_jugador, escala=ESCALA_JUGADOR)
+    from mapas.mapa1_data import colisiones_escaladas
+
+    jugador = Jugador(pos_x, pos_y, ancho_jugador, alto_jugador, escala=ESCALA_JUGADOR, colisiones=colisiones_escaladas)
+
 
     fondo_escalado = pygame.transform.scale(fondo_mapa, (SCALED_WIDTH, SCALED_HEIGHT))
 
@@ -64,6 +67,7 @@ def ejecutar_mapa1():
 
         if jugador.rect.colliderect(puerta_1):
             ejecutar_mapa2()  # Llama a la función del mapa 2
+
 
         pygame.display.flip()
         clock.tick(60)

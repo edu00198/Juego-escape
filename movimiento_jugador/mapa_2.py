@@ -34,11 +34,12 @@ def ejecutar_mapa2():
     offset_x = (ANCHO_PANTALLA - fondo_mapa.get_width() * escala) // 2
     offset_y = (ALTO_PANTALLA - fondo_mapa.get_height() * escala) // 2
 
-    # Posición inicial del jugador (puede ajustarse si querés que aparezca cerca de una puerta)
-    pos_x = OFFSET_X + 10 * 16 * ESCALA_JUGADOR  # TILE_SIZE = 16
-    pos_y = OFFSET_Y + 9 * 16 * ESCALA_JUGADOR
-
+    
+    puerta2pos = puerta_2_entrada.topleft
+    pos_x = puerta2pos[0]
+    pos_y = puerta2pos[1] - alto_jugador * 10
     jugador = Jugador(pos_x, pos_y, ancho_jugador, alto_jugador, escala=ESCALA_JUGADOR, colisiones=colisiones_escaladas)
+
 
     fondo_escalado = pygame.transform.scale(fondo_mapa, (SCALED_WIDTH, SCALED_HEIGHT))
 
@@ -71,7 +72,7 @@ def ejecutar_mapa2():
 
         elif jugador.rect.colliderect(puerta_2_entrada):
             print("Volver al mapa 1")
-            running = False
+            return
 
     pygame.quit()
     sys.exit()

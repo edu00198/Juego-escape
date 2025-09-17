@@ -6,7 +6,9 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from configuracion import VELOCIDAD_JUGADOR, ANCHO_PANTALLA, ALTO_PANTALLA, VELOCIDAD_ANIMACION
 
 class Jugador:
-    def __init__(self, x, y, ancho, alto, escala=1.0):
+    def __init__(self, x, y, ancho, alto, escala=1.0, colisiones=None):
+        self.colisiones = colisiones or []
+
 
         self.velocidad = VELOCIDAD_JUGADOR
         self.escala = escala
@@ -89,9 +91,8 @@ class Jugador:
         teclas = pygame.key.get_pressed()
         moviendo = False
 
-        from configuracion import mapa_actual
+        colisiones = self.colisiones
 
-        from mapas.mapa1_data import colisiones_escaladas as colisiones
 
         #if mapa_actual.mapa_actual == "mapa1":
         #    colisiones = colisiones_mapa_1
@@ -207,7 +208,7 @@ class Jugador:
 
         # Obtener el sprite actual
         imagen = self.animacion_actual[self.frame_actual]
-        
+
         # Dibujar el sprite con desplazamiento
         pantalla.blit(imagen, (self.sprite_pos.x + offset_x, self.sprite_pos.y + offset_y))
 
