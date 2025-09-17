@@ -1,80 +1,77 @@
+# mapa_2.py
 import pygame
 import sys
 import os
-from configuracion import ANCHO_PANTALLA, ALTO_PANTALLA, BLANCO, ESCALA_JUGADOR
-from menu.button import Button
-from movimiento_jugador.jugador import Jugador
-from movimiento_jugador.colisiones import colisiones_mapa_2, puerta_2_entrada, puerta_2_salida
-from mapas.fondo import mapa2
-from .menu_pausa import pause_menu
 
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from configuracion import ANCHO_PANTALLA, ALTO_PANTALLA, ESCALA_JUGADOR
+from movimiento_jugador.jugador import Jugador
+from mapas.mapa2_data import (
+    fondo_mapa,
+    SCALED_WIDTH,
+    SCALED_HEIGHT,
+    OFFSET_X,
+    OFFSET_Y,
+    puerta_2_entrada,
+    puerta_2_salida,
+    colisiones_escaladas
+)
+
+pantalla = pygame.display.set_mode((1280, 720))
 
 def ejecutar_mapa2():
-        # mapa2.py
-    from configuracion import mapa_actual
-
-    # Cambiar el mapa actual
-    mapa_actual.mapa_actual = "mapa2"
-
-    pygame.init()
-    pantalla = pygame.display.set_mode((ANCHO_PANTALLA, ALTO_PANTALLA))
-    pygame.display.set_caption("Juego Escape")
-
-    # Fondo 2
-    try:
-        fondo = pygame.image.load(mapa2).convert()  # fondo_2 viene de configuracion.py
-        fondo = pygame.transform.scale(fondo, (ANCHO_PANTALLA, ALTO_PANTALLA))
-    except Exception as e:
-        print(f"No se pudo cargar el fondo: {e}")
-        fondo = None
-
+    clock = pygame.time.Clock()
+    running = True
 
     ancho_jugador = 26
-    alto_jugador = 32
-    pos_x = (ANCHO_PANTALLA - ancho_jugador) // 2
-    pos_y = (ALTO_PANTALLA - alto_jugador) // 2
-    jugador = Jugador(pos_x, pos_y, ancho_jugador, alto_jugador, escala=ESCALA_JUGADOR)
+    alto_jugador = 15
 
-    clock = pygame.time.Clock()
-    ejecutando = True
+    escala_x = ANCHO_PANTALLA / fondo_mapa.get_width()
+    escala_y = ALTO_PANTALLA / fondo_mapa.get_height()
+    escala = min(escala_x, escala_y)
 
-    while ejecutando:
-        clock.tick(60)
+    offset_x = (ANCHO_PANTALLA - fondo_mapa.get_width() * escala) // 2
+    offset_y = (ALTO_PANTALLA - fondo_mapa.get_height() * escala) // 2
 
-        # Eventos
-        for evento in pygame.event.get():
-            if evento.type == pygame.QUIT:
-                ejecutando = False
-            elif evento.type == pygame.KEYDOWN:
-                if evento.key == pygame.K_ESCAPE:
-                    pause_menu(pantalla)
+    # Posición inicial del jugador (puede ajustarse si querés que aparezca cerca de una puerta)
+    pos_x = OFFSET_X + 10 * 16 * ESCALA_JUGADOR  # TILE_SIZE = 16
+    pos_y = OFFSET_Y + 9 * 16 * ESCALA_JUGADOR
 
-        # Movimiento del jugador con colisiones
-        
+    jugador = Jugador(pos_x, pos_y, ancho_jugador, alto_jugador, escala=ESCALA_JUGADOR, colisiones=colisiones_escaladas)
+
+    fondo_escalado = pygame.transform.scale(fondo_mapa, (SCALED_WIDTH, SCALED_HEIGHT))
+
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+
         jugador.manejar_teclas()
 
-        
-        for rect in colisiones_mapa_2:
-            pygame.draw.rect(pantalla, (255, 0, 0), rect, 2)  # dibuja cada rect en la pantalla
-            pygame.draw.rect(pantalla, (0, 0, 255), puerta_2_entrada, 2)  # dibuja la puerta en verde
-            pygame.draw.rect(pantalla, (0, 0, 255), puerta_2_entrada, 2) 
+        pantalla.fill((0, 0, 0))
+        pantalla.blit(fondo_escalado, (OFFSET_X, OFFSET_Y))
 
+        # Dibujar colisiones (depuración)
+        for colision in colisiones_escaladas:
+            pygame.draw.rect(pantalla, (255, 0, 0), colision, 2)
 
+        # Dibujar puertas (depuración)
+        pygame.draw.rect(pantalla, (0, 0, 255), puerta_2_entrada, 2)
+        pygame.draw.rect(pantalla, (0, 255, 255), puerta_2_salida, 2)
 
-        # Dibujar fondo
-        if fondo:
-            pantalla.blit(fondo, (0, 0))
-        else:
-            pantalla.fill(BLANCO)
-
-        # Dibujar jugador
-        jugador.dibujar(pantalla)
-
-      
+        jugador.dibujar(pantalla, offset_x, offset_y)
         pygame.display.flip()
+        clock.tick(60)
+
+        # Transiciones de mapa
+        if jugador.rect.colliderect(puerta_2_salida):
+            print("Transición al mapa 3")
+            running = False  # Detenemos el bucle para que el main pueda cargar el siguiente mapa
+
+        elif jugador.rect.colliderect(puerta_2_entrada):
+            print("Volver al mapa 1")
+            running = False
 
     pygame.quit()
-
-
-if __name__ == "__main__":
-    ejecutar_mapa2()
+    sys.exit()

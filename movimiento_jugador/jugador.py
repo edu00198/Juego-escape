@@ -198,10 +198,7 @@ class Jugador:
         if not self.animacion_actual:
             print("No hay animación actual disponible")
             return
-
-        # Debug: imprimir información de posición
-        print(f"Posición del jugador: sprite_pos=({self.sprite_pos.x}, {self.sprite_pos.y}), offset=({offset_x}, {offset_y})")
-
+        
         # Actualizar el frame de animación
         self.contador_tiempo += 1
         if self.contador_tiempo >= self.velocidad_animacion:
@@ -210,8 +207,7 @@ class Jugador:
 
         # Obtener el sprite actual
         imagen = self.animacion_actual[self.frame_actual]
-        print(f"Tamaño del sprite actual: {imagen.get_size()}")
-
+        
         # Dibujar el sprite con desplazamiento
         pantalla.blit(imagen, (self.sprite_pos.x + offset_x, self.sprite_pos.y + offset_y))
 
