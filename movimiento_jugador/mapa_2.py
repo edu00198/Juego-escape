@@ -2,6 +2,7 @@
 import pygame
 import sys
 import os
+from movimiento_jugador.mapa3 import ejecutar_mapa3
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
@@ -68,7 +69,7 @@ def ejecutar_mapa2():
         # Transiciones de mapa
         if jugador.rect.colliderect(puerta_2_salida):
             print("Transición al mapa 3")
-            running = False  # Detenemos el bucle para que el main pueda cargar el siguiente mapa
+            ejecutar_mapa3()  # Detenemos el bucle para que el main pueda cargar el siguiente mapa
 
         elif jugador.rect.colliderect(puerta_2_entrada):
             print("Volver al mapa 1")
