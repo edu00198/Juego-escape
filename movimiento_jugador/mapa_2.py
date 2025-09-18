@@ -25,7 +25,7 @@ def ejecutar_mapa2():
     clock = pygame.time.Clock()
     running = True
 
-    ancho_jugador = 26
+    ancho_jugador = 23
     alto_jugador = 15
 
     escala_x = ANCHO_PANTALLA / fondo_mapa.get_width()
@@ -33,7 +33,7 @@ def ejecutar_mapa2():
     escala = min(escala_x, escala_y)
 
     offset_x = (ANCHO_PANTALLA - fondo_mapa.get_width() * escala) // 2
-    offset_y = (ALTO_PANTALLA - fondo_mapa.get_height() * escala) // 2
+    offset_y = (ALTO_PANTALLA - fondo_mapa.get_height() * escala) // 2 
 
     
     puerta2pos = puerta_2_entrada.topleft
@@ -65,14 +65,15 @@ def ejecutar_mapa2():
 
         pantalla.blit(fondo_escalado, (OFFSET_X, OFFSET_Y))  # Fondo del mapa
 
-        # Dibujar colisiones (opcional para depuración)
+        # Dibujar colisiones (opcional para depuración)👍
+        """
         for colision in colisiones_escaladas:
             pygame.draw.rect(pantalla, (255, 0, 0), colision, 2)
 
         # Dibujar puertas (opcional para depuración)
         pygame.draw.rect(pantalla, (0, 0, 255), puerta_2_entrada, 2)
         pygame.draw.rect(pantalla, (0, 255, 255), puerta_2_salida, 2)
-
+        """
         jugador.dibujar(pantalla, offset_x, offset_y)  # Primero el jugador
 
         pantalla.blit(imagen_escalada, (0, 0))  # Después la imagen → queda arriba del jugador

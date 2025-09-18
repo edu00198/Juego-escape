@@ -82,7 +82,7 @@ l_piso = [
 
 l_hitbox_mapa3 = [
   [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-  [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1],
+  [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
   [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1],
   [1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1],
   [1,0,0,1,0,0,1,0,0,0,1,0,0,1,0,0,0,0,0,1],
@@ -215,14 +215,14 @@ colisiones_escaladas = generar_colisiones_escaladas(
 )
 
 puerta_3_entrada = pygame.Rect(
-    OFFSET_X + 19 * TILE_SIZE * SCALE_FACTOR,  # posicion x (10)
-    OFFSET_Y + 5* TILE_SIZE * SCALE_FACTOR,   # posición y del tile 8
+    OFFSET_X * 1 * TILE_SIZE * SCALE_FACTOR,  # posicion x (10)
+    OFFSET_Y + 5 * TILE_SIZE * SCALE_FACTOR,   # posición y del tile 8
     TILE_SIZE * 1 * SCALE_FACTOR,              # Ancho 
     TILE_SIZE * 1 * SCALE_FACTOR               # alto
 )
 puerta_3_salida = pygame.Rect(
     OFFSET_X + 16 * TILE_SIZE * SCALE_FACTOR,  # columna inicial
-    OFFSET_Y + 1 * TILE_SIZE * SCALE_FACTOR,   # fila inicial
+    OFFSET_Y + 2 * TILE_SIZE * SCALE_FACTOR,   # fila inicial
     2 * TILE_SIZE * SCALE_FACTOR,              # ancho = 2 tiles
-    2 * TILE_SIZE * SCALE_FACTOR               # alto = 2 tiles
+    1 * TILE_SIZE * SCALE_FACTOR               # alto = 2 tiles
 )

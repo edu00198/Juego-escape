@@ -17,7 +17,7 @@ def ejecutar_mapa1():
     clock = pygame.time.Clock()
     running = True
 
-    ancho_jugador = 26
+    ancho_jugador = 23
     alto_jugador = 15
 
     escala_x = ANCHO_PANTALLA / fondo_mapa.get_width()

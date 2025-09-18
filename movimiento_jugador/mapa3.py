@@ -24,7 +24,7 @@ def ejecutar_mapa3():
     clock = pygame.time.Clock()
     running = True
 
-    ancho_jugador = 26
+    ancho_jugador = 23
     alto_jugador = 15
 
     escala_x = ANCHO_PANTALLA / fondo_mapa.get_width()
@@ -36,8 +36,8 @@ def ejecutar_mapa3():
 
     
     puerta2pos = puerta_3_entrada.topleft
-    pos_x = puerta2pos[0]
-    pos_y = puerta2pos[1] - alto_jugador * 10
+    pos_x = puerta2pos[0] - ancho_jugador / 2
+    pos_y = puerta2pos[1] - alto_jugador * 8
     jugador = Jugador(pos_x, pos_y, ancho_jugador, alto_jugador, escala=ESCALA_JUGADOR, colisiones=colisiones_escaladas)
 
 
@@ -58,10 +58,12 @@ def ejecutar_mapa3():
             pygame.draw.rect(pantalla, (255, 0, 0), colision, 2)
 
         # Dibujar puertas (depuración)
+        """
         pygame.draw.rect(pantalla, (0, 0, 255), puerta_3_entrada, 2)
         pygame.draw.rect(pantalla, (0, 255, 255), puerta_3_salida, 2)
-
+        """
         jugador.dibujar(pantalla, offset_x, offset_y)
+        
         pygame.display.flip()
         clock.tick(60)
 
