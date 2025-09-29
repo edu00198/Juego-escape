@@ -102,37 +102,13 @@ def ejecutar_mapa1():
     ]
     dialog_system.start_dialog(intro_texts, "El Comienzo de la Aventura")
 
-    # ---------------------------
-    # Escala del mapa y jugador
-    # ---------------------------
-    escala_x = SCALED_WIDTH / fondo_mapa.get_width()
-    escala_y = SCALED_HEIGHT / fondo_mapa.get_height()
-    escala_fondo = min(escala_x, escala_y)
-
-    # Escalar la puerta y colisiones
-    puerta_1_scaled = pygame.Rect(
-        OFFSET_X + int(puerta_1.x * escala_fondo),
-        OFFSET_Y + int(puerta_1.y * escala_fondo),
-        int(puerta_1.width * escala_fondo),
-        int(puerta_1.height * escala_fondo)
-    )
-
-    colisiones_escaladas_scaled = []
-    for c in colisiones_escaladas:
-        colisiones_escaladas_scaled.append(pygame.Rect(
-            OFFSET_X + int(c.x * escala_fondo),
-            OFFSET_Y + int(c.y * escala_fondo),
-            int(c.width * escala_fondo),
-            int(c.height * escala_fondo)
-        ))
-
     # Posición inicial fija del jugador (centrado)
     ancho_jugador, alto_jugador = 23, 15
     pos_x = (ANCHO_PANTALLA - ancho_jugador) // 2
     pos_y = (ALTO_PANTALLA - alto_jugador) // 2
 
     jugador = Jugador(pos_x, pos_y, ancho_jugador, alto_jugador,
-                      escala=ESCALA_JUGADOR, colisiones=colisiones_escaladas_scaled)
+                      escala=ESCALA_JUGADOR, colisiones=colisiones_escaladas)
 
     # Fondo escalado
     fondo_escalado = pygame.transform.scale(fondo_mapa, (SCALED_WIDTH, SCALED_HEIGHT))
@@ -163,7 +139,7 @@ def ejecutar_mapa1():
         dialog_system.draw()  # cuadro de diálogo encima
 
         # Detectar colisión con la puerta y mostrar diálogo
-        if not dialog_system.active and not puerta_dialog_shown and jugador.rect.colliderect(puerta_1_scaled):
+        if not dialog_system.active and not puerta_dialog_shown and jugador.rect.colliderect(puerta_1):
             puerta_dialog_shown = True
             puerta_texts = [
                 "Has encontrado una puerta misteriosa.",
@@ -173,7 +149,7 @@ def ejecutar_mapa1():
             dialog_system.start_dialog(puerta_texts, "Puerta Misteriosa")
 
         # Cambiar de mapa solo después de cerrar el diálogo
-        if puerta_abierta and jugador.rect.colliderect(puerta_1_scaled):
+        if puerta_abierta and jugador.rect.colliderect(puerta_1):
             ejecutar_mapa2()
 
         pygame.display.flip()
