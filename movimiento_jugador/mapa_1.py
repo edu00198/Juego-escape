@@ -180,6 +180,8 @@ def ejecutar_mapa1():
 
             # Sistema de diálogo
             if dialog_system.handle_input(event):
+                # Limpiar la cola de eventos para evitar teclas atascadas tras el diálogo
+                pygame.event.clear()
                 if puerta_dialog_shown:
                     puerta_abierta = True
 
