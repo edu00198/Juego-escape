@@ -1,228 +1,351 @@
 import pygame
-import sys
-
-# Inicializar Pygame
-pygame.init()
-
-# Configuración de pantalla
-ANCHO, ALTO = 800, 600
-pantalla = pygame.display.set_mode((ANCHO, ALTO))
-pygame.display.set_caption("Juego de Llaves, Cofres y Cartas")
+from mapas.fondo import key, cofre_a, cofre_c, nota
 
 # Colores
-BLANCO = (255, 255, 255)
-NEGRO = (0, 0, 0)
-AZUL = (0, 100, 200)
-VERDE = (0, 200, 0)
-ROJO = (200, 0, 0)
 DORADO = (255, 215, 0)
+NEGRO = (0, 0, 0)
+BLANCO = (255, 255, 255)
 MARRON = (139, 69, 19)
-GRIS = (128, 128, 128)
-AMARILLO = (255, 255, 0)
-
-# Fuentes
-fuente_titulo = pygame.font.Font(None, 36)
-fuente_texto = pygame.font.Font(None, 24)
-fuente_carta = pygame.font.Font(None, 20)
-
-class Jugador:
-    def __init__(self, x, y):
-        self.rect = pygame.Rect(x, y, 30, 30)
-        self.velocidad = 5
-        self.tiene_llave = False
-    
-    def mover(self, keys):
-        if keys[pygame.K_LEFT] and self.rect.x > 0:
-            self.rect.x -= self.velocidad
-        if keys[pygame.K_RIGHT] and self.rect.x < ANCHO - self.rect.width:
-            self.rect.x += self.velocidad
-        if keys[pygame.K_UP] and self.rect.y > 0:
-            self.rect.y -= self.velocidad
-        if keys[pygame.K_DOWN] and self.rect.y < ALTO - self.rect.height:
-            self.rect.y += self.velocidad
-    
-    def dibujar(self, pantalla):
-        pygame.draw.rect(pantalla, AZUL, self.rect)
-        # Dibujar ojos
-        pygame.draw.circle(pantalla, BLANCO, (self.rect.x + 8, self.rect.y + 8), 3)
-        pygame.draw.circle(pantalla, BLANCO, (self.rect.x + 22, self.rect.y + 8), 3)
-        pygame.draw.circle(pantalla, NEGRO, (self.rect.x + 8, self.rect.y + 8), 1)
-        pygame.draw.circle(pantalla, NEGRO, (self.rect.x + 22, self.rect.y + 8), 1)
+ROJO = (200, 0, 0)
+VERDE = (0, 200, 0)
 
 class Llave:
     def __init__(self, x, y):
-        self.rect = pygame.Rect(x, y, 20, 20)
         self.encontrada = False
-    
+        try:
+            self.imagen = pygame.image.load(key).convert_alpha()
+            self.imagen = pygame.transform.scale(self.imagen, (35, 35))
+        except Exception as e:
+            print(f"No se pudo cargar la imagen de la llave desde '{key}': {e}")
+            self.imagen = None
+
+        if self.imagen:
+            self.rect = self.imagen.get_rect()
+            self.rect.x = x
+            self.rect.y = y
+        else:
+            self.rect = pygame.Rect(x, y, 25, 25)
+
+    def recoger(self):
+        self.encontrada = True
+
     def dibujar(self, pantalla):
         if not self.encontrada:
-            # Dibujar llave dorada
-            pygame.draw.rect(pantalla, DORADO, self.rect)
-            pygame.draw.rect(pantalla, NEGRO, self.rect, 2)
-            # Detalles de la llave
-            pygame.draw.circle(pantalla, DORADO, (self.rect.x + 5, self.rect.y + 10), 8)
-            pygame.draw.circle(pantalla, NEGRO, (self.rect.x + 5, self.rect.y + 10), 8, 2)
+            if self.imagen:
+                pantalla.blit(self.imagen, self.rect)
+            else:
+                pygame.draw.rect(pantalla, DORADO, self.rect)
+                pygame.draw.rect(pantalla, NEGRO, self.rect, 2)
+                pygame.draw.circle(pantalla, DORADO, (self.rect.x + 8, self.rect.y + 12), 6)
+                pygame.draw.circle(pantalla, NEGRO, (self.rect.x + 8, self.rect.y + 12), 6, 2)
+
 
 class Cofre:
-    def __init__(self, x, y, mensaje):
-        self.rect = pygame.Rect(x, y, 40, 30)
+    def __init__(self, x, y):
         self.abierto = False
-        self.mensaje = mensaje
-    
+        try:
+            self.imagen_cerrado = pygame.image.load(cofre_c).convert_alpha()
+            self.imagen_cerrado = pygame.transform.scale(self.imagen_cerrado, (80, 75))
+            self.imagen_abierto = pygame.image.load(cofre_a).convert_alpha()
+            self.imagen_abierto = pygame.transform.scale(self.imagen_abierto, (80, 75))
+        except Exception as e:
+            print(f"No se pudieron cargar las imágenes del cofre: {e}")
+            self.imagen_cerrado = None
+            self.imagen_abierto = None
+
+        if self.imagen_cerrado:
+            self.rect = self.imagen_cerrado.get_rect()
+            self.rect.x = x
+            self.rect.y = y
+        else:
+            self.rect = pygame.Rect(x, y, 80, 75)
+
     def abrir(self):
         self.abierto = True
-    
-    def dibujar(self, pantalla):
-        if self.abierto:
-            # Cofre abierto (marrón claro)
-            pygame.draw.rect(pantalla, (160, 82, 45), self.rect)
-            pygame.draw.rect(pantalla, NEGRO, self.rect, 2)
-            # Tapa abierta
-            pygame.draw.rect(pantalla, MARRON, (self.rect.x, self.rect.y - 10, self.rect.width, 10))
-            pygame.draw.rect(pantalla, NEGRO, (self.rect.x, self.rect.y - 10, self.rect.width, 10), 2)
-        else:
-            # Cofre cerrado
-            pygame.draw.rect(pantalla, MARRON, self.rect)
-            pygame.draw.rect(pantalla, NEGRO, self.rect, 2)
-            # Cerradura
-            pygame.draw.circle(pantalla, DORADO, (self.rect.centerx, self.rect.centery), 5)
-            pygame.draw.circle(pantalla, NEGRO, (self.rect.centerx, self.rect.centery), 5, 2)
 
-class Carta:
-    def __init__(self, mensaje):
-        self.mensaje = mensaje
+    def dibujar(self, pantalla):
+        if self.imagen_cerrado and self.imagen_abierto:
+            if self.abierto:
+                pantalla.blit(self.imagen_abierto, self.rect)
+            else:
+                pantalla.blit(self.imagen_cerrado, self.rect)
+        else:
+            if self.abierto:
+                pygame.draw.rect(pantalla, (160, 82, 45), self.rect)
+                pygame.draw.rect(pantalla, NEGRO, self.rect, 2)
+                pygame.draw.rect(pantalla, MARRON, (self.rect.x, self.rect.y - 8, self.rect.width, 8))
+                pygame.draw.rect(pantalla, NEGRO, (self.rect.x, self.rect.y - 8, self.rect.width, 8), 2)
+            else:
+                pygame.draw.rect(pantalla, MARRON, self.rect)
+                pygame.draw.rect(pantalla, NEGRO, self.rect, 2)
+                pygame.draw.circle(pantalla, DORADO, (self.rect.centerx, self.rect.centery), 5)
+                pygame.draw.circle(pantalla, NEGRO, (self.rect.centerx, self.rect.centery), 5, 2)
+
+
+class CartaCodigo:
+    def __init__(self, codigo_secreto, texto):
+        self.encontrada = False
+        self.codigo_secreto = codigo_secreto
+        self.texto = texto
         self.visible = False
-        self.rect = pygame.Rect(ANCHO//2 - 200, ALTO//2 - 150, 400, 300)
-    
+        try:
+            self.imagen_carta = pygame.image.load(nota).convert_alpha()
+            self.imagen_carta = pygame.transform.scale(self.imagen_carta, (450, 350))
+        except Exception as e:
+            print(f"No se pudo usar la imagen de la carta: {e}")
+            self.imagen_carta = None
+
+        pantalla = pygame.display.get_surface()
+        self.rect = self.imagen_carta.get_rect(center=(pantalla.get_width() // 2,
+                                                       pantalla.get_height() // 2))
+        self.fuente_titulo = pygame.font.Font(None, 40)
+        self.fuente_codigo = pygame.font.Font(None, 48)
+        self.fuente_texto = pygame.font.Font(None, 24)
+        self.fuente_instruccion = pygame.font.Font(None, 22)
+
     def mostrar(self):
         self.visible = True
-    
+
     def ocultar(self):
         self.visible = False
-    
+
+    def manejar_evento(self, evento):
+        if evento.type == pygame.KEYDOWN:
+            if evento.key == pygame.K_ESCAPE and self.visible:
+                self.ocultar()
+                return True
+        return False
+
+    def dibujar(self, pantalla, texto):
+        if not self.visible:
+            return
+
+        ancho_pantalla, alto_pantalla = pantalla.get_size()
+        overlay = pygame.Surface((ancho_pantalla, alto_pantalla))
+        overlay.set_alpha(150)
+        overlay.fill((0, 0, 0))
+        pantalla.blit(overlay, (0, 0))
+
+        if self.imagen_carta:
+            pantalla.blit(self.imagen_carta, self.rect.topleft)
+
+        titulo = self.fuente_titulo.render("¡NOTA SECRETA ENCONTRADA!", True, (0, 0, 0))
+        titulo_rect = titulo.get_rect(center=(self.rect.centerx, self.rect.y + 50))
+        pantalla.blit(titulo, titulo_rect)
+
+        y_offset = 110
+        texto = self.fuente_texto.render(self.texto, True, (0, 0, 0))
+        texto_rect = texto.get_rect(center=(self.rect.centerx, self.rect.y + y_offset))
+        pantalla.blit(texto, texto_rect)
+        y_offset += 28
+
+        y_offset += 20
+        codigo_fondo = pygame.Rect(self.rect.centerx - 80, self.rect.y + y_offset - 10, 160, 50)
+        pygame.draw.rect(pantalla, (212, 175, 55), codigo_fondo)
+        pygame.draw.rect(pantalla, (0, 0, 0), codigo_fondo, 3)
+
+        codigo_texto = self.fuente_codigo.render(self.codigo_secreto, True, (0, 0, 0))
+        codigo_rect = codigo_texto.get_rect(center=codigo_fondo.center)
+        pantalla.blit(codigo_texto, codigo_rect)
+
+        y_offset += 80
+        mensaje_final = [
+            "Memoriza este código y acércate a la puerta.",
+            "Presiona ENTER cerca de la puerta para ingresar el código."
+        ]
+        for linea in mensaje_final:
+            texto = self.fuente_instruccion.render(linea, True, (0, 0, 0))
+            texto_rect = texto.get_rect(center=(self.rect.centerx, self.rect.y + y_offset))
+            pantalla.blit(texto, texto_rect)
+            y_offset += 25
+
+        cerrar_texto = self.fuente_texto.render("Presiona ESPACIO para continuar", True, (255, 0, 0))
+        cerrar_rect = cerrar_texto.get_rect(center=(self.rect.centerx, self.rect.bottom - 30))
+        pantalla.blit(cerrar_texto, cerrar_rect)
+
+
+class PanelCodigo:
+    def __init__(self, codigo_correcto, ancho_pantalla=800, alto_pantalla=600):
+        self.codigo_correcto = codigo_correcto
+        self.codigo_ingresado = ""
+        self.visible = False
+        self.codigo_correcto_ingresado = False
+        self.mensaje_error = ""
+        self.tiempo_mensaje = 0
+        
+        # Rect centrado en pantalla
+        self.rect = pygame.Rect(ancho_pantalla // 2 - 150, alto_pantalla // 2 - 100, 300, 200)
+        self.fuente_titulo = pygame.font.Font(None, 32)
+        self.fuente_codigo = pygame.font.Font(None, 36)
+        self.fuente_texto = pygame.font.Font(None, 24)
+
+    def mostrar(self):
+        self.visible = True
+        self.codigo_ingresado = ""
+        self.mensaje_error = ""
+        self.codigo_correcto_ingresado = False
+
+    def ocultar(self):
+        self.visible = False
+
+    def manejar_evento(self, evento):
+        if not self.visible:
+            return False
+
+        if evento.type == pygame.KEYDOWN:
+            if evento.key == pygame.K_ESCAPE:
+                self.ocultar()
+                return True
+            elif evento.key == pygame.K_BACKSPACE:
+                self.codigo_ingresado = self.codigo_ingresado[:-1]
+                self.mensaje_error = ""
+            elif evento.key == pygame.K_RETURN or evento.key == pygame.K_KP_ENTER:
+                if self.codigo_ingresado == self.codigo_correcto:
+                    self.codigo_correcto_ingresado = True
+                    self.mensaje_error = "¡CÓDIGO CORRECTO!"
+                    self.tiempo_mensaje = pygame.time.get_ticks()
+                    return "codigo_correcto"
+                else:
+                    self.mensaje_error = "Código incorrecto. Intenta de nuevo."
+                    self.codigo_ingresado = ""
+                    self.tiempo_mensaje = pygame.time.get_ticks()
+            elif len(self.codigo_ingresado) < 4 and evento.unicode.isdigit():
+                self.codigo_ingresado += evento.unicode
+                self.mensaje_error = ""
+
+        return False
+
+    def actualizar(self):
+        if self.tiempo_mensaje > 0 and pygame.time.get_ticks() - self.tiempo_mensaje > 2000:
+            if not self.codigo_correcto_ingresado:
+                self.mensaje_error = ""
+            self.tiempo_mensaje = 0
+
     def dibujar(self, pantalla):
         if self.visible:
+            ancho_pantalla, alto_pantalla = pantalla.get_size()
+
             # Fondo semi-transparente
-            overlay = pygame.Surface((ANCHO, ALTO))
+            overlay = pygame.Surface((ancho_pantalla, alto_pantalla))
             overlay.set_alpha(128)
-            overlay.fill(NEGRO)
+            overlay.fill((0, 0, 0))
             pantalla.blit(overlay, (0, 0))
-            
-            # Carta
-            pygame.draw.rect(pantalla, BLANCO, self.rect)
-            pygame.draw.rect(pantalla, NEGRO, self.rect, 3)
-            
+
+            # Panel del código
+            pygame.draw.rect(pantalla, (220, 220, 220), self.rect)
+            pygame.draw.rect(pantalla, (0, 0, 0), self.rect, 3)
+
             # Título
-            titulo = fuente_titulo.render("¡Misión Encontrada!", True, NEGRO)
-            titulo_rect = titulo.get_rect(center=(self.rect.centerx, self.rect.y + 40))
+            titulo = self.fuente_titulo.render("INGRESA EL CÓDIGO", True, (0, 0, 0))
+            titulo_rect = titulo.get_rect(center=(self.rect.centerx, self.rect.y + 30))
             pantalla.blit(titulo, titulo_rect)
-            
-            # Mensaje - dividir en líneas
-            lineas = self.mensaje.split('\n')
-            y_offset = 80
-            for linea in lineas:
-                if linea.strip():  # Solo dibujar líneas no vacías
-                    texto = fuente_carta.render(linea, True, NEGRO)
-                    texto_rect = texto.get_rect(center=(self.rect.centerx, self.rect.y + y_offset))
-                    pantalla.blit(texto, texto_rect)
-                y_offset += 25
-            
-            # Instrucción para cerrar
-            cerrar_texto = fuente_texto.render("Presiona ESPACIO para continuar", True, ROJO)
-            cerrar_rect = cerrar_texto.get_rect(center=(self.rect.centerx, self.rect.bottom - 30))
-            pantalla.blit(cerrar_texto, cerrar_rect)
 
-class Juego:
-    def __init__(self):
-        self.jugador = Jugador(50, 50)
-        self.llave = Llave(300, 200)
-        
-        # Mensaje de la carta
-        mensaje_mision = """Tu próxima misión es:
+            # Campo de código
+            codigo_rect = pygame.Rect(self.rect.centerx - 60, self.rect.centery - 15, 120, 30)
+            pygame.draw.rect(pantalla, (255, 255, 255), codigo_rect)
+            pygame.draw.rect(pantalla, (0, 0, 0), codigo_rect, 2)
 
-Encuentra las 3 gemas perdidas del reino.
-Están escondidas en lugares peligrosos:
-- La gema roja en el volcán ardiente
-- La gema azul en las profundidades del océano  
-- La gema verde en el bosque encantado
+            # Mostrar código ingresado
+            codigo_display = self.codigo_ingresado + "_" * (4 - len(self.codigo_ingresado))
+            codigo_texto = self.fuente_codigo.render(codigo_display, True, (0, 0, 0))
+            codigo_texto_rect = codigo_texto.get_rect(center=codigo_rect.center)
+            pantalla.blit(codigo_texto, codigo_texto_rect)
 
-¡Ten cuidado con los guardianes!
-El destino del reino está en tus manos."""
-        
-        self.cofre = Cofre(500, 300, mensaje_mision)
-        self.carta = Carta(mensaje_mision)
-        self.juego_terminado = False
-    
-    def manejar_eventos(self, evento):
-        if evento.type == pygame.KEYDOWN:
-            if evento.key == pygame.K_SPACE and self.carta.visible:
-                self.carta.ocultar()
-    
-    def actualizar(self):
-        keys = pygame.key.get_pressed()
-        self.jugador.mover(keys)
-        
-        # Verificar colisión con llave
-        if not self.llave.encontrada and self.jugador.rect.colliderect(self.llave.rect):
-            self.llave.encontrada = True
-            self.jugador.tiene_llave = True
-        
-        # Verificar colisión con cofre
-        if (self.jugador.tiene_llave and not self.cofre.abierto and 
-            self.jugador.rect.colliderect(self.cofre.rect)):
-            self.cofre.abrir()
-            self.carta.mostrar()
-    
+            # Mensaje de error o éxito
+            if self.mensaje_error:
+                color = (0, 200, 0) if self.codigo_correcto_ingresado else (200, 0, 0)
+                error_texto = self.fuente_texto.render(self.mensaje_error, True, color)
+                error_rect = error_texto.get_rect(center=(self.rect.centerx, self.rect.centery + 40))
+                pantalla.blit(error_texto, error_rect)
+
+            # Instrucciones
+            if not self.codigo_correcto_ingresado:
+                instrucciones = [
+                    "Ingresa el código de 4 dígitos",
+                    "ENTER: Confirmar | ESC: Cancelar"
+                ]
+                y_offset = 100
+                for instruccion in instrucciones:
+                    inst_texto = self.fuente_texto.render(instruccion, True, (0, 0, 0))
+                    inst_rect = inst_texto.get_rect(center=(self.rect.centerx, self.rect.y + y_offset))
+                    pantalla.blit(inst_texto, inst_rect)
+                    y_offset += 25
+
+
+class SistemaLlavesCofres:
+    def __init__(self, codigo_secreto):
+        self.llaves = []
+        self.cofres = []
+        self.cartas = []
+        self.panel_codigo = None
+        self.llaves_encontradas = 0
+        self.codigo_secreto = codigo_secreto
+        self.codigo_correcto = False
+
+    def agregar_llave(self, x, y, sprite_path=None):
+        llave = Llave(x, y)
+        self.llaves.append(llave)
+        return llave
+
+    def agregar_cofre(self, x, y, sprite_cerrado_path=None, sprite_abierto_path=None, sprite_carta_path=None):
+        cofre = Cofre(x, y)
+        self.cofres.append(cofre)
+
+    def agregar_carta(self, texto):
+        carta = CartaCodigo(self.codigo_secreto, texto)
+        self.cartas.append(carta)
+        return carta
+
     def dibujar(self, pantalla):
-        pantalla.fill(BLANCO)
-        
-        # Dibujar elementos del juego
-        self.jugador.dibujar(pantalla)
-        self.llave.dibujar(pantalla)
-        self.cofre.dibujar(pantalla)
-        
-        # Dibujar interfaz
-        if self.jugador.tiene_llave:
-            llave_texto = fuente_texto.render("¡Tienes una llave!", True, DORADO)
-            pantalla.blit(llave_texto, (10, 10))
-        
-        if self.cofre.abierto:
-            cofre_texto = fuente_texto.render("¡Cofre abierto! Misión recibida.", True, VERDE)
-            pantalla.blit(cofre_texto, (10, 40))
-        
-        # Instrucciones
-        if not self.jugador.tiene_llave:
-            instruccion = fuente_texto.render("Usa las flechas para moverte. Encuentra la llave.", True, NEGRO)
-            pantalla.blit(instruccion, (10, ALTO - 60))
-        elif not self.cofre.abierto:
-            instruccion = fuente_texto.render("¡Ve al cofre para abrirlo con tu llave!", True, NEGRO)
-            pantalla.blit(instruccion, (10, ALTO - 60))
-        else:
-            instruccion = fuente_texto.render("¡Misión completada! El cofre ha sido abierto.", True, NEGRO)
-            pantalla.blit(instruccion, (10, ALTO - 60))
-        
-        # Dibujar carta (siempre al final para que esté encima)
-        self.carta.dibujar(pantalla)
+        for llave in self.llaves:
+            llave.dibujar(pantalla)
+        for cofre in self.cofres:
+            cofre.dibujar(pantalla)
+        for carta in self.cartas:
+            carta.dibujar(pantalla, carta.texto)
+        if self.panel_codigo:
+            self.panel_codigo.dibujar(pantalla)
 
-# Función principal
-def main():
-    reloj = pygame.time.Clock()
-    juego = Juego()
-    
-    ejecutando = True
-    while ejecutando:
-        for evento in pygame.event.get():
-            if evento.type == pygame.QUIT:
-                ejecutando = False
-            
-            juego.manejar_eventos(evento)
-        
-        juego.actualizar()
-        juego.dibujar(pantalla)
-        
-        pygame.display.flip()
-        reloj.tick(60)
-    
-    pygame.quit()
-    sys.exit()
+    def crear_panel_codigo(self, ancho_pantalla=800, alto_pantalla=600):
+        self.panel_codigo = PanelCodigo(self.codigo_secreto, ancho_pantalla, alto_pantalla)
 
+    def verificar_colisiones(self, jugador_rect):
+        for llave in self.llaves:
+            if not llave.encontrada and jugador_rect.colliderect(llave.rect):
+                llave.recoger()
+                self.llaves_encontradas += 1
+                return "llave"
+        if self.llaves_encontradas > 0:
+            for i, cofre in enumerate(self.cofres):
+                if not cofre.abierto and jugador_rect.colliderect(cofre.rect):
+                    cofre.abrir()
+                    if i < len(self.cartas):
+                        self.cartas[i].mostrar()
+                    self.llaves_encontradas -= 1
+                    return "cofre"
+        return None
+
+    def mostrar_panel_codigo(self):
+        if self.panel_codigo:
+            self.panel_codigo.mostrar()
+
+    def manejar_eventos(self, evento):
+        for carta in self.cartas:
+            if carta.manejar_evento(evento):
+                return True
+        if self.panel_codigo:
+            resultado = self.panel_codigo.manejar_evento(evento)
+            if resultado == "codigo_correcto":
+                self.codigo_correcto = True
+                return "codigo_correcto"
+        return False
+
+    def actualizar(self):
+        if self.panel_codigo:
+            self.panel_codigo.actualizar()
+
+    def hay_interfaz_visible(self):
+        interfaz_visible = any(carta.visible for carta in self.cartas)
+        if self.panel_codigo:
+            interfaz_visible = interfaz_visible or self.panel_codigo.visible
+        return interfaz_visible

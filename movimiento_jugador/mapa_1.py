@@ -1,15 +1,29 @@
 import pygame
 import sys
 import os
-from .mapa_2 import ejecutar_mapa2
+import random
 
+# Ajustes de paths
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from configuracion import ANCHO_PANTALLA, ALTO_PANTALLA, ESCALA_JUGADOR
+from configuracion import ANCHO_PANTALLA, ALTO_PANTALLA, ESCALA_JUGADOR, BLANCO
 from movimiento_jugador.jugador import Jugador
-from mapas.mapa1_data import fondo_mapa, SCALED_HEIGHT, SCALED_WIDTH, OFFSET_X, OFFSET_Y, puerta_1, colisiones_escaladas
+from mapas.mapa1_data import (
+    fondo_mapa,
+    SCALED_HEIGHT,
+    SCALED_WIDTH,
+    OFFSET_X,
+    OFFSET_Y,
+    puerta_1,
+    colisiones_escaladas,
+)
+from .puzzle_cofre import SistemaLlavesCofres
+from .menu_pausa import pause_menu
+from .mapa_2 import ejecutar_mapa2
+
 
 pantalla = pygame.display.set_mode((ANCHO_PANTALLA, ALTO_PANTALLA))
+
 
 # =============================
 # Sistema de Diálogo
@@ -83,11 +97,14 @@ class DialogSystem:
 
         # Indicador para continuar
         indicator = self.font.render("Espacio/Enter para continuar...", True, (200, 200, 200))
-        self.pantalla.blit(indicator, (self.dialog_rect.right - indicator.get_width() - 20, self.dialog_rect.bottom - 30))
+        self.pantalla.blit(
+            indicator,
+            (self.dialog_rect.right - indicator.get_width() - 20, self.dialog_rect.bottom - 30),
+        )
 
 
 # =============================
-# Ejecutar Mapa
+# Ejecutar Mapa 1
 # =============================
 def ejecutar_mapa1():
     clock = pygame.time.Clock()
@@ -98,13 +115,11 @@ def ejecutar_mapa1():
     intro_texts = [
         "Hace mucho tiempo, en un reino lejano, un valiente aventurero inició su misión.",
         "Las leyendas hablan de una reliquia mágica en lo profundo de un castillo.",
-        "Tu aventura comienza aquí, en la entrada de este misterioso lugar..."
+        "Tu aventura comienza aquí, en la entrada de este misterioso lugar...",
     ]
     dialog_system.start_dialog(intro_texts, "El Comienzo de la Aventura")
 
-    # ---------------------------
     # Escala del mapa y jugador
-    # ---------------------------
     escala_x = SCALED_WIDTH / fondo_mapa.get_width()
     escala_y = SCALED_HEIGHT / fondo_mapa.get_height()
     escala_fondo = min(escala_x, escala_y)
@@ -114,28 +129,38 @@ def ejecutar_mapa1():
         OFFSET_X + int(puerta_1.x * escala_fondo),
         OFFSET_Y + int(puerta_1.y * escala_fondo),
         int(puerta_1.width * escala_fondo),
-        int(puerta_1.height * escala_fondo)
+        int(puerta_1.height * escala_fondo),
     )
 
     colisiones_escaladas_scaled = []
     for c in colisiones_escaladas:
-        colisiones_escaladas_scaled.append(pygame.Rect(
-            OFFSET_X + int(c.x * escala_fondo),
-            OFFSET_Y + int(c.y * escala_fondo),
-            int(c.width * escala_fondo),
-            int(c.height * escala_fondo)
-        ))
+        colisiones_escaladas_scaled.append(
+            pygame.Rect(
+                OFFSET_X + int(c.x * escala_fondo),
+                OFFSET_Y + int(c.y * escala_fondo),
+                int(c.width * escala_fondo),
+                int(c.height * escala_fondo),
+            )
+        )
 
-    # Posición inicial fija del jugador (centrado)
+    # Posición inicial fija del jugador
     ancho_jugador, alto_jugador = 23, 15
     pos_x = (ANCHO_PANTALLA - ancho_jugador) // 2
     pos_y = (ALTO_PANTALLA - alto_jugador) // 2
 
-    jugador = Jugador(pos_x, pos_y, ancho_jugador, alto_jugador,
-                      escala=ESCALA_JUGADOR, colisiones=colisiones_escaladas_scaled)
+    jugador = Jugador(
+        pos_x, pos_y, ancho_jugador, alto_jugador, escala=ESCALA_JUGADOR, colisiones=colisiones_escaladas_scaled
+    )
 
     # Fondo escalado
     fondo_escalado = pygame.transform.scale(fondo_mapa, (SCALED_WIDTH, SCALED_HEIGHT))
+
+    # Sistema de cofres
+    sistema_cofres = SistemaLlavesCofres(codigo_secreto=str(random.randint(1000, 9999)))
+    sistema_cofres.agregar_llave(175, 325)
+    sistema_cofres.agregar_cofre(1125, 200)
+    sistema_cofres.agregar_carta("Bienvenido al escape de la mazmorra!")
+    sistema_cofres.crear_panel_codigo(ANCHO_PANTALLA, ALTO_PANTALLA)
 
     puerta_dialog_shown = False
     puerta_abierta = False
@@ -145,34 +170,58 @@ def ejecutar_mapa1():
             if event.type == pygame.QUIT:
                 running = False
 
-            # Manejo de diálogos
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE and not sistema_cofres.hay_interfaz_visible():
+                    pause_menu(pantalla)
+                else:
+                    # Sistema cofres
+                    resultado = sistema_cofres.manejar_eventos(event)
+                    if resultado == "codigo_correcto":
+                        puerta_abierta = True
+
+            # Sistema de diálogo
             if dialog_system.handle_input(event):
                 if puerta_dialog_shown:
                     puerta_abierta = True
 
-        # Movimiento solo si no hay diálogo activo
-        if not dialog_system.active:
+        # Movimiento jugador
+        if not dialog_system.active and not sistema_cofres.hay_interfaz_visible():
+            pos_anterior = jugador.rect.topleft
             jugador.manejar_teclas()
 
-        # ---------------------------
-        # Dibujar fondo y jugador
-        # ---------------------------
+            # Colisiones
+            colision_pared = any(jugador.rect.colliderect(rect) for rect in colisiones_escaladas_scaled)
+            colision_cofre = any((not cofre.abierto) and jugador.rect.colliderect(cofre.rect) for cofre in sistema_cofres.cofres)
+            if colision_pared or (colision_cofre and sistema_cofres.llaves_encontradas == 0):
+                jugador.rect.topleft = pos_anterior
+
+            # Interacción cofres/llaves
+            resultado = sistema_cofres.verificar_colisiones(jugador.rect)
+            if resultado == "llave":
+                print("¡Recogiste una llave!")
+            elif resultado == "cofre":
+                dialog_system.start_dialog(["Has abierto un cofre...", "¡Y encontraste una carta!"], "Cofre")
+
+        # Dibujar
         pantalla.fill((0, 0, 0))
         pantalla.blit(fondo_escalado, (OFFSET_X, OFFSET_Y))
+        sistema_cofres.dibujar(pantalla)
         jugador.dibujar(pantalla, 0, 0)
-        dialog_system.draw()  # cuadro de diálogo encima
+        dialog_system.draw()
 
-        # Detectar colisión con la puerta y mostrar diálogo
+        # Colisión con la puerta
         if not dialog_system.active and not puerta_dialog_shown and jugador.rect.colliderect(puerta_1_scaled):
             puerta_dialog_shown = True
-            puerta_texts = [
-                "Has encontrado una puerta misteriosa.",
-                "Un aura mágica emana de ella...",
-                "Te preguntas qué habrá al otro lado..."
-            ]
-            dialog_system.start_dialog(puerta_texts, "Puerta Misteriosa")
+            dialog_system.start_dialog(
+                [
+                    "Has encontrado una puerta misteriosa.",
+                    "Un aura mágica emana de ella...",
+                    "Te preguntas qué habrá al otro lado...",
+                ],
+                "Puerta Misteriosa",
+            )
 
-        # Cambiar de mapa solo después de cerrar el diálogo
+        # Pasar al mapa 2
         if puerta_abierta and jugador.rect.colliderect(puerta_1_scaled):
             ejecutar_mapa2()
 
