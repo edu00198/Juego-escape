@@ -168,12 +168,12 @@ class PanelCodigo:
         self.codigo_correcto_ingresado = False
         self.mensaje_error = ""
         self.tiempo_mensaje = 0
-        
-        # Rect centrado en pantalla
-        self.rect = pygame.Rect(ancho_pantalla // 2 - 150, alto_pantalla // 2 - 100, 300, 200)
-        self.fuente_titulo = pygame.font.Font(None, 32)
-        self.fuente_codigo = pygame.font.Font(None, 36)
-        self.fuente_texto = pygame.font.Font(None, 24)
+
+        self.rect = pygame.Rect(ancho_pantalla // 2 - 200, alto_pantalla // 2 - 150, 400, 300)
+        self.fuente_titulo = pygame.font.Font(None, 36)
+        self.fuente_codigo = pygame.font.Font(None, 48)
+        self.fuente_texto = pygame.font.Font(None, 28)
+        self.fuente_instruccion = pygame.font.Font(None, 24)
 
     def mostrar(self):
         self.visible = True
@@ -195,7 +195,7 @@ class PanelCodigo:
             elif evento.key == pygame.K_BACKSPACE:
                 self.codigo_ingresado = self.codigo_ingresado[:-1]
                 self.mensaje_error = ""
-            elif evento.key == pygame.K_RETURN or evento.key == pygame.K_KP_ENTER:
+            elif evento.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
                 if self.codigo_ingresado == self.codigo_correcto:
                     self.codigo_correcto_ingresado = True
                     self.mensaje_error = "¡CÓDIGO CORRECTO!"
@@ -221,51 +221,52 @@ class PanelCodigo:
         if self.visible:
             ancho_pantalla, alto_pantalla = pantalla.get_size()
 
-            # Fondo semi-transparente
-            overlay = pygame.Surface((ancho_pantalla, alto_pantalla))
-            overlay.set_alpha(128)
-            overlay.fill((0, 0, 0))
+            overlay = pygame.Surface((ancho_pantalla, alto_pantalla), pygame.SRCALPHA)
+            for i in range(200):
+                alpha = max(0, 128 - i)
+                pygame.draw.circle(overlay, (0, 0, 0, alpha), (ancho_pantalla//2, alto_pantalla//2), i*3)
             pantalla.blit(overlay, (0, 0))
 
-            # Panel del código
-            pygame.draw.rect(pantalla, (220, 220, 220), self.rect)
-            pygame.draw.rect(pantalla, (0, 0, 0), self.rect, 3)
+            rect_bg = pygame.Rect(self.rect)
+            border_radius = 20
+            pygame.draw.rect(pantalla, (240, 240, 240), rect_bg, border_radius=border_radius)
+            pygame.draw.rect(pantalla, (50, 50, 50), rect_bg, 4, border_radius=border_radius)
 
-            # Título
+            titulo_sombra = self.fuente_titulo.render("INGRESA EL CÓDIGO", True, (100, 100, 100))
             titulo = self.fuente_titulo.render("INGRESA EL CÓDIGO", True, (0, 0, 0))
-            titulo_rect = titulo.get_rect(center=(self.rect.centerx, self.rect.y + 30))
+            titulo_rect = titulo.get_rect(center=(self.rect.centerx, self.rect.y + 40))
+            pantalla.blit(titulo_sombra, titulo_rect.move(2, 2))
             pantalla.blit(titulo, titulo_rect)
 
-            # Campo de código
-            codigo_rect = pygame.Rect(self.rect.centerx - 60, self.rect.centery - 15, 120, 30)
-            pygame.draw.rect(pantalla, (255, 255, 255), codigo_rect)
-            pygame.draw.rect(pantalla, (0, 0, 0), codigo_rect, 2)
+            codigo_rect = pygame.Rect(self.rect.centerx - 80, self.rect.centery - 25, 160, 50)
+            pygame.draw.rect(pantalla, (255, 255, 255), codigo_rect, border_radius=10)
+            pygame.draw.rect(pantalla, (0, 0, 0), codigo_rect, 3, border_radius=10)
 
-            # Mostrar código ingresado
-            codigo_display = self.codigo_ingresado + "_" * (4 - len(self.codigo_ingresado))
+            codigo_display = " ".join(self.codigo_ingresado + "_" * (4 - len(self.codigo_ingresado)))
             codigo_texto = self.fuente_codigo.render(codigo_display, True, (0, 0, 0))
             codigo_texto_rect = codigo_texto.get_rect(center=codigo_rect.center)
             pantalla.blit(codigo_texto, codigo_texto_rect)
 
-            # Mensaje de error o éxito
             if self.mensaje_error:
                 color = (0, 200, 0) if self.codigo_correcto_ingresado else (200, 0, 0)
+                error_bg_rect = pygame.Rect(self.rect.centerx - 150, self.rect.centery + 40, 300, 40)
+                pygame.draw.rect(pantalla, (255, 255, 255), error_bg_rect, border_radius=10)
+                pygame.draw.rect(pantalla, color, error_bg_rect, 2, border_radius=10)
                 error_texto = self.fuente_texto.render(self.mensaje_error, True, color)
-                error_rect = error_texto.get_rect(center=(self.rect.centerx, self.rect.centery + 40))
+                error_rect = error_texto.get_rect(center=error_bg_rect.center)
                 pantalla.blit(error_texto, error_rect)
 
-            # Instrucciones
             if not self.codigo_correcto_ingresado:
                 instrucciones = [
                     "Ingresa el código de 4 dígitos",
                     "ENTER: Confirmar | ESC: Cancelar"
                 ]
-                y_offset = 100
+                y_offset = self.rect.centery + 100
                 for instruccion in instrucciones:
                     inst_texto = self.fuente_texto.render(instruccion, True, (0, 0, 0))
-                    inst_rect = inst_texto.get_rect(center=(self.rect.centerx, self.rect.y + y_offset))
+                    inst_rect = inst_texto.get_rect(center=(self.rect.centerx, y_offset))
                     pantalla.blit(inst_texto, inst_rect)
-                    y_offset += 25
+                    y_offset += 35
 
 
 class SistemaLlavesCofres:
@@ -305,6 +306,14 @@ class SistemaLlavesCofres:
     def crear_panel_codigo(self, ancho_pantalla=800, alto_pantalla=600):
         self.panel_codigo = PanelCodigo(self.codigo_secreto, ancho_pantalla, alto_pantalla)
 
+    def cerrar_panel_codigo(self):
+        """Oculta y resetea el panel de código (para cuando se vuelve a mapa1)."""
+        if self.panel_codigo:
+            self.panel_codigo.visible = False
+            self.panel_codigo.codigo_ingresado = ""
+            self.panel_codigo.mensaje_error = ""
+            self.panel_codigo.codigo_correcto_ingresado = False
+
     def verificar_colisiones(self, jugador_rect):
         for llave in self.llaves:
             if not llave.encontrada and jugador_rect.colliderect(llave.rect):
@@ -321,9 +330,11 @@ class SistemaLlavesCofres:
                     return "cofre"
         return None
 
-    def mostrar_panel_codigo(self):
+    def mostrar_panel_codigo(self, x=None, y=None):
         if self.panel_codigo:
             self.panel_codigo.mostrar()
+            if x is not None and y is not None:
+                self.panel_codigo.rect.center = (x, y)
 
     def manejar_eventos(self, evento):
         for carta in self.cartas:
@@ -333,6 +344,8 @@ class SistemaLlavesCofres:
             resultado = self.panel_codigo.manejar_evento(evento)
             if resultado == "codigo_correcto":
                 self.codigo_correcto = True
+                global codigo_ya_ingresado
+                codigo_ya_ingresado = True
                 return "codigo_correcto"
         return False
 
