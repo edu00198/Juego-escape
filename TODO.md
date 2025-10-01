@@ -1,0 +1,3 @@
+- [ ] Remove initial dialog start in ejecutar_mapa1
+- [ ] Add has_moved flag
+- [ ] Add logic to start dialog after first move

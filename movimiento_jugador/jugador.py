@@ -196,7 +196,7 @@ class Jugador:
         self.rect.bottom = min(self.rect.bottom, ALTO_PANTALLA)
 
         # Synchronize sprite_pos with rect after clamping
-        offset_x = 58  # same offset as in __init__
+        offset_x = 70  # same offset as in __init__
         offset_y = 101
         self.sprite_pos.x = self.rect.x - offset_x
         self.sprite_pos.y = self.rect.y - offset_y

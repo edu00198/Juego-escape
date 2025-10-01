@@ -104,6 +104,7 @@ def ejecutar_mapa1():
     clock = pygame.time.Clock()
     running = True
     dialog_system = DialogSystem(pantalla)
+    has_moved = False
 
     # Historia inicial
     intro_texts = [
@@ -111,7 +112,6 @@ def ejecutar_mapa1():
         "Las leyendas hablan de una reliquia mágica en lo profundo de un castillo.",
         "Tu aventura comienza aquí, en la entrada de este misterioso lugar...",
     ]
-    dialog_system.start_dialog(intro_texts, "El Comienzo de la Aventura")
 
     escala_x = SCALED_WIDTH / fondo_mapa.get_width()
     escala_y = SCALED_HEIGHT / fondo_mapa.get_height()
@@ -166,6 +166,10 @@ def ejecutar_mapa1():
                 jugador.rect.topleft = pos_anterior
 
             resultado = sistema_cofres.verificar_colisiones(jugador.rect)
+
+            if not has_moved and pos_anterior != jugador.rect.topleft:
+                has_moved = True
+                dialog_system.start_dialog(intro_texts, "El Comienzo de la Aventura")
 
         pantalla.fill((0, 0, 0))
         pantalla.blit(fondo_escalado, (OFFSET_X, OFFSET_Y))
