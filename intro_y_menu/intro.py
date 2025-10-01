@@ -57,7 +57,7 @@ def main_intro():
         big_font = pygame.font.SysFont("Arial", 150, bold=True)
         small_font = pygame.font.SysFont("Arial", 70)
     
-    logo_original = pygame.image.load("intro_assets/arbol.png")
+    logo_original = pygame.image.load("assets/arbol.png")
     
     max_logo_width = WIDTH // 0.8
     max_logo_height = HEIGHT // 0.8  
