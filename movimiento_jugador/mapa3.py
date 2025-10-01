@@ -43,6 +43,43 @@ def ejecutar_mapa3():
 
     fondo_escalado = pygame.transform.scale(fondo_mapa, (SCALED_WIDTH, SCALED_HEIGHT))
 
+    BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+    ruta_pared = os.path.join(BASE_DIR, "mapas", "fondomapa3.png")
+
+    # Cargar imagen
+    imagen_pared = pygame.image.load(ruta_pared).convert_alpha()
+
+    # Escalar si querés adaptarla al tamaño de pantalla
+    imagen_escalada = pygame.transform.scale(imagen_pared, (1280, 720))
+
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+
+        jugador.manejar_teclas()
+
+        pantalla.fill((0, 0, 0))  # Limpiar pantalla
+
+        pantalla.blit(fondo_escalado, (OFFSET_X, OFFSET_Y))  # Fondo del mapa
+
+        # Dibujar colisiones (opcional para depuración)👍
+        """
+        for colision in colisiones_escaladas:
+            pygame.draw.rect(pantalla, (255, 0, 0), colision, 2)
+
+        # Dibujar puertas (opcional para depuración)
+        pygame.draw.rect(pantalla, (0, 0, 255), puerta_2_entrada, 2)
+        pygame.draw.rect(pantalla, (0, 255, 255), puerta_2_salida, 2)
+        """
+        jugador.dibujar(pantalla, offset_x, offset_y)  # Primero el jugador
+
+        pantalla.blit(imagen_escalada, (0, 0))  # Después la imagen → queda arriba del jugador
+
+        pygame.display.flip()
+
+        clock.tick(60)
+
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:

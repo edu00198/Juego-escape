@@ -195,7 +195,7 @@ class Jugador:
         self.rect.bottom = min(self.rect.bottom, ALTO_PANTALLA)
 
         # Synchronize sprite_pos with rect after clamping
-        offset_x = 58  # same offset as in __init__
+        offset_x = 70  # same offset as in __init__
         offset_y = 101
         self.sprite_pos.x = self.rect.x - offset_x
         self.sprite_pos.y = self.rect.y - offset_y
@@ -219,6 +219,4 @@ class Jugador:
 
         # Dibujar la hitbox (verde) con desplazamiento
         hitbox_offset = self.rect.move(offset_x, offset_y)
-        pygame.draw.rect(pantalla, (0, 255, 0), hitbox_offset, 2)
-
-
+       #pygame.draw.rect(pantalla, (0, 255, 0), hitbox_offset, 2)
