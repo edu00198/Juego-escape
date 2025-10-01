@@ -1,5 +1,5 @@
 import pygame
-from mapas.fondo import key, cofre_a, cofre_c, nota
+from assets.mapas.fondo import key, cofre_a, cofre_c, nota
 
 # Colores
 DORADO = (255, 215, 0)
@@ -111,7 +111,7 @@ class CartaCodigo:
 
     def manejar_evento(self, evento):
         if evento.type == pygame.KEYDOWN:
-            if evento.key == pygame.K_ESCAPE and self.visible:
+            if evento.key == pygame.K_SPACE and self.visible:
                 self.ocultar()
                 return True
         return False
@@ -155,7 +155,7 @@ class CartaCodigo:
             pantalla.blit(texto, texto_rect)
             y_offset += 25
 
-        cerrar_texto = self.fuente_texto.render("Presiona ESCAPE para salir", True, (255, 0, 0))
+        cerrar_texto = self.fuente_texto.render("Presiona ESPACIO para salir", True, (255, 0, 0))
         cerrar_rect = cerrar_texto.get_rect(center=(self.rect.centerx, self.rect.bottom - 30))
         pantalla.blit(cerrar_texto, cerrar_rect)
 
@@ -189,7 +189,7 @@ class PanelCodigo:
             return False
 
         if evento.type == pygame.KEYDOWN:
-            if evento.key == pygame.K_ESCAPE:
+            if evento.key == pygame.K_SPACE:
                 self.ocultar()
                 return True
             elif evento.key == pygame.K_BACKSPACE:
