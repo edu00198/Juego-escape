@@ -46,7 +46,7 @@ def ejecutar_mapa2():
 
     
     BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-    ruta_pared = os.path.join(BASE_DIR, "mapas", "pared_mapa_2.png")
+    ruta_pared = os.path.join(BASE_DIR,"assets", "mapas", "pared_mapa_2.png")
 
     # Cargar imagen
     imagen_pared = pygame.image.load(ruta_pared).convert_alpha()

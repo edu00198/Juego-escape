@@ -3,9 +3,9 @@ import time
 print("Importando módulo mapa_1...")
 from movimiento_jugador import mapa_1
 print("Importando otros módulos...")
-from intro import main_intro
-from pantalla_carga import press_any_key_screen
-from menu.menuzaso import menus
+from intro_y_menu.intro  import main_intro
+from intro_y_menu.pantalla_carga import press_any_key_screen
+from intro_y_menu.menu.menuzaso import menus
 
 def main():
     print("Iniciando juego...")

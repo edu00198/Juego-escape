@@ -18,7 +18,7 @@ background = pygame.image.load(ruta_fondo).convert()
 background = pygame.transform.scale(background, (ANCHO_PANTALLA, ALTO_PANTALLA))
 
 def get_font(size): # Returns Press-Start-2P in the desired size
-    return pygame.font.Font("menu/assets/nueva.otf", size)
+    return pygame.font.Font("intro_y_menu/menu/assets/nueva.otf", size)
 # --- FUENTE Y TEXTO ---
 font=get_font(25)
 text_surface = font.render("PRESS ANY KEY TO START", True, (255, 255, 255))

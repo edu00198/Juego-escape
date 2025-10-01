@@ -63,9 +63,8 @@ class Jugador:
                                            (int(img.get_width() * escala), int(img.get_height() * escala))) 
                                            for img in lista]
 
-
     def cargar_sprites(self, carpeta_principal, subcarpeta):
-        ruta_base = os.path.join(os.path.dirname(os.path.dirname(__file__)), "sprites", carpeta_principal, subcarpeta)
+        ruta_base = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets", "sprites_jugador", carpeta_principal, subcarpeta)
         imagenes = []
 
         print(f"Intentando cargar sprites desde: {ruta_base}")
@@ -84,7 +83,7 @@ class Jugador:
 
         return imagenes
 
-            # mapa2.py
+        return imagenes
   
 
     def manejar_teclas(self):

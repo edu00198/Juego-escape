@@ -3,9 +3,9 @@ import pygame
 import sys
 import os
 from configuracion import ANCHO_PANTALLA, ALTO_PANTALLA, BLANCO, ESCALA_JUGADOR, m1_opciones, m2_opciones
-from menu.button import Button
-from menu.settings import settings_menu
-from menu.menuzaso import menus
+from intro_y_menu.menu.button import Button
+from intro_y_menu.menu.settings import settings_menu
+from intro_y_menu.menu.menuzaso import menus
 
 
 def pause_menu(pantalla, mapa_actual=1):
