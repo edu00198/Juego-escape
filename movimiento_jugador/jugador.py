@@ -195,6 +195,12 @@ class Jugador:
         self.rect.top = max(self.rect.top, 0)
         self.rect.bottom = min(self.rect.bottom, ALTO_PANTALLA)
 
+        # Synchronize sprite_pos with rect after clamping
+        offset_x = 58  # same offset as in __init__
+        offset_y = 101
+        self.sprite_pos.x = self.rect.x - offset_x
+        self.sprite_pos.y = self.rect.y - offset_y
+
     def dibujar(self, pantalla, offset_x=0, offset_y=0):
         if not self.animacion_actual:
             print("No hay animación actual disponible")

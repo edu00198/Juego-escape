@@ -126,22 +126,10 @@ def ejecutar_mapa1():
     escala_y = SCALED_HEIGHT / fondo_mapa.get_height()
     escala_fondo = min(escala_x, escala_y)
 
-    # Escalar la puerta y colisiones
-    puerta_1_scaled = pygame.Rect(
-        OFFSET_X + int(puerta_1.x * escala_fondo),
-        OFFSET_Y + int(puerta_1.y * escala_fondo),
-        int(puerta_1.width * escala_fondo),
-        int(puerta_1.height * escala_fondo)
-    )
+    # La puerta y colisiones ya están escaladas en mapa1_data.py
+    puerta_1_scaled = puerta_1
 
-    colisiones_escaladas_scaled = []
-    for c in colisiones_escaladas:
-        colisiones_escaladas_scaled.append(pygame.Rect(
-            OFFSET_X + int(c.x * escala_fondo),
-            OFFSET_Y + int(c.y * escala_fondo),
-            int(c.width * escala_fondo),
-            int(c.height * escala_fondo)
-        ))
+    colisiones_escaladas_scaled = colisiones_escaladas
 
     # Posición inicial fija del jugador (centrado)
     ancho_jugador, alto_jugador = 23, 15
