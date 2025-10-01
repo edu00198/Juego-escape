@@ -186,10 +186,6 @@ def ejecutar_mapa1():
 
             # Interacción cofres/llaves
             resultado = sistema_cofres.verificar_colisiones(jugador.rect)
-            if resultado == "llave":
-                print("¡Recogiste una llave!")
-            elif resultado == "cofre":
-                dialog_system.start_dialog(["Has abierto un cofre...", "¡Y encontraste una carta!"], "Cofre")
 
         # Dibujar
         pantalla.fill((0, 0, 0))

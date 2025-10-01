@@ -129,10 +129,6 @@ class CartaCodigo:
         if self.imagen_carta:
             pantalla.blit(self.imagen_carta, self.rect.topleft)
 
-        titulo = self.fuente_titulo.render("¡NOTA SECRETA ENCONTRADA!", True, (0, 0, 0))
-        titulo_rect = titulo.get_rect(center=(self.rect.centerx, self.rect.y + 50))
-        pantalla.blit(titulo, titulo_rect)
-
         y_offset = 110
         texto = self.fuente_texto.render(self.texto, True, (0, 0, 0))
         texto_rect = texto.get_rect(center=(self.rect.centerx, self.rect.y + y_offset))
@@ -159,7 +155,7 @@ class CartaCodigo:
             pantalla.blit(texto, texto_rect)
             y_offset += 25
 
-        cerrar_texto = self.fuente_texto.render("Presiona ESPACIO para continuar", True, (255, 0, 0))
+        cerrar_texto = self.fuente_texto.render("Presiona ESCAPE para salir", True, (255, 0, 0))
         cerrar_rect = cerrar_texto.get_rect(center=(self.rect.centerx, self.rect.bottom - 30))
         pantalla.blit(cerrar_texto, cerrar_rect)
 
