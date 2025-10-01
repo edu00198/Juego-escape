@@ -7,7 +7,7 @@ import random
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from configuracion import ANCHO_PANTALLA, ALTO_PANTALLA, ESCALA_JUGADOR, BLANCO
-from movimiento_jugador.jugador import Jugador
+from juego.jugador import Jugador
 from assets.mapas.mapa1_data import (
     fondo_mapa,
     SCALED_HEIGHT,

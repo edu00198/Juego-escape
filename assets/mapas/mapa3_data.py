@@ -6,7 +6,7 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from configuracion import ANCHO_PANTALLA, ALTO_PANTALLA, ESCALA_JUGADOR
-from movimiento_jugador.jugador import Jugador
+from juego.jugador import Jugador
 
 pygame.init()
 
