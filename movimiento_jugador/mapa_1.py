@@ -24,6 +24,9 @@ from .mapa_2 import ejecutar_mapa2
 
 pantalla = pygame.display.set_mode((ANCHO_PANTALLA, ALTO_PANTALLA))
 
+# Estado global para persistir el código correcto entre mapas
+codigo_ya_ingresado = False
+
 
 # =============================
 # Sistema de Diálogo
@@ -128,15 +131,21 @@ def ejecutar_mapa1():
                       escala=ESCALA_JUGADOR, colisiones=colisiones_escaladas_scaled)
 
     fondo_escalado = pygame.transform.scale(fondo_mapa, (SCALED_WIDTH, SCALED_HEIGHT))
-
     sistema_cofres = SistemaLlavesCofres(codigo_secreto=str(random.randint(1000, 9999)))
     sistema_cofres.agregar_llave(175, 325)
     sistema_cofres.agregar_cofre(1125, 200)
     sistema_cofres.agregar_carta("Bienvenido al escape de la mazmorra!")
     sistema_cofres.crear_panel_codigo(ANCHO_PANTALLA, ALTO_PANTALLA)
 
-    puerta_dialog_shown = False
-    puerta_abierta = False
+    # -------------------------------
+    # REINICIAR ESTADO DE INTERFACES
+    # -------------------------------
+    global codigo_ya_ingresado
+    sistema_cofres.codigo_correcto = codigo_ya_ingresado
+    if sistema_cofres.panel_codigo:
+        sistema_cofres.panel_codigo.ocultar()
+    for carta in sistema_cofres.cartas:
+        carta.ocultar()
 
     while running:
         for event in pygame.event.get():
@@ -149,12 +158,10 @@ def ejecutar_mapa1():
                 else:
                     resultado = sistema_cofres.manejar_eventos(event)
                     if resultado == "codigo_correcto":
-                        puerta_abierta = True
+                        ejecutar_mapa2()
 
             if dialog_system.handle_input(event):
                 pygame.event.clear()
-                if puerta_dialog_shown:
-                    puerta_abierta = True
 
         if not dialog_system.active and not sistema_cofres.hay_interfaz_visible():
             pos_anterior = jugador.rect.topleft
@@ -179,7 +186,7 @@ def ejecutar_mapa1():
 
         # Detectar colisión con la puerta
         if jugador.rect.colliderect(puerta_1_scaled):
-            if sistema_cofres.llaves_encontradas == 0 or not any(c.abierto for c in sistema_cofres.cofres):
+            if not any(c.abierto for c in sistema_cofres.cofres):
                 if not dialog_system.active:
                     dialog_system.start_dialog(
                         [
@@ -189,8 +196,9 @@ def ejecutar_mapa1():
                         "Puerta Cerrada"
                     )
                 jugador.rect.y += 5  # retroceso visual
-            else:
-                ejecutar_mapa2()
+            elif not sistema_cofres.codigo_correcto:
+                if not sistema_cofres.panel_codigo.visible:
+                    sistema_cofres.mostrar_panel_codigo(jugador.rect.centerx, jugador.rect.centery)
 
         pygame.display.flip()
         clock.tick(60)
