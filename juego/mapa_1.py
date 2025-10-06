@@ -159,6 +159,13 @@ def ejecutar_mapa1():
                     resultado = sistema_cofres.manejar_eventos(event)
                     if resultado == "codigo_correcto":
                         ejecutar_mapa2()
+                        # Move player back from the door to avoid immediate re-trigger
+                        jugador.rect.y -= 10
+                        # Reset interfaces after returning from mapa2
+                        if sistema_cofres.panel_codigo:
+                            sistema_cofres.panel_codigo.ocultar()
+                        for carta in sistema_cofres.cartas:
+                            carta.ocultar()
 
             if dialog_system.handle_input(event):
                 pygame.event.clear()

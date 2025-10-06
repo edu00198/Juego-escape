@@ -44,7 +44,7 @@ def ejecutar_mapa3():
     fondo_escalado = pygame.transform.scale(fondo_mapa, (SCALED_WIDTH, SCALED_HEIGHT))
 
     BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-    ruta_pared = os.path.join(BASE_DIR, "mapas", "fondomapa3.png")
+    ruta_pared = os.path.join(BASE_DIR, "assets", "mapas", "fondomapa3.png")
 
     # Cargar imagen
     imagen_pared = pygame.image.load(ruta_pared).convert_alpha()
@@ -69,8 +69,8 @@ def ejecutar_mapa3():
             pygame.draw.rect(pantalla, (255, 0, 0), colision, 2)
 
         # Dibujar puertas (opcional para depuración)
-        pygame.draw.rect(pantalla, (0, 0, 255), puerta_2_entrada, 2)
-        pygame.draw.rect(pantalla, (0, 255, 255), puerta_2_salida, 2)
+        pygame.draw.rect(pantalla, (0, 0, 255), puerta_3_entrada, 2)
+        pygame.draw.rect(pantalla, (0, 255, 255), puerta_3_salida, 2)
         """
         jugador.dibujar(pantalla, offset_x, offset_y)  # Primero el jugador
 
@@ -80,37 +80,14 @@ def ejecutar_mapa3():
 
         clock.tick(60)
 
-    while running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-
-        jugador.manejar_teclas()
-
-        pantalla.fill((0, 0, 0))
-        pantalla.blit(fondo_escalado, (OFFSET_X, OFFSET_Y))
-
-        # Dibujar colisiones (depuración)
-        for colision in colisiones_escaladas:
-            pygame.draw.rect(pantalla, (255, 0, 0), colision, 2)
-
-        # Dibujar puertas (depuración)
-        """
-        pygame.draw.rect(pantalla, (0, 0, 255), puerta_3_entrada, 2)
-        pygame.draw.rect(pantalla, (0, 255, 255), puerta_3_salida, 2)
-        """
-        jugador.dibujar(pantalla, offset_x, offset_y)
-        
-        pygame.display.flip()
-        clock.tick(60)
-
         # Transiciones de mapa
         if jugador.rect.colliderect(puerta_3_salida):
-            print("Transición al mapa 3")
+            print("Transición al siguiente mapa")
             running = False  # Detenemos el bucle para que el main pueda cargar el siguiente mapa
 
         elif jugador.rect.colliderect(puerta_3_entrada):
-            print("Volver al mapa 1")
+            print("Volver al mapa 2")
+            running = False  # Detenemos el bucle para que el main pueda cargar el mapa 2
             return
 
     pygame.quit()
