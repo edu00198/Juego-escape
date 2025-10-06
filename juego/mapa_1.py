@@ -165,17 +165,31 @@ def ejecutar_mapa1():
                         cerca_puerta = jugador.rect.colliderect(puerta_1_scaled)
                         hay_cofre_abierto = any(c.abierto for c in sistema_cofres.cofres)
                         panel_visible = sistema_cofres.panel_codigo and sistema_cofres.panel_codigo.visible
-                        if cerca_puerta and hay_cofre_abierto:
+                        # DEBUG: mostrar estado para diagnosticar transiciones
+                        print(f"DEBUG SPACE: cerca_puerta={cerca_puerta}, hay_cofre_abierto={hay_cofre_abierto}, panel_visible={panel_visible}, codigo_correcto={sistema_cofres.codigo_correcto}")
+                        # Más info: rects (jugador vs puerta)
+                        try:
+                            print(f"jugador.rect={jugador.rect}, puerta_1_scaled={puerta_1_scaled}")
+                        except Exception as e:
+                            print(f"DEBUG RECT ERROR: {e}")
+                        # Allow leaving to mapa2 if either a cofre is open (fresh session)
+                        # or if the code was already entered in a previous session.
+                        if cerca_puerta and (hay_cofre_abierto or sistema_cofres.codigo_correcto):
                             if sistema_cofres.codigo_correcto:
                                 # Código ya ingresado: pasar a mapa2
-                                ejecutar_mapa2()
+                                ret = ejecutar_mapa2()
                                 # Ensure interfaces reset so we can return later
                                 if sistema_cofres.panel_codigo:
                                     sistema_cofres.panel_codigo.ocultar()
                                 for carta in sistema_cofres.cartas:
                                     carta.ocultar()
-                                # Move player a bit back to avoid immediate re-trigger after return
-                                jugador.rect.y -= 10
+                                # If returned from mapa2, reposition jugador a bit lejos de la puerta
+                                if ret == "to_mapa1":
+                                    try:
+                                        jugador.rect.y -= 60
+                                        jugador.rect.x += 10
+                                    except Exception:
+                                        pass
                                 skip_forward = True
                             elif not panel_visible:
                                 # Abrir panel para ingresar código

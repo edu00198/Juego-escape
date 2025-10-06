@@ -1,4 +1,4 @@
-# Main.py
+    # Main.py
 import pygame
 import time
 print("Importando módulo mapa_1...")
