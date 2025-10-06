@@ -1,4 +1,4 @@
-# mapa_2.py
+
 import pygame
 import sys
 import os
