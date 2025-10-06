@@ -1,27 +1,25 @@
-# mapa_2.py
 import pygame
 import sys
 import os
-
+pygame.init()
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from configuracion import ANCHO_PANTALLA, ALTO_PANTALLA, ESCALA_JUGADOR
 from juego.jugador import Jugador
-from juego.mapa_4 import ejecutar_mapa4
-from assets.mapas.mapa3_data import (
+from assets.mapas.mapa4_data import (
     fondo_mapa,
     SCALED_WIDTH,
     SCALED_HEIGHT,
     OFFSET_X,
     OFFSET_Y,
-    puerta_3_entrada,
-    puerta_3_salida,
+    puerta_4_entrada,
+    puerta_4_salida,
     colisiones_escaladas
 )
 
-pantalla = pygame.display.set_mode((1280, 720))
+pantalla = pygame.display.set_mode((ANCHO_PANTALLA, ALTO_PANTALLA))
 
-def ejecutar_mapa3():
+def ejecutar_mapa4():
     clock = pygame.time.Clock()
     running = True
 
@@ -35,23 +33,20 @@ def ejecutar_mapa3():
     offset_x = (ANCHO_PANTALLA - fondo_mapa.get_width() * escala) // 2
     offset_y = (ALTO_PANTALLA - fondo_mapa.get_height() * escala) // 2
 
-    
-    puerta2pos = puerta_3_entrada.topleft
-    pos_x = puerta2pos[0] - ancho_jugador / 2
-    pos_y = puerta2pos[1] - alto_jugador * 8
+    puerta4pos = puerta_4_entrada.topleft
+    pos_x = puerta4pos[0]
+    pos_y = puerta4pos[1] - alto_jugador * 10
     jugador = Jugador(pos_x, pos_y, ancho_jugador, alto_jugador, escala=ESCALA_JUGADOR, colisiones=colisiones_escaladas)
-
 
     fondo_escalado = pygame.transform.scale(fondo_mapa, (SCALED_WIDTH, SCALED_HEIGHT))
 
     BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-    ruta_pared = os.path.join(BASE_DIR, "assets", "mapas", "fondomapa3.png")
-
-    # Cargar imagen
-    imagen_pared = pygame.image.load(ruta_pared).convert_alpha()
-
-    # Escalar si querés adaptarla al tamaño de pantalla
-    imagen_escalada = pygame.transform.scale(imagen_pared, (1280, 720))
+    ruta_pared = os.path.join(BASE_DIR, "assets", "mapas", "pared_mapa_4.png")
+    if os.path.exists(ruta_pared):
+        imagen_pared = pygame.image.load(ruta_pared).convert_alpha()
+        imagen_escalada = pygame.transform.scale(imagen_pared, (ANCHO_PANTALLA, ALTO_PANTALLA))
+    else:
+        imagen_escalada = None
 
     while running:
         for event in pygame.event.get():
@@ -64,32 +59,29 @@ def ejecutar_mapa3():
 
         pantalla.blit(fondo_escalado, (OFFSET_X, OFFSET_Y))  # Fondo del mapa
 
-        # Dibujar colisiones (opcional para depuración)👍
-        """
+        #Dibujar colisiones (opcional para depuración)
         for colision in colisiones_escaladas:
             pygame.draw.rect(pantalla, (255, 0, 0), colision, 2)
 
-        # Dibujar puertas (opcional para depuración)
-        pygame.draw.rect(pantalla, (0, 0, 255), puerta_3_entrada, 2)
-        pygame.draw.rect(pantalla, (0, 255, 255), puerta_3_salida, 2)
-        """
+        #Dibujar puertas (opcional para depuración)
+        pygame.draw.rect(pantalla, (0, 0, 255), puerta_4_entrada, 2)
+        pygame.draw.rect(pantalla, (0, 255, 255), puerta_4_salida, 2)
+
         jugador.dibujar(pantalla, offset_x, offset_y)  # Primero el jugador
 
-        pantalla.blit(imagen_escalada, (0, 0))  # Después la imagen → queda arriba del jugador
+        if imagen_escalada:
+            pantalla.blit(imagen_escalada, (0, 0))  # Después la imagen → queda arriba del jugador
 
         pygame.display.flip()
-
         clock.tick(60)
 
         # Transiciones de mapa
-        if jugador.rect.colliderect(puerta_3_salida):
+        if jugador.rect.colliderect(puerta_4_salida):
             print("Transición al siguiente mapa")
-            running = False  # Detenemos el bucle para que el main pueda cargar el siguiente mapa
-            ejecutar_mapa4()
-
-        elif jugador.rect.colliderect(puerta_3_entrada):
-            print("Volver al mapa 2")
-            running = False  # Detenemos el bucle para que el main pueda cargar el mapa 2
+            running = False  # Aquí puedes llamar al siguiente mapa si lo tienes
+            
+        elif jugador.rect.colliderect(puerta_4_entrada):
+            print("Volver al mapa anterior")
             return
 
     pygame.quit()
