@@ -1,6 +1,10 @@
 import pygame
 from assets.mapas.fondo import key, cofre_a, cofre_c, nota
 
+# Flag persistente para indicar si el código ya fue ingresado correctamente
+# Esto es leído por `mapa_1` para mantener el estado entre mapas.
+codigo_ya_ingresado = False
+
 # Colores
 DORADO = (255, 215, 0)
 NEGRO = (0, 0, 0)
@@ -111,7 +115,8 @@ class CartaCodigo:
 
     def manejar_evento(self, evento):
         if evento.type == pygame.KEYDOWN:
-            if evento.key == pygame.K_SPACE and self.visible:
+            # Allow closing the card with SPACE or ESCAPE
+            if self.visible and evento.key in (pygame.K_SPACE, pygame.K_ESCAPE):
                 self.ocultar()
                 return True
         return False
@@ -189,7 +194,8 @@ class PanelCodigo:
             return False
 
         if evento.type == pygame.KEYDOWN:
-            if evento.key == pygame.K_SPACE:
+            # Allow closing the panel with SPACE or ESC
+            if evento.key in (pygame.K_SPACE, pygame.K_ESCAPE):
                 self.ocultar()
                 return True
             elif evento.key == pygame.K_BACKSPACE:
@@ -337,6 +343,19 @@ class SistemaLlavesCofres:
                 self.panel_codigo.rect.center = (x, y)
 
     def manejar_eventos(self, evento):
+        # If ESC was pressed, close any visible UI (cards or panel)
+        if evento.type == pygame.KEYDOWN and evento.key == pygame.K_ESCAPE:
+            any_closed = False
+            for carta in self.cartas:
+                if carta.visible:
+                    carta.ocultar()
+                    any_closed = True
+            if self.panel_codigo and self.panel_codigo.visible:
+                self.panel_codigo.ocultar()
+                any_closed = True
+            if any_closed:
+                return True
+
         for carta in self.cartas:
             if carta.manejar_evento(evento):
                 return True

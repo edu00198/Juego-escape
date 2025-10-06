@@ -20,12 +20,13 @@ from assets.mapas.mapa1_data import (
 from .puzzle_cofre import SistemaLlavesCofres
 from .menu_pausa import pause_menu
 from .mapa_2 import ejecutar_mapa2
+from . import puzzle_cofre
 
 
 pantalla = pygame.display.set_mode((ANCHO_PANTALLA, ALTO_PANTALLA))
 
-# Estado global para persistir el código correcto entre mapas
-codigo_ya_ingresado = False
+# Usamos la variable persistente definida en `juego.puzzle_cofre` para saber
+# si el código ya fue ingresado en sesiones anteriores.
 
 
 # =============================
@@ -140,8 +141,8 @@ def ejecutar_mapa1():
     # -------------------------------
     # REINICIAR ESTADO DE INTERFACES
     # -------------------------------
-    global codigo_ya_ingresado
-    sistema_cofres.codigo_correcto = codigo_ya_ingresado
+    # Restore the persisted code-correct flag from the puzzle module
+    sistema_cofres.codigo_correcto = puzzle_cofre.codigo_ya_ingresado
     if sistema_cofres.panel_codigo:
         sistema_cofres.panel_codigo.ocultar()
     for carta in sistema_cofres.cartas:
@@ -156,16 +157,42 @@ def ejecutar_mapa1():
                 if event.key == pygame.K_ESCAPE and not sistema_cofres.hay_interfaz_visible():
                     pause_menu(pantalla)
                 else:
-                    resultado = sistema_cofres.manejar_eventos(event)
-                    if resultado == "codigo_correcto":
-                        ejecutar_mapa2()
-                        # Move player back from the door to avoid immediate re-trigger
-                        jugador.rect.y -= 10
-                        # Reset interfaces after returning from mapa2
-                        if sistema_cofres.panel_codigo:
-                            sistema_cofres.panel_codigo.ocultar()
-                        for carta in sistema_cofres.cartas:
-                            carta.ocultar()
+                    # If SPACE is pressed while colliding with the door and a cofre is opened,
+                    # open the code panel. Do not forward this event to the UI handlers so
+                    # the panel doesn't immediately react to the same SPACE press.
+                    skip_forward = False
+                    if event.key == pygame.K_SPACE:
+                        cerca_puerta = jugador.rect.colliderect(puerta_1_scaled)
+                        hay_cofre_abierto = any(c.abierto for c in sistema_cofres.cofres)
+                        panel_visible = sistema_cofres.panel_codigo and sistema_cofres.panel_codigo.visible
+                        if cerca_puerta and hay_cofre_abierto:
+                            if sistema_cofres.codigo_correcto:
+                                # Código ya ingresado: pasar a mapa2
+                                ejecutar_mapa2()
+                                # Ensure interfaces reset so we can return later
+                                if sistema_cofres.panel_codigo:
+                                    sistema_cofres.panel_codigo.ocultar()
+                                for carta in sistema_cofres.cartas:
+                                    carta.ocultar()
+                                # Move player a bit back to avoid immediate re-trigger after return
+                                jugador.rect.y -= 10
+                                skip_forward = True
+                            elif not panel_visible:
+                                # Abrir panel para ingresar código
+                                sistema_cofres.mostrar_panel_codigo(jugador.rect.centerx, jugador.rect.centery)
+                                skip_forward = True
+
+                    if not skip_forward:
+                        resultado = sistema_cofres.manejar_eventos(event)
+                        if resultado == "codigo_correcto":
+                            ejecutar_mapa2()
+                            # Move player back from the door to avoid immediate re-trigger
+                            jugador.rect.y -= 10
+                            # Reset interfaces after returning from mapa2
+                            if sistema_cofres.panel_codigo:
+                                sistema_cofres.panel_codigo.ocultar()
+                            for carta in sistema_cofres.cartas:
+                                carta.ocultar()
 
             if dialog_system.handle_input(event):
                 pygame.event.clear()
@@ -204,8 +231,20 @@ def ejecutar_mapa1():
                     )
                 jugador.rect.y += 5  # retroceso visual
             elif not sistema_cofres.codigo_correcto:
-                if not sistema_cofres.panel_codigo.visible:
-                    sistema_cofres.mostrar_panel_codigo(jugador.rect.centerx, jugador.rect.centery)
+                # No abrir automáticamente el panel. Mostrar una pista para presionar SPACE
+                # si hay al menos un cofre abierto y el código no fue ingresado.
+                pass
+
+        # Mostrar pista en pantalla para abrir el panel con SPACE
+        cerca_puerta = jugador.rect.colliderect(puerta_1_scaled)
+        hay_cofre_abierto = any(c.abierto for c in sistema_cofres.cofres)
+        panel_visible = sistema_cofres.panel_codigo and sistema_cofres.panel_codigo.visible
+        if cerca_puerta and hay_cofre_abierto and not sistema_cofres.codigo_correcto and not panel_visible:
+            # Dibuja una pequeña instrucción sobre el jugador
+            font_hint = pygame.font.Font(None, 28)
+            hint_surf = font_hint.render("Presiona ESPACIO para ingresar el código", True, (255, 255, 255))
+            hint_rect = hint_surf.get_rect(center=(jugador.rect.centerx, jugador.rect.top - 20))
+            pantalla.blit(hint_surf, hint_rect)
 
         pygame.display.flip()
         clock.tick(60)
