@@ -91,7 +91,8 @@ def ejecutar_mapa2():
         elif jugador.rect.colliderect(puerta_2_entrada):
             print("Volver al mapa 1")
             running = False  # Detenemos el bucle para que el main pueda cargar el mapa 1
-            return
+            # Indica al llamador que el jugador quiere volver a mapa1
+            return "to_mapa1"
 
     pygame.quit()
     sys.exit()
