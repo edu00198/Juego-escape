@@ -1,4 +1,5 @@
 # Main.py
+import pygame
 import time
 print("Importando módulo mapa_1...")
 from juego import mapa_1
@@ -8,6 +9,7 @@ from intro_y_menu.pantalla_carga import press_any_key_screen
 from intro_y_menu.menu.menuzaso import menus
 
 def main():
+    pygame.init()
     print("Iniciando juego...")
     #main_intro()   # Ejecuta la intro del juego
     #time.sleep(1)  # Pausa breve entre la intro y el menu

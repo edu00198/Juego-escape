@@ -85,10 +85,12 @@ def ejecutar_mapa2():
         # Transiciones de mapa
         if jugador.rect.colliderect(puerta_2_salida):
             print("Transición al mapa 3")
+            running = False  # Detenemos el bucle para que el main pueda cargar el siguiente mapa
             ejecutar_mapa3()  # Detenemos el bucle para que el main pueda cargar el siguiente mapa
 
         elif jugador.rect.colliderect(puerta_2_entrada):
             print("Volver al mapa 1")
+            running = False  # Detenemos el bucle para que el main pueda cargar el mapa 1
             return
 
     pygame.quit()
