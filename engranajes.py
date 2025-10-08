@@ -13,11 +13,13 @@ FPS = 60
 # CLASE ENGRANAJE
 # ============================
 class Engranaje:
-    def __init__(self, x, y, radio, velocidad):
+    def __init__(self, x, y, radio, velocidad, tolerancia, ref_radio):
         self.x = x
         self.y = y
         self.radio = radio
         self.velocidad = velocidad
+        self.tolerancia = tolerancia
+        self.ref_radio = ref_radio  # tamaño del punto rojo de referencia
         self.angulo = random.randint(0, 360)
         self.detenido = False
 
@@ -32,16 +34,16 @@ class Engranaje:
         self.detenido = False
         self.angulo = random.randint(0, 360)
 
-    def alineado(self, tolerancia=10):
-        # Se considera alineado si la línea amarilla está cerca de la línea guía (arriba)
+    def alineado(self):
+        # 270° representa la dirección "arriba"
         angulo_mod = self.angulo % 360
-        return abs(angulo_mod - 270) < tolerancia or abs(angulo_mod + 90) < tolerancia  # 270° apunta hacia arriba
+        return abs(angulo_mod - 270) < self.tolerancia or abs(angulo_mod + 90) < self.tolerancia
 
     def dibujar(self, pantalla):
-        # Círculo base (el engranaje)
-        pygame.draw.circle(pantalla, (150, 150, 150), (self.x, self.y), self.radio, 5)
+        # Engranaje base
+        pygame.draw.circle(pantalla, (160, 160, 160), (self.x, self.y), self.radio, 5)
         
-        # Línea que marca la posición del engranaje
+        # Línea que marca la posición actual
         punta_x = self.x + math.cos(math.radians(self.angulo)) * self.radio
         punta_y = self.y + math.sin(math.radians(self.angulo)) * self.radio
         pygame.draw.line(pantalla, (255, 215, 0), (self.x, self.y), (punta_x, punta_y), 5)
@@ -49,7 +51,7 @@ class Engranaje:
         # Marca fija de referencia (arriba)
         ref_x = self.x
         ref_y = self.y - self.radio
-        pygame.draw.circle(pantalla, (255, 100, 100), (ref_x, ref_y), 6)
+        pygame.draw.circle(pantalla, (255, 100, 100), (ref_x, ref_y), self.ref_radio)
 
 # ============================
 # FUNCIÓN PRINCIPAL
@@ -61,11 +63,11 @@ def minijuego_engranares():
     clock = pygame.time.Clock()
     font = pygame.font.Font(None, 36)
 
-    # Crear 3 engranajes con velocidades distintas
+    # Engranajes con dificultad progresiva (menor referencia y más precisión)
     engranajes = [
-        Engranaje(ANCHO//2 - 200, ALTO//2, 80, 2),
-        Engranaje(ANCHO//2, ALTO//2, 80, 3),
-        Engranaje(ANCHO//2 + 200, ALTO//2, 80, 4)
+        Engranaje(ANCHO//2 - 200, ALTO//2, 80, 2, tolerancia=25, ref_radio=12),  # más fácil
+        Engranaje(ANCHO//2, ALTO//2, 80, 3, tolerancia=18, ref_radio=8),         # intermedio
+        Engranaje(ANCHO//2 + 200, ALTO//2, 80, 4, tolerancia=12, ref_radio=5)    # difícil
     ]
 
     indice_actual = 0
@@ -87,6 +89,7 @@ def minijuego_engranares():
                 if not terminado and event.key == pygame.K_SPACE:
                     engranaje = engranajes[indice_actual]
                     engranaje.detener()
+
                     if engranaje.alineado():
                         indice_actual += 1
                         if indice_actual >= len(engranajes):
@@ -96,7 +99,7 @@ def minijuego_engranares():
                     else:
                         terminado = True
                         exito = False
-                        mensaje_final = "❌ Fallaste el alineamiento. Inténtalo de nuevo."
+                        mensaje_final = "❌ Fallaste el alineamiento. El mecanismo se reinicia..."
 
                 elif terminado and event.key == pygame.K_RETURN:
                     if exito:
@@ -111,27 +114,23 @@ def minijuego_engranares():
 
         # Actualización de engranajes
         if not terminado:
-            for engranaje in engranajes:
-                if engranaje == engranajes[indice_actual]:
-                    engranaje.actualizar()
+            engranajes[indice_actual].actualizar()
 
-        # Dibujar fondo
-        pantalla.fill((20, 20, 40))
+        # Fondo
+        pantalla.fill((15, 15, 30))
 
-        # Texto de instrucción
-        titulo = font.render("Alineá cada engranaje con el punto rojo (uno por vez)", True, (255, 255, 255))
+        # Texto
+        titulo = font.render("Alineá cada engranaje con su punto rojo", True, (255, 255, 255))
         pantalla.blit(titulo, (ANCHO//2 - titulo.get_width()//2, 60))
 
         # Dibujar engranajes
         for i, engranaje in enumerate(engranajes):
-            color = (200, 200, 200)
             if i == indice_actual and not terminado:
-                color = (255, 255, 100)
-                pygame.draw.circle(pantalla, (255, 255, 50), (engranaje.x, engranaje.y), engranaje.radio + 10, 3)
+                pygame.draw.circle(pantalla, (255, 255, 100), (engranaje.x, engranaje.y), engranaje.radio + 12, 3)
             engranaje.dibujar(pantalla)
 
         # Indicador de progreso
-        progreso = font.render(f"Engranaje {indice_actual+1 if not terminado else len(engranajes)} / {len(engranajes)}", True, (200, 200, 200))
+        progreso = font.render(f"Engranaje {min(indice_actual + 1, len(engranajes))} / {len(engranajes)}", True, (200, 200, 200))
         pantalla.blit(progreso, (ANCHO//2 - progreso.get_width()//2, ALTO - 100))
 
         # Mensaje final
