@@ -83,7 +83,7 @@ l_piso = [
 l_hitbox_mapa3 = [
   [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
   [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-  [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1],
+  [1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,0,0,1,1],
   [1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1],
   [1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1],
   [0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1],
@@ -226,3 +226,11 @@ puerta_3_salida = pygame.Rect(
     2 * TILE_SIZE * SCALE_FACTOR,              # ancho = 2 tiles
     1 * TILE_SIZE * SCALE_FACTOR               # alto = 2 tiles
 )
+
+puerta_3_engranaje = pygame.Rect(
+    OFFSET_X + 13 * TILE_SIZE * SCALE_FACTOR,  # columna inicial (la más a la izquierda)
+    OFFSET_Y + 1 * TILE_SIZE * SCALE_FACTOR,   # fila inicial (la más arriba)
+    2 * TILE_SIZE * SCALE_FACTOR,             # ancho = 2 tiles (columnas 13 y 14)
+    2 * TILE_SIZE * SCALE_FACTOR              # alto = 2 tiles (filas 1 y 2)
+)
+
