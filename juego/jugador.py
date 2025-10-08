@@ -11,6 +11,7 @@ class Jugador:
 
 
         self.velocidad = VELOCIDAD_JUGADOR
+        
         self.escala = escala
 
         # Posición visual del sprite (sin desplazamiento manual)
@@ -33,6 +34,7 @@ class Jugador:
         )
         self.rect.inflate_ip(-30, -20)  # achica la hitbox horizontal y verticalmente
 
+
         print("Iniciando carga de animaciones...")
         # Animaciones (como ya tenías)
         self.animaciones = {
@@ -43,7 +45,12 @@ class Jugador:
             "run_abajo": self.cargar_sprites("run_personaje_lvl1", "run_abajo"),
             "run_arriba": self.cargar_sprites("run_personaje_lvl1", "run_arriba"),
             "run_izquierda": self.cargar_sprites("run_personaje_lvl1", "run_izquierda"),
-            "run_derecha": self.cargar_sprites("run_personaje_lvl1", "run_derecha")
+            "run_derecha": self.cargar_sprites("run_personaje_lvl1", "run_derecha"),
+            "attack_abajo": self.cargar_sprites("attack_personaje_lvl1", "attack_abajo"),
+            "attack_arriba": self.cargar_sprites("attack_personaje_lvl1", "attack_arriba"),
+            "attack_izquierda": self.cargar_sprites("attack_personaje_lvl1", "attack_izquierda"),
+            "attack_derecha": self.cargar_sprites("attack_personaje_lvl1", "attack_derecha"),
+
         }
         print("Animaciones cargadas:", list(self.animaciones.keys()))
         print("Número de frames en idle_abajo:", len(self.animaciones["idle_abajo"]) if "idle_abajo" in self.animaciones else 0)
@@ -54,6 +61,8 @@ class Jugador:
         self.frame_actual = 0
         self.contador_tiempo = 0
         self.velocidad_animacion = VELOCIDAD_ANIMACION
+        self.velocidad_animacion_attack = VELOCIDAD_ANIMACION * 1.1  # o *3 si querés más lento
+        self.atacando = False  # ya lo tenías, pero asegurate que esté acá
 
 
         # Escalar sprites si la escala no es 1
@@ -88,16 +97,24 @@ class Jugador:
 
     def manejar_teclas(self):
         teclas = pygame.key.get_pressed()
+
+        # 1) Si ya está atacando, no proceses movimiento ni otro ataque
+        if self.atacando:
+            return
+
+        # 2) Detectar inicio de ataque
+        if teclas[pygame.K_SPACE]:
+            self.estado = "attack"
+            self.atacando = True
+            clave_animacion = f"{self.estado}_{self.direccion}"
+            if clave_animacion in self.animaciones:
+                self.animacion_actual = self.animaciones[clave_animacion]
+                self.frame_actual = 0
+            return
+
+        # 3) Movimiento normal
         moviendo = False
-
         colisiones = self.colisiones
-
-
-        #if mapa_actual.mapa_actual == "mapa1":
-        #    colisiones = colisiones_mapa_1
-        #elif mapa_actual.mapa_actual == "mapa2":
-        #    colisiones = colisiones_mapa_2
-
 
         izquierda = teclas[pygame.K_LEFT]
         derecha   = teclas[pygame.K_RIGHT]
@@ -181,13 +198,15 @@ class Jugador:
                         self.sprite_pos.y -= self.velocidad
                         break
 
-        self.estado = "run" if moviendo else "idle"
-        clave_animacion = f"{self.estado}_{self.direccion}"
+        if not self.atacando:
+            self.estado = "run" if moviendo else "idle"
+            clave_animacion = f"{self.estado}_{self.direccion}"
 
-        if clave_animacion in self.animaciones and self.animaciones[clave_animacion]:
-            if self.animacion_actual != self.animaciones[clave_animacion]:
-                self.animacion_actual = self.animaciones[clave_animacion]
-                self.frame_actual = 0
+            if clave_animacion in self.animaciones and self.animaciones[clave_animacion]:
+                if self.animacion_actual != self.animaciones[clave_animacion]:
+                    self.animacion_actual = self.animaciones[clave_animacion]
+                    self.frame_actual = 0
+
 
         self.rect.left = max(self.rect.left, 0)
         self.rect.right = min(self.rect.right, ANCHO_PANTALLA)
@@ -207,9 +226,17 @@ class Jugador:
         
         # Actualizar el frame de animación
         self.contador_tiempo += 1
-        if self.contador_tiempo >= self.velocidad_animacion:
+
+        # Elegir velocidad según estado
+        if self.estado == "attack":
+            velocidad_actual = self.velocidad_animacion_attack
+        else:
+            velocidad_actual = self.velocidad_animacion
+
+        if self.contador_tiempo >= velocidad_actual:
             self.frame_actual = (self.frame_actual + 1) % len(self.animacion_actual)
             self.contador_tiempo = 0
+
 
         # Obtener el sprite actual
         imagen = self.animacion_actual[self.frame_actual]
@@ -219,4 +246,7 @@ class Jugador:
 
         # Dibujar la hitbox (verde) con desplazamiento
         hitbox_offset = self.rect.move(offset_x, offset_y)
-       #pygame.draw.rect(pantalla, (0, 255, 0), hitbox_offset, 2)
+        pygame.draw.rect(pantalla, (0, 255, 0), hitbox_offset, 2)
+        if self.estado == "attack" and self.frame_actual == len(self.animacion_actual) - 1:
+            self.atacando = False
+            self.estado = "idle"
