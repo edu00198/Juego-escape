@@ -63,18 +63,16 @@ def minijuego_engranares():
     clock = pygame.time.Clock()
     font = pygame.font.Font(None, 36)
 
-    # Engranajes con dificultad progresiva (menor referencia y más precisión)
     engranajes = [
-        Engranaje(ANCHO//2 - 200, ALTO//2, 80, 2, tolerancia=25, ref_radio=12),  # más fácil
-        Engranaje(ANCHO//2, ALTO//2, 80, 3, tolerancia=18, ref_radio=8),         # intermedio
-        Engranaje(ANCHO//2 + 200, ALTO//2, 80, 4, tolerancia=12, ref_radio=5)    # difícil
+        Engranaje(ANCHO//2 - 200, ALTO//2, 80, 2, tolerancia=25, ref_radio=12),
+        Engranaje(ANCHO//2, ALTO//2, 80, 3, tolerancia=18, ref_radio=8),
+        Engranaje(ANCHO//2 + 200, ALTO//2, 80, 4, tolerancia=12, ref_radio=5)
     ]
 
     indice_actual = 0
     terminado = False
     exito = False
     mensaje_final = ""
-
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -105,7 +103,7 @@ def minijuego_engranares():
                     if exito:
                         return "completado"
                     else:
-                        # Reiniciar todos los engranajes
+                        # Reiniciar todos los engranajes para permitir reintentos infinitos
                         for engranaje in engranajes:
                             engranaje.reiniciar()
                         indice_actual = 0
@@ -143,12 +141,3 @@ def minijuego_engranares():
         pygame.display.flip()
         clock.tick(FPS)
 
-# ============================
-# EJECUCIÓN DIRECTA
-# ============================
-if __name__ == "__main__":
-    resultado = minijuego_engranares()
-    if resultado == "completado":
-        print("✅ ¡Puerta abierta! Has alineado el mecanismo.")
-    else:
-        print("❌ Saliste del minijuego.")
