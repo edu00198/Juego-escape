@@ -36,14 +36,14 @@ class Jugador:
         print("Iniciando carga de animaciones...")
         # Animaciones (como ya tenías)
         self.animaciones = {
-            "idle_abajo": self.cargar_sprites("idle_personaje_lvl1_con_sombra", "idle_abajo"),
-            "idle_arriba": self.cargar_sprites("idle_personaje_lvl1_con_sombra", "idle_arriba"),
-            "idle_izquierda": self.cargar_sprites("idle_personaje_lvl1_con_sombra", "idle_izquierda"),
-            "idle_derecha": self.cargar_sprites("idle_personaje_lvl1_con_sombra", "idle_derecha"),
-            "run_abajo": self.cargar_sprites("run_personaje_lvl1_con_sombra", "run_abajo"),
-            "run_arriba": self.cargar_sprites("run_personaje_lvl1_con_sombra", "run_arriba"),
-            "run_izquierda": self.cargar_sprites("run_personaje_lvl1_con_sombra", "run_izquierda"),
-            "run_derecha": self.cargar_sprites("run_personaje_lvl1_con_sombra", "run_derecha")
+            "idle_abajo": self.cargar_sprites("idle_personaje_lvl1", "idle_abajo"),
+            "idle_arriba": self.cargar_sprites("idle_personaje_lvl1", "idle_arriba"),
+            "idle_izquierda": self.cargar_sprites("idle_personaje_lvl1", "idle_izquierda"),
+            "idle_derecha": self.cargar_sprites("idle_personaje_lvl1", "idle_derecha"),
+            "run_abajo": self.cargar_sprites("run_personaje_lvl1", "run_abajo"),
+            "run_arriba": self.cargar_sprites("run_personaje_lvl1", "run_arriba"),
+            "run_izquierda": self.cargar_sprites("run_personaje_lvl1", "run_izquierda"),
+            "run_derecha": self.cargar_sprites("run_personaje_lvl1", "run_derecha")
         }
         print("Animaciones cargadas:", list(self.animaciones.keys()))
         print("Número de frames en idle_abajo:", len(self.animaciones["idle_abajo"]) if "idle_abajo" in self.animaciones else 0)
