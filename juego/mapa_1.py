@@ -112,10 +112,18 @@ def ejecutar_mapa1():
 
     # Historia inicial
     intro_texts = [
-        "Hace mucho tiempo, en un reino lejano, un valiente aventurero inició su misión.",
-        "Las leyendas hablan de una reliquia mágica en lo profundo de un castillo.",
-        "Tu aventura comienza aquí, en la entrada de este misterioso lugar...",
-    ]
+    "…¿Dónde… estoy?",
+    "Solo escuchás gotas cayendo. Las paredes están húmedas, el aire… pesado.",
+    "???: Despertaste al fin. Pocos recuerdan su nombre aquí.",
+    "Jugador: ¿Quién habla? Muéstrate.",
+    "???: No temas. Soy la voz de lo que fue este lugar.",
+    "???: Todos los que entran buscan escapar, pero solo los que escuchan… encuentran la salida.",
+    "Jugador: ¿La salida? ¿Dónde está?",
+    "???: Más allá de estas puertas, cada una custodiada por pruebas y mentiras.",
+    "Jugador: Entonces seguiré adelante.",
+    "???: Recordá esto, aventurero: no todo lo que brilla te ayudará… y no todo lo que calla está muerto."
+]
+
 
     escala_x = SCALED_WIDTH / fondo_mapa.get_width()
     escala_y = SCALED_HEIGHT / fondo_mapa.get_height()
@@ -176,20 +184,13 @@ def ejecutar_mapa1():
                         # or if the code was already entered in a previous session.
                         if cerca_puerta and (hay_cofre_abierto or sistema_cofres.codigo_correcto):
                             if sistema_cofres.codigo_correcto:
-                                # Código ya ingresado: pasar a mapa2
-                                ret = ejecutar_mapa2()
-                                # Ensure interfaces reset so we can return later
+                                # Código ya ingresado: pasar a mapa2 (no retorno a mapa1)
+                                ejecutar_mapa2()
+                                # Ensure interfaces reset (no return to mapa1)
                                 if sistema_cofres.panel_codigo:
                                     sistema_cofres.panel_codigo.ocultar()
                                 for carta in sistema_cofres.cartas:
                                     carta.ocultar()
-                                # If returned from mapa2, reposition jugador a bit lejos de la puerta
-                                if ret == "to_mapa1":
-                                    try:
-                                        jugador.rect.y -= 60
-                                        jugador.rect.x += 10
-                                    except Exception:
-                                        pass
                                 skip_forward = True
                             elif not panel_visible:
                                 # Abrir panel para ingresar código
@@ -200,9 +201,7 @@ def ejecutar_mapa1():
                         resultado = sistema_cofres.manejar_eventos(event)
                         if resultado == "codigo_correcto":
                             ejecutar_mapa2()
-                            # Move player back from the door to avoid immediate re-trigger
-                            jugador.rect.y -= 10
-                            # Reset interfaces after returning from mapa2
+                            # Reset interfaces after going to mapa2 (no return to mapa1)
                             if sistema_cofres.panel_codigo:
                                 sistema_cofres.panel_codigo.ocultar()
                             for carta in sistema_cofres.cartas:
@@ -229,7 +228,10 @@ def ejecutar_mapa1():
         pantalla.fill((0, 0, 0))
         pantalla.blit(fondo_escalado, (OFFSET_X, OFFSET_Y))
         sistema_cofres.dibujar(pantalla)
-        jugador.dibujar(pantalla, 0, 0)
+        # Si el panel para insertar el código está visible, NO dibujar al jugador
+        panel_visible = sistema_cofres.panel_codigo and sistema_cofres.panel_codigo.visible
+        if not panel_visible:
+            jugador.dibujar(pantalla, 0, 0)
         dialog_system.draw()
 
         # Detectar colisión con la puerta
