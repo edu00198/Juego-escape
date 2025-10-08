@@ -79,10 +79,7 @@ def ejecutar_mapa4():
         if jugador.rect.colliderect(puerta_4_salida):
             print("Transición al siguiente mapa")
             running = False  # Aquí puedes llamar al siguiente mapa si lo tienes
-            
-        elif jugador.rect.colliderect(puerta_4_entrada):
-            print("Volver al mapa anterior")
-            return
+        # Ya no se permite volver al mapa anterior ni cerrar la ejecución si se toca la entrada
 
     pygame.quit()
     sys.exit()
