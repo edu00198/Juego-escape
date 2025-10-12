@@ -174,7 +174,7 @@ class PanelCodigo:
         self.mensaje_error = ""
         self.tiempo_mensaje = 0
 
-        self.rect = pygame.Rect(ancho_pantalla // 2 - 200, alto_pantalla // 2 - 150, 400, 300)
+        self.rect = pygame.Rect((ancho_pantalla - 400) // 2, (alto_pantalla - 300) // 2, 400, 300)
         self.fuente_titulo = pygame.font.Font(None, 36)
         self.fuente_codigo = pygame.font.Font(None, 48)
         self.fuente_texto = pygame.font.Font(None, 28)

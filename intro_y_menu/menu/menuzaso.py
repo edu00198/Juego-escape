@@ -72,7 +72,7 @@ from .settings import settings_menu
 
 
 def get_font(size):
-    BASE_DIR = os.path.dirname(__file__)  # carpeta donde está este .py
+    BASE_DIR = os.path.dirname(__file__)
     ruta_fuente = os.path.join(BASE_DIR, "assets", "font.ttf")
     return pygame.font.Font(ruta_fuente, size)
 
@@ -95,7 +95,6 @@ def menus():
         fondo = pygame.Surface((ANCHO_PANTALLA, ALTO_PANTALLA))
         fondo.fill((50, 50, 50))
 
-    # Botones (con las posiciones que ya tenías)
     ruta_start = os.path.join(BASE_DIR, "assets", "DEFINITIVO.png")
     ruta_exit = os.path.join(BASE_DIR, "assets", "salir.png")
     ruta_options = os.path.join(BASE_DIR, "assets", "options.png")
@@ -135,7 +134,6 @@ def menus():
                         settings_menu(window)
                         pygame.event.clear()
 
-        # Dibujar fondo
         window.blit(fondo, (0, 0))
 
         # Actualizar y dibujar botones

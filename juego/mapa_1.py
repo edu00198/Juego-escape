@@ -144,7 +144,8 @@ def ejecutar_mapa1():
     sistema_cofres.agregar_llave(175, 325)
     sistema_cofres.agregar_cofre(1125, 200)
     sistema_cofres.agregar_carta("Bienvenido al escape de la mazmorra!")
-    sistema_cofres.crear_panel_codigo(ANCHO_PANTALLA, ALTO_PANTALLA)
+    sistema_cofres.crear_panel_codigo((ANCHO_PANTALLA - 400) // 2, (ALTO_PANTALLA - 300) // 2)
+
 
     # -------------------------------
     # REINICIAR ESTADO DE INTERFACES

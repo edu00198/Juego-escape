@@ -103,14 +103,14 @@ class Jugador:
             return
 
         # 2) Detectar inicio de ataque
-        if teclas[pygame.K_SPACE]:
+        """if teclas[pygame.K_SPACE]:
             self.estado = "attack"
             self.atacando = True
             clave_animacion = f"{self.estado}_{self.direccion}"
             if clave_animacion in self.animaciones:
                 self.animacion_actual = self.animaciones[clave_animacion]
                 self.frame_actual = 0
-            return
+            return"""
 
         # 3) Movimiento normal
         moviendo = False
@@ -245,8 +245,7 @@ class Jugador:
         pantalla.blit(imagen, (self.sprite_pos.x + offset_x, self.sprite_pos.y + offset_y))
 
         # Dibujar la hitbox (verde) con desplazamiento
-        hitbox_offset = self.rect.move(offset_x, offset_y)
-        pygame.draw.rect(pantalla, (0, 255, 0), hitbox_offset, 2)
+        #hitbox_offset = self.rect.move(offset_x, offset_y)
+        #pygame.draw.rect(pantalla, (0, 255, 0), hitbox_offset, 2)
         if self.estado == "attack" and self.frame_actual == len(self.animacion_actual) - 1:
-            self.atacando = False
             self.estado = "idle"

@@ -2,7 +2,7 @@
 import pygame
 import sys
 import os
-from juego.mapa3 import ejecutar_mapa3
+from juego.mapa_3 import ejecutar_mapa3
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 

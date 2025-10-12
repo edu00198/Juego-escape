@@ -19,7 +19,7 @@ from assets.mapas.mapa3_data import (
     colisiones_escaladas
 )
 
-from engranajes import minijuego_engranares  # importamos el minijuego
+from .engranajes import minijuego_engranares  # importamos el minijuego
 
 pantalla = pygame.display.set_mode((ANCHO_PANTALLA, ALTO_PANTALLA))
 

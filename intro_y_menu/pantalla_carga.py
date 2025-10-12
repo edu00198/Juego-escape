@@ -5,7 +5,7 @@ import time
 from configuracion import ANCHO_PANTALLA, ALTO_PANTALLA
 pygame.init()
 
-# --- CONFIGURACIÓN DE VENTANA ---
+
 screen = pygame.display.set_mode((ANCHO_PANTALLA, ALTO_PANTALLA))
 pygame.display.set_caption("Pantalla de carga")
 clock = pygame.time.Clock()
@@ -14,12 +14,11 @@ clock = pygame.time.Clock()
 BASE_DIR = os.path.dirname(__file__)
 ruta_fondo = os.path.join(BASE_DIR, "menu","assets", "carga.png")
 
-background = pygame.image.load(ruta_fondo).convert()
-background = pygame.transform.scale(background, (ANCHO_PANTALLA, ALTO_PANTALLA))
+fondo = pygame.image.load(ruta_fondo).convert()
+fondo = pygame.transform.scale(fondo, (ANCHO_PANTALLA, ALTO_PANTALLA))
 
-def get_font(size): # Returns Press-Start-2P in the desired size
+def get_font(size):
     return pygame.font.Font("intro_y_menu/menu/assets/nueva.otf", size)
-# --- FUENTE Y TEXTO ---
 font=get_font(25)
 text_surface = font.render("PRESS ANY KEY TO START", True, (255, 255, 255))
 text_rect = text_surface.get_rect(center=(ANCHO_PANTALLA//2, ALTO_PANTALLA//2+250))
@@ -29,7 +28,7 @@ def press_any_key_screen():
     show_text = True
 
     while True:
-        screen.blit(background, (0, 0))
+        screen.blit(fondo, (0, 0))
 
         # --- Control de parpadeo cada 0.5 segundos ---
         if time.time() - start_time > 0.5:
@@ -50,4 +49,4 @@ def press_any_key_screen():
         clock.tick(60)
 
 def main_menu():
-    print("Entrando al menú...")  # Aquí iría tu lógica del menú
+    print("Entrando al menú...")  
