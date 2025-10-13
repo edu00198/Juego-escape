@@ -21,6 +21,7 @@ from .puzzle_cofre import SistemaLlavesCofres
 from .menu_pausa import pause_menu
 from .mapa_2 import ejecutar_mapa2
 from . import puzzle_cofre
+from .save_system import save_game
 
 
 pantalla = pygame.display.set_mode((ANCHO_PANTALLA, ALTO_PANTALLA))
@@ -164,7 +165,15 @@ def ejecutar_mapa1():
 
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE and not sistema_cofres.hay_interfaz_visible():
-                    pause_menu(pantalla)
+                    # Preparar estado para guardar
+                    state = {
+                        'mapa': 'mapa1',
+                        'pos_jugador': (jugador.rect.x, jugador.rect.y),
+                        'cofres_abiertos': [c.abierto for c in sistema_cofres.cofres],
+                        'codigo_correcto': sistema_cofres.codigo_correcto,
+                        'llaves_encontradas': sistema_cofres.llaves_encontradas
+                    }
+                    pause_menu(pantalla, mapa_actual=1, state=state)
                 else:
                     # If SPACE is pressed while colliding with the door and a cofre is opened,
                     # open the code panel. Do not forward this event to the UI handlers so
@@ -201,6 +210,15 @@ def ejecutar_mapa1():
                     if not skip_forward:
                         resultado = sistema_cofres.manejar_eventos(event)
                         if resultado == "codigo_correcto":
+                            # Autoguardado antes de pasar a mapa2
+                            state = {
+                                'mapa': 'mapa2',
+                                'pos_jugador': (jugador.rect.x, jugador.rect.y),
+                                'cofres_abiertos': [c.abierto for c in sistema_cofres.cofres],
+                                'codigo_correcto': True,
+                                'llaves_encontradas': sistema_cofres.llaves_encontradas
+                            }
+                            save_game(state)
                             ejecutar_mapa2()
                             # Reset interfaces after going to mapa2 (no return to mapa1)
                             if sistema_cofres.panel_codigo:
@@ -258,6 +276,168 @@ def ejecutar_mapa1():
         panel_visible = sistema_cofres.panel_codigo and sistema_cofres.panel_codigo.visible
         if cerca_puerta and hay_cofre_abierto and not sistema_cofres.codigo_correcto and not panel_visible:
             # Dibuja una pequeña instrucción sobre el jugador
+            font_hint = pygame.font.Font(None, 28)
+            hint_surf = font_hint.render("Presiona ESPACIO para ingresar el código", True, (255, 255, 255))
+            hint_rect = hint_surf.get_rect(center=(jugador.rect.centerx, jugador.rect.top - 20))
+            pantalla.blit(hint_surf, hint_rect)
+
+        pygame.display.flip()
+        clock.tick(60)
+
+    pygame.quit()
+    sys.exit()
+
+
+def ejecutar_mapa1_con_estado(state):
+    """Ejecuta mapa1 cargando el estado guardado."""
+    clock = pygame.time.Clock()
+    running = True
+    dialog_system = DialogSystem(pantalla)
+    has_moved = False
+
+    # Historia inicial (solo si no ha movido)
+    intro_texts = [
+    "…¿Dónde… estoy?",
+    "Solo escuchás gotas cayendo. Las paredes están húmedas, el aire… pesado.",
+    "???: Despertaste al fin. Pocos recuerdan su nombre aquí.",
+    "Jugador: ¿Quién habla? Muéstrate.",
+    "???: No temas. Soy la voz de lo que fue este lugar.",
+    "???: Todos los que entran buscan escapar, pero solo los que escuchan… encuentran la salida.",
+    "Jugador: ¿La salida? ¿Dónde está?",
+    "???: Más allá de estas puertas, cada una custodiada por pruebas y mentiras.",
+    "Jugador: Entonces seguiré adelante.",
+    "???: Recordá esto, aventurero: no todo lo que brilla te ayudará… y no todo lo que calla está muerto."
+]
+
+    escala_x = SCALED_WIDTH / fondo_mapa.get_width()
+    escala_y = SCALED_HEIGHT / fondo_mapa.get_height()
+    escala_fondo = min(escala_x, escala_y)
+
+    puerta_1_scaled = puerta_1
+    colisiones_escaladas_scaled = colisiones_escaladas
+
+    ancho_jugador, alto_jugador = 23, 15
+    pos_x, pos_y = state.get('pos_jugador', ((ANCHO_PANTALLA - ancho_jugador) // 2, (ALTO_PANTALLA - alto_jugador) // 2))
+
+    jugador = Jugador(pos_x, pos_y, ancho_jugador, alto_jugador,
+                      escala=ESCALA_JUGADOR, colisiones=colisiones_escaladas_scaled)
+
+    fondo_escalado = pygame.transform.scale(fondo_mapa, (SCALED_WIDTH, SCALED_HEIGHT))
+    sistema_cofres = SistemaLlavesCofres(codigo_secreto=str(random.randint(1000, 9999)))
+    sistema_cofres.agregar_llave(175, 325)
+    sistema_cofres.agregar_cofre(1125, 200)
+    sistema_cofres.agregar_carta("Bienvenido al escape de la mazmorra!")
+    sistema_cofres.crear_panel_codigo((ANCHO_PANTALLA - 400) // 2, (ALTO_PANTALLA - 300) // 2)
+
+    # Restaurar estado
+    cofres_abiertos = state.get('cofres_abiertos', [])
+    for i, abierto in enumerate(cofres_abiertos):
+        if i < len(sistema_cofres.cofres):
+            sistema_cofres.cofres[i].abierto = abierto
+    sistema_cofres.codigo_correcto = state.get('codigo_correcto', False)
+    sistema_cofres.llaves_encontradas = state.get('llaves_encontradas', 0)
+    puzzle_cofre.codigo_ya_ingresado = sistema_cofres.codigo_correcto
+
+    if sistema_cofres.panel_codigo:
+        sistema_cofres.panel_codigo.ocultar()
+    for carta in sistema_cofres.cartas:
+        carta.ocultar()
+
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE and not sistema_cofres.hay_interfaz_visible():
+                    # Preparar estado para guardar
+                    state = {
+                        'mapa': 'mapa1',
+                        'pos_jugador': (jugador.rect.x, jugador.rect.y),
+                        'cofres_abiertos': [c.abierto for c in sistema_cofres.cofres],
+                        'codigo_correcto': sistema_cofres.codigo_correcto,
+                        'llaves_encontradas': sistema_cofres.llaves_encontradas
+                    }
+                    pause_menu(pantalla, mapa_actual=1, state=state)
+                else:
+                    skip_forward = False
+                    if event.key == pygame.K_SPACE:
+                        cerca_puerta = jugador.rect.colliderect(puerta_1_scaled)
+                        hay_cofre_abierto = any(c.abierto for c in sistema_cofres.cofres)
+                        panel_visible = sistema_cofres.panel_codigo and sistema_cofres.panel_codigo.visible
+                        if cerca_puerta and (hay_cofre_abierto or sistema_cofres.codigo_correcto):
+                            if sistema_cofres.codigo_correcto:
+                                ejecutar_mapa2()
+                                if sistema_cofres.panel_codigo:
+                                    sistema_cofres.panel_codigo.ocultar()
+                                for carta in sistema_cofres.cartas:
+                                    carta.ocultar()
+                                skip_forward = True
+                            elif not panel_visible:
+                                sistema_cofres.mostrar_panel_codigo(jugador.rect.centerx, jugador.rect.centery)
+                                skip_forward = True
+
+                    if not skip_forward:
+                        resultado = sistema_cofres.manejar_eventos(event)
+                        if resultado == "codigo_correcto":
+                            state = {
+                                'mapa': 'mapa2',
+                                'pos_jugador': (jugador.rect.x, jugador.rect.y),
+                                'cofres_abiertos': [c.abierto for c in sistema_cofres.cofres],
+                                'codigo_correcto': True,
+                                'llaves_encontradas': sistema_cofres.llaves_encontradas
+                            }
+                            save_game(state)
+                            ejecutar_mapa2()
+                            if sistema_cofres.panel_codigo:
+                                sistema_cofres.panel_codigo.ocultar()
+                            for carta in sistema_cofres.cartas:
+                                carta.ocultar()
+
+            if dialog_system.handle_input(event):
+                pygame.event.clear()
+
+        if not dialog_system.active and not sistema_cofres.hay_interfaz_visible():
+            pos_anterior = jugador.rect.topleft
+            jugador.manejar_teclas()
+
+            colision_pared = any(jugador.rect.colliderect(rect) for rect in colisiones_escaladas_scaled)
+            colision_cofre = any((not cofre.abierto) and jugador.rect.colliderect(cofre.rect) for cofre in sistema_cofres.cofres)
+            if colision_pared or (colision_cofre and sistema_cofres.llaves_encontradas == 0):
+                jugador.rect.topleft = pos_anterior
+
+            resultado = sistema_cofres.verificar_colisiones(jugador.rect)
+
+            if not has_moved and pos_anterior != jugador.rect.topleft:
+                has_moved = True
+                dialog_system.start_dialog(intro_texts, "El Comienzo de la Aventura")
+
+        pantalla.fill((0, 0, 0))
+        pantalla.blit(fondo_escalado, (OFFSET_X, OFFSET_Y))
+        sistema_cofres.dibujar(pantalla)
+        panel_visible = sistema_cofres.panel_codigo and sistema_cofres.panel_codigo.visible
+        if not panel_visible:
+            jugador.dibujar(pantalla, 0, 0)
+        dialog_system.draw()
+
+        if jugador.rect.colliderect(puerta_1_scaled):
+            if not any(c.abierto for c in sistema_cofres.cofres):
+                if not dialog_system.active:
+                    dialog_system.start_dialog(
+                        [
+                            "La puerta está sellada.",
+                            "Necesitas encontrar la llave y abrir el cofre antes de continuar..."
+                        ],
+                        "Puerta Cerrada"
+                    )
+                jugador.rect.y += 5
+            elif not sistema_cofres.codigo_correcto:
+                pass
+
+        cerca_puerta = jugador.rect.colliderect(puerta_1_scaled)
+        hay_cofre_abierto = any(c.abierto for c in sistema_cofres.cofres)
+        panel_visible = sistema_cofres.panel_codigo and sistema_cofres.panel_codigo.visible
+        if cerca_puerta and hay_cofre_abierto and not sistema_cofres.codigo_correcto and not panel_visible:
             font_hint = pygame.font.Font(None, 28)
             hint_surf = font_hint.render("Presiona ESPACIO para ingresar el código", True, (255, 255, 255))
             hint_rect = hint_surf.get_rect(center=(jugador.rect.centerx, jugador.rect.top - 20))

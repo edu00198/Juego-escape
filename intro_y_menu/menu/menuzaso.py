@@ -3,6 +3,8 @@ import sys
 import os
 from .button import Button
 from .settings import settings_menu
+from juego.save_system import load_game
+from juego import mapa_1
 
 
 def loading_screen(window):
@@ -56,6 +58,72 @@ def loading_screen(window):
         percent_text = font.render(f"{progress}%", True, (255, 255, 255))
         percent_rect = percent_text.get_rect(center=(ANCHO_PANTALLA // 2, bar_y + bar_height + 30))
         window.blit(percent_text, percent_rect)
+
+        pygame.display.flip()
+        clock.tick(60)
+
+
+def game_selection_menu(window):
+    """Menú para seleccionar nueva partida o cargar partida."""
+    from configuracion import ANCHO_PANTALLA, ALTO_PANTALLA
+    clock = pygame.time.Clock()
+    BASE_DIR = os.path.dirname(__file__)
+
+    # Fondo
+    ruta_fondo = os.path.join(BASE_DIR, "assets", "fondo_titulo.png")
+    if os.path.exists(ruta_fondo):
+        fondo = pygame.image.load(ruta_fondo).convert()
+        fondo = pygame.transform.scale(fondo, (ANCHO_PANTALLA, ALTO_PANTALLA))
+    else:
+        fondo = pygame.Surface((ANCHO_PANTALLA, ALTO_PANTALLA))
+        fondo.fill((50, 50, 50))
+
+    # Botones
+    new_game_button = Button(None, (ANCHO_PANTALLA // 2, 400), scale=1.0, text="Nueva Partida")
+    load_game_button = Button(None, (ANCHO_PANTALLA // 2, 500), scale=1.0, text="Cargar Partida")
+    back_button = Button(None, (ANCHO_PANTALLA // 2, 600), scale=1.0, text="Volver")
+
+    buttons = [new_game_button, load_game_button, back_button]
+    selected_index = 0
+    buttons[selected_index].selected = True
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+            if event.type == pygame.KEYDOWN:
+                if event.key in [pygame.K_DOWN, pygame.K_RIGHT]:
+                    selected_index = (selected_index + 1) % len(buttons)
+                elif event.key in [pygame.K_UP, pygame.K_LEFT]:
+                    selected_index = (selected_index - 1) % len(buttons)
+                elif event.key == pygame.K_RETURN:
+                    if buttons[selected_index] == new_game_button:
+                        print("Nueva partida")
+                        mapa_1.ejecutar_mapa1()
+                        return
+                    elif buttons[selected_index] == load_game_button:
+                        state = load_game()
+                        if state:
+                            # Cargar el mapa correspondiente basado en el estado
+                            if state.get('mapa') == 'mapa1':
+                                mapa_1.ejecutar_mapa1_con_estado(state)
+                            # Agregar otros mapas si es necesario
+                        else:
+                            # Mostrar mensaje de no hay partida guardada
+                            pass
+                        return
+                    elif buttons[selected_index] == back_button:
+                        return
+
+        window.blit(fondo, (0, 0))
+
+        # Actualizar y dibujar botones
+        for i, btn in enumerate(buttons):
+            btn.selected = (i == selected_index)
+            btn.update()
+            btn.draw(window)
 
         pygame.display.flip()
         clock.tick(60)
@@ -125,7 +193,7 @@ def menus():
                     # Acción según el botón seleccionado
                     if buttons[selected_index] == start_button:
                         print("Iniciar juego")
-                        return
+                        game_selection_menu(window)
                     elif buttons[selected_index] == exit_button:
                         pygame.quit()
                         sys.exit()
