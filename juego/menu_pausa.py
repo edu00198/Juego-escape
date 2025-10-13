@@ -6,17 +6,14 @@ from configuracion import ANCHO_PANTALLA, ALTO_PANTALLA, BLANCO, ESCALA_JUGADOR,
 from intro_y_menu.menu.button import Button
 from intro_y_menu.menu.settings import settings_menu
 from intro_y_menu.menu.menuzaso import menus
+from .save_system import save_game
 
 
-def pause_menu(pantalla, mapa_actual=1):
+def pause_menu(pantalla, mapa_actual=1, state=None):
     """
     Menú de pausa que aparece al presionar ESC.
-    Botones: Reanudar, Ayuda, Configuración, Salir
+    Botones: Reanudar, Guardar y Salir, Ayuda, Configuración, Salir al Menú
     """
-    pygame.init()
-    pantalla = pygame.display.set_mode((ANCHO_PANTALLA, ALTO_PANTALLA))
-    pygame.display.set_caption("OPCIONES")
-
     # Fondo según el mapa
     try:
         if mapa_actual == 1:
@@ -35,20 +32,16 @@ def pause_menu(pantalla, mapa_actual=1):
     btn_width = 300
     btn_height = 60
     spacing = 20
-    start_y = (ALTO_PANTALLA - (btn_height * 4 + spacing * 3)) // 2
+    start_y = (ALTO_PANTALLA - (btn_height * 5 + spacing * 4)) // 2
     clock = pygame.time.Clock()
 
-    if fondo:
-        pantalla.blit(fondo, (0, 0))
-    else:
-        pantalla.fill(BLANCO)
-
     reanudar_button = Button(None, (ANCHO_PANTALLA // 2, start_y), text="REANUDAR")
-    ayuda_button = Button(None, (ANCHO_PANTALLA // 2, start_y + (btn_height + spacing)), text="AYUDA")
-    config_button = Button(None, (ANCHO_PANTALLA // 2, start_y + 2 * (btn_height + spacing)), text="CONFIGURACION")
-    salir_button = Button(None, (ANCHO_PANTALLA // 2, start_y + 3 * (btn_height + spacing)), text="SALIR")
+    guardar_salir_button = Button(None, (ANCHO_PANTALLA // 2, start_y + (btn_height + spacing)), text="GUARDAR Y SALIR")
+    ayuda_button = Button(None, (ANCHO_PANTALLA // 2, start_y + 2 * (btn_height + spacing)), text="AYUDA")
+    config_button = Button(None, (ANCHO_PANTALLA // 2, start_y + 3 * (btn_height + spacing)), text="CONFIGURACION")
+    salir_menu_button = Button(None, (ANCHO_PANTALLA // 2, start_y + 4 * (btn_height + spacing)), text="SALIR AL MENU")
 
-    buttons = [reanudar_button, ayuda_button, config_button, salir_button]
+    buttons = [reanudar_button, guardar_salir_button, ayuda_button, config_button, salir_menu_button]
     selected_index = 0
     buttons[selected_index].selected = True
 
@@ -71,11 +64,18 @@ def pause_menu(pantalla, mapa_actual=1):
                     clicked_button = buttons[selected_index]
                     if clicked_button == reanudar_button:
                         return
+                    elif clicked_button == guardar_salir_button:
+                        if state:
+                            save_game(state)
+                            print("Partida guardada.")
+                        else:
+                            print("No hay estado para guardar.")
+                        menus()
                     elif clicked_button == ayuda_button:
                         print("Abrir ayuda...")
                     elif clicked_button == config_button:
-                        settings_menu(pantalla)  # pasamos el mapa
-                    elif clicked_button == salir_button:
+                        settings_menu(pantalla)
+                    elif clicked_button == salir_menu_button:
                         menus()
 
         # Dibujar fondo
