@@ -14,9 +14,30 @@ class Button:
         self.hover_effect = hover_effect   # <<--- agregado
 
         # Imagen base o fallback
-        if image_path and os.path.exists(image_path):
-            img = pygame.image.load(image_path).convert_alpha()
-        else:
+        img = None
+
+        # If a Surface was passed directly, use it
+        if isinstance(image_path, pygame.Surface):
+            img = image_path
+        # If a path-like (str/bytes/PathLike) was passed, try to load it
+        elif isinstance(image_path, (str, bytes, os.PathLike)) and os.path.exists(image_path):
+            try:
+                img = pygame.image.load(image_path)
+                # convert_alpha() can raise if the display/video isn't initialized.
+                try:
+                    img = img.convert_alpha()
+                except Exception:
+                    # fallback to convert() if alpha conversion fails
+                    try:
+                        img = img.convert()
+                    except Exception:
+                        # last-resort: keep the loaded surface as-is
+                        pass
+            except Exception:
+                img = None
+
+        # If loading failed or no valid image was provided, create a fallback surface
+        if img is None:
             img = pygame.Surface((200, 70), pygame.SRCALPHA)
             img.fill((30, 30, 30, 220))
             pygame.draw.rect(img, (200, 200, 200), img.get_rect(), 3)
@@ -36,8 +57,10 @@ class Button:
     def get_scaled_image(self, scale):
         """Devuelve la imagen escalada según el factor dado."""
         w, h = self.original_image.get_size()
-        new_size = (int(w * scale), int(h * scale))
-        return pygame.transform.smoothscale(self.original_image, new_size)
+        # Ensure width/height are at least 1 to avoid errors from pygame
+        new_w = max(1, int(w * scale))
+        new_h = max(1, int(h * scale))
+        return pygame.transform.smoothscale(self.original_image, (new_w, new_h))
 
     def draw(self, surface):
         surface.blit(self.current_image, self.rect)

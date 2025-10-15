@@ -143,8 +143,55 @@ def ejecutar_mapa1():
     jugador = Jugador(pos_x, pos_y, ancho_jugador, alto_jugador,
                       escala=ESCALA_JUGADOR, colisiones=colisiones_escaladas_scaled)
 
+    # Normalize loaded position: detect whether saved pos corresponds to
+    # sprite_pos (visual position) or to rect coordinates (older saves).
+    saved_x, saved_y = pos_x, pos_y
+
+    # Default offsets used by Jugador for rect relative to sprite_pos
+    offset_x = 58
+    offset_y = 101
+
+    # If the rect computed from sprite_pos is noticeably outside the visible map area,
+    # assume the saved values were rect coordinates. Otherwise keep as sprite_pos.
+    map_left = OFFSET_X
+    map_top = OFFSET_Y
+    map_right = OFFSET_X + SCALED_WIDTH
+    map_bottom = OFFSET_Y + SCALED_HEIGHT
+
+    rect_out_of_bounds = (
+        jugador.rect.right < map_left or jugador.rect.left > map_right or
+        jugador.rect.bottom < map_top or jugador.rect.top > map_bottom
+    )
+
+    if rect_out_of_bounds:
+        # Interpret saved values as rect coordinates
+        try:
+            jugador.rect.topleft = (int(saved_x), int(saved_y))
+            # Recompute sprite_pos from rect using the known offsets
+            jugador.sprite_pos.x = jugador.rect.x - offset_x
+            jugador.sprite_pos.y = jugador.rect.y - offset_y
+            print(f"[LOAD DEBUG] Saved pos looked like rect coords. Set rect={jugador.rect.topleft}, sprite_pos=({jugador.sprite_pos.x}, {jugador.sprite_pos.y})")
+        except Exception:
+            # Fallback to clamping sprite_pos inside map
+            jugador.sprite_pos.x = max(map_left, min(jugador.sprite_pos.x, map_right))
+            jugador.sprite_pos.y = max(map_top, min(jugador.sprite_pos.y, map_bottom))
+            print(f"[LOAD DEBUG] Failed interpreting saved rect; clamped sprite_pos to ({jugador.sprite_pos.x}, {jugador.sprite_pos.y})")
+
+    # Clamp rect within visible map bounds and sync sprite_pos to avoid breaking collisions/drawing
+    old_rect_topleft = jugador.rect.topleft
+    jugador.rect.left = max(map_left, min(jugador.rect.left, map_right - jugador.rect.width))
+    jugador.rect.top = max(map_top, min(jugador.rect.top, map_bottom - jugador.rect.height))
+    jugador.sprite_pos.x = jugador.rect.x - offset_x
+    jugador.sprite_pos.y = jugador.rect.y - offset_y
+
+    if jugador.rect.topleft != old_rect_topleft:
+        print(f"[LOAD DEBUG] Clamped rect from {old_rect_topleft} to {jugador.rect.topleft}; sprite_pos now=({jugador.sprite_pos.x}, {jugador.sprite_pos.y})")
+    else:
+        print(f"[LOAD DEBUG] Player position OK: rect={jugador.rect.topleft}, sprite_pos=({jugador.sprite_pos.x}, {jugador.sprite_pos.y})")
+
     fondo_escalado = pygame.transform.scale(fondo_mapa, (SCALED_WIDTH, SCALED_HEIGHT))
-    sistema_cofres = SistemaLlavesCofres(codigo_secreto=str(random.randint(1000, 9999)))
+    codigo_secreto = str(random.randint(1000, 9999))
+    sistema_cofres = SistemaLlavesCofres(codigo_secreto=codigo_secreto)
     sistema_cofres.agregar_llave(175, 325)
     sistema_cofres.agregar_cofre(1125, 200)
     sistema_cofres.agregar_carta("Bienvenido al escape de la mazmorra!")
@@ -169,12 +216,15 @@ def ejecutar_mapa1():
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE and not sistema_cofres.hay_interfaz_visible():
                     # Preparar estado para guardar
+                    # Save sprite_pos (visual position) rather than collision rect
                     state = {
                         'mapa': 'mapa1',
-                        'pos_jugador': (jugador.rect.x, jugador.rect.y),
+                        'pos_jugador': (jugador.sprite_pos.x, jugador.sprite_pos.y),
                         'cofres_abiertos': [c.abierto for c in sistema_cofres.cofres],
                         'codigo_correcto': sistema_cofres.codigo_correcto,
-                        'llaves_encontradas': sistema_cofres.llaves_encontradas
+                        'llaves_encontradas': sistema_cofres.llaves_encontradas,
+                        'codigo_secreto': sistema_cofres.codigo_secreto,
+                        'has_moved': has_moved
                     }
                     pause_menu(pantalla, mapa_actual=1, state=state)
                 else:
@@ -216,10 +266,13 @@ def ejecutar_mapa1():
                             # Autoguardado antes de pasar a mapa2
                             state = {
                                 'mapa': 'mapa2',
-                                'pos_jugador': (jugador.rect.x, jugador.rect.y),
+                                # save sprite position
+                                'pos_jugador': (jugador.sprite_pos.x, jugador.sprite_pos.y),
                                 'cofres_abiertos': [c.abierto for c in sistema_cofres.cofres],
                                 'codigo_correcto': True,
-                                'llaves_encontradas': sistema_cofres.llaves_encontradas
+                                'llaves_encontradas': sistema_cofres.llaves_encontradas,
+                                'codigo_secreto': sistema_cofres.codigo_secreto,
+                                'has_moved': has_moved
                             }
                             save_game(state)
                             ejecutar_mapa2()
@@ -320,13 +373,17 @@ def ejecutar_mapa1_con_estado(state):
     colisiones_escaladas_scaled = colisiones_escaladas
 
     ancho_jugador, alto_jugador = 23, 15
-    pos_x, pos_y = state.get('pos_jugador', ((ANCHO_PANTALLA - ancho_jugador) // 2, (ALTO_PANTALLA - alto_jugador) // 2))
+    # Expect saved 'pos_jugador' to be the sprite_pos (x,y). Provide defaults if missing.
+    default_pos = ((ANCHO_PANTALLA - ancho_jugador) // 2, (ALTO_PANTALLA - alto_jugador) // 2)
+    pos_x, pos_y = state.get('pos_jugador', default_pos)
 
+    # Create jugador using sprite position
     jugador = Jugador(pos_x, pos_y, ancho_jugador, alto_jugador,
                       escala=ESCALA_JUGADOR, colisiones=colisiones_escaladas_scaled)
 
     fondo_escalado = pygame.transform.scale(fondo_mapa, (SCALED_WIDTH, SCALED_HEIGHT))
-    sistema_cofres = SistemaLlavesCofres(codigo_secreto=str(random.randint(1000, 9999)))
+    codigo_secreto = state.get('codigo_secreto', str(random.randint(1000, 9999)))
+    sistema_cofres = SistemaLlavesCofres(codigo_secreto=codigo_secreto)
     sistema_cofres.agregar_llave(175, 325)
     sistema_cofres.agregar_cofre(1125, 200)
     sistema_cofres.agregar_carta("Bienvenido al escape de la mazmorra!")
@@ -339,7 +396,17 @@ def ejecutar_mapa1_con_estado(state):
             sistema_cofres.cofres[i].abierto = abierto
     sistema_cofres.codigo_correcto = state.get('codigo_correcto', False)
     sistema_cofres.llaves_encontradas = state.get('llaves_encontradas', 0)
+    has_moved = state.get('has_moved', False)
     puzzle_cofre.codigo_ya_ingresado = sistema_cofres.codigo_correcto
+
+    # Ensure consistency: if any chest is open, the key must have been found
+    if any(c.abierto for c in sistema_cofres.cofres):
+        sistema_cofres.llaves_encontradas = max(sistema_cofres.llaves_encontradas, 1)
+
+    # Mark key objects as found so they are not drawn again
+    if sistema_cofres.llaves_encontradas > 0:
+        for i in range(min(sistema_cofres.llaves_encontradas, len(sistema_cofres.llaves))):
+            sistema_cofres.llaves[i].encontrada = True
 
     if sistema_cofres.panel_codigo:
         sistema_cofres.panel_codigo.ocultar()
@@ -353,13 +420,15 @@ def ejecutar_mapa1_con_estado(state):
 
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE and not sistema_cofres.hay_interfaz_visible():
-                    # Preparar estado para guardar
+                    # Preparar estado para guardar (usar sprite_pos)
                     state = {
                         'mapa': 'mapa1',
-                        'pos_jugador': (jugador.rect.x, jugador.rect.y),
+                        'pos_jugador': (jugador.sprite_pos.x, jugador.sprite_pos.y),
                         'cofres_abiertos': [c.abierto for c in sistema_cofres.cofres],
                         'codigo_correcto': sistema_cofres.codigo_correcto,
-                        'llaves_encontradas': sistema_cofres.llaves_encontradas
+                        'llaves_encontradas': sistema_cofres.llaves_encontradas,
+                        'codigo_secreto': sistema_cofres.codigo_secreto,
+                        'has_moved': has_moved
                     }
                     pause_menu(pantalla, mapa_actual=1, state=state)
                 else:
@@ -385,10 +454,12 @@ def ejecutar_mapa1_con_estado(state):
                         if resultado == "codigo_correcto":
                             state = {
                                 'mapa': 'mapa2',
-                                'pos_jugador': (jugador.rect.x, jugador.rect.y),
+                                'pos_jugador': (jugador.sprite_pos.x, jugador.sprite_pos.y),
                                 'cofres_abiertos': [c.abierto for c in sistema_cofres.cofres],
                                 'codigo_correcto': True,
-                                'llaves_encontradas': sistema_cofres.llaves_encontradas
+                                'llaves_encontradas': sistema_cofres.llaves_encontradas,
+                                'codigo_secreto': sistema_cofres.codigo_secreto,
+                                'has_moved': has_moved
                             }
                             save_game(state)
                             ejecutar_mapa2()
