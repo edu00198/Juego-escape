@@ -14,7 +14,7 @@ def main():
     #time.sleep(1)  # Pausa breve entre la intro y el menu
     #press_any_key_screen()  # Muestra la pantalla de "Press Any Key"
     #menus()         # Muestra el menú principal
-    print("Llamando a ejecutar_mapa1()...")
-    mapa_1.ejecutar_mapa1()
+    # Show main menu first; the menu has options to start a new game or load saves.
+    menus()
 
 main()
