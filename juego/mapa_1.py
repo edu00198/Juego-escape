@@ -141,7 +141,8 @@ def ejecutar_mapa1():
                       escala=ESCALA_JUGADOR, colisiones=colisiones_escaladas_scaled)
 
     fondo_escalado = pygame.transform.scale(fondo_mapa, (SCALED_WIDTH, SCALED_HEIGHT))
-    sistema_cofres = SistemaLlavesCofres(codigo_secreto=str(random.randint(1000, 9999)))
+    codigo_secreto = str(random.randint(1000, 9999))
+    sistema_cofres = SistemaLlavesCofres(codigo_secreto=codigo_secreto)
     sistema_cofres.agregar_llave(175, 325)
     sistema_cofres.agregar_cofre(1125, 200)
     sistema_cofres.agregar_carta("Bienvenido al escape de la mazmorra!")
@@ -171,7 +172,9 @@ def ejecutar_mapa1():
                         'pos_jugador': (jugador.rect.x, jugador.rect.y),
                         'cofres_abiertos': [c.abierto for c in sistema_cofres.cofres],
                         'codigo_correcto': sistema_cofres.codigo_correcto,
-                        'llaves_encontradas': sistema_cofres.llaves_encontradas
+                        'llaves_encontradas': sistema_cofres.llaves_encontradas,
+                        'codigo_secreto': sistema_cofres.codigo_secreto,
+                        'has_moved': has_moved
                     }
                     pause_menu(pantalla, mapa_actual=1, state=state)
                 else:
@@ -216,7 +219,9 @@ def ejecutar_mapa1():
                                 'pos_jugador': (jugador.rect.x, jugador.rect.y),
                                 'cofres_abiertos': [c.abierto for c in sistema_cofres.cofres],
                                 'codigo_correcto': True,
-                                'llaves_encontradas': sistema_cofres.llaves_encontradas
+                                'llaves_encontradas': sistema_cofres.llaves_encontradas,
+                                'codigo_secreto': sistema_cofres.codigo_secreto,
+                                'has_moved': has_moved
                             }
                             save_game(state)
                             ejecutar_mapa2()
@@ -323,7 +328,8 @@ def ejecutar_mapa1_con_estado(state):
                       escala=ESCALA_JUGADOR, colisiones=colisiones_escaladas_scaled)
 
     fondo_escalado = pygame.transform.scale(fondo_mapa, (SCALED_WIDTH, SCALED_HEIGHT))
-    sistema_cofres = SistemaLlavesCofres(codigo_secreto=str(random.randint(1000, 9999)))
+    codigo_secreto = state.get('codigo_secreto', str(random.randint(1000, 9999)))
+    sistema_cofres = SistemaLlavesCofres(codigo_secreto=codigo_secreto)
     sistema_cofres.agregar_llave(175, 325)
     sistema_cofres.agregar_cofre(1125, 200)
     sistema_cofres.agregar_carta("Bienvenido al escape de la mazmorra!")
@@ -336,7 +342,12 @@ def ejecutar_mapa1_con_estado(state):
             sistema_cofres.cofres[i].abierto = abierto
     sistema_cofres.codigo_correcto = state.get('codigo_correcto', False)
     sistema_cofres.llaves_encontradas = state.get('llaves_encontradas', 0)
+    has_moved = state.get('has_moved', False)
     puzzle_cofre.codigo_ya_ingresado = sistema_cofres.codigo_correcto
+
+    # Ensure consistency: if any chest is open, the key must have been found
+    if any(c.abierto for c in sistema_cofres.cofres):
+        sistema_cofres.llaves_encontradas = 1
 
     if sistema_cofres.panel_codigo:
         sistema_cofres.panel_codigo.ocultar()
@@ -356,7 +367,9 @@ def ejecutar_mapa1_con_estado(state):
                         'pos_jugador': (jugador.rect.x, jugador.rect.y),
                         'cofres_abiertos': [c.abierto for c in sistema_cofres.cofres],
                         'codigo_correcto': sistema_cofres.codigo_correcto,
-                        'llaves_encontradas': sistema_cofres.llaves_encontradas
+                        'llaves_encontradas': sistema_cofres.llaves_encontradas,
+                        'codigo_secreto': sistema_cofres.codigo_secreto,
+                        'has_moved': has_moved
                     }
                     pause_menu(pantalla, mapa_actual=1, state=state)
                 else:
@@ -385,7 +398,9 @@ def ejecutar_mapa1_con_estado(state):
                                 'pos_jugador': (jugador.rect.x, jugador.rect.y),
                                 'cofres_abiertos': [c.abierto for c in sistema_cofres.cofres],
                                 'codigo_correcto': True,
-                                'llaves_encontradas': sistema_cofres.llaves_encontradas
+                                'llaves_encontradas': sistema_cofres.llaves_encontradas,
+                                'codigo_secreto': sistema_cofres.codigo_secreto,
+                                'has_moved': has_moved
                             }
                             save_game(state)
                             ejecutar_mapa2()
