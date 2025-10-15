@@ -24,6 +24,9 @@ from . import puzzle_cofre
 from .save_system import save_game
 
 
+
+
+
 pantalla = pygame.display.set_mode((ANCHO_PANTALLA, ALTO_PANTALLA))
 
 # Usamos la variable persistente definida en `juego.puzzle_cofre` para saber

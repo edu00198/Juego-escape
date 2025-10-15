@@ -5,6 +5,11 @@ from assets.mapas.fondo import key, cofre_a, cofre_c, nota
 # Esto es leído por `mapa_1` para mantener el estado entre mapas.
 codigo_ya_ingresado = False
 
+# Cargar sprites del cofre en una lista
+sprites = [
+    pygame.image.load(f"assets/animaciones/chest_animation/animacion cofre ({i}).png") for i in range(1, 6)
+]
+
 # Colores
 DORADO = (255, 215, 0)
 NEGRO = (0, 0, 0)
@@ -330,6 +335,74 @@ class SistemaLlavesCofres:
             for i, cofre in enumerate(self.cofres):
                 if not cofre.abierto and jugador_rect.colliderect(cofre.rect):
                     cofre.abrir()
+                    # Reproducir animación de apertura de cofre si existen 'screen' y 'sprites'.
+                    try:
+                        screen = pygame.display.get_surface()
+                        import importlib, sys
+                        # Preferir la lista local 'sprites' si existe en este módulo
+                        sprites_to_play = globals().get('sprites', None)
+                        # Si no hay sprites locales, intentar obtenerlos desde juego.mapa_1
+                        if not sprites_to_play:
+                            try:
+                                if 'juego.mapa_1' in sys.modules:
+                                    mod = sys.modules['juego.mapa_1']
+                                else:
+                                    mod = importlib.import_module('juego.mapa_1')
+                                sprites_to_play = getattr(mod, 'sprites', None)
+                            except Exception:
+                                sprites_to_play = None
+
+                        if sprites_to_play and screen:
+                            # Preparar snapshot del fondo bajo la animación para restaurarlo
+                            try:
+                                # Usar primer frame sin escalar para calcular el rect de animación
+                                sample = sprites_to_play[0]
+                                anim_rect = sample.get_rect(center=cofre.rect.center)
+                                # Asegurar que anim_rect esté dentro de la pantalla
+                                anim_rect.clamp_ip(screen.get_rect())
+                                background_snapshot = screen.subsurface(anim_rect).copy()
+                            except Exception:
+                                anim_rect = None
+                                background_snapshot = None
+
+                            for frame in sprites_to_play:
+                                # Mantener la cola de eventos para que la ventana no se congele
+                                pygame.event.pump()
+                                try:
+                                    # Escalar el frame al doble de tamaño (scale2x preserva calidad)
+                                    try:
+                                        frame_s = pygame.transform.scale2x(frame)
+                                    except Exception:
+                                        # Fallback: escalar manualmente si scale2x falla
+                                        frame_s = pygame.transform.scale(frame, (frame.get_width()*5, frame.get_height()*2))
+
+                                    # Calcular rect centrado en el cofre
+                                    frame_rect = frame_s.get_rect(center=cofre.rect.center)
+
+                                    # Restaurar fondo en la zona de la animación para evitar manchas
+                                    if background_snapshot and anim_rect:
+                                        screen.blit(background_snapshot, anim_rect.topleft)
+
+                                    # Dibujar frame sobre el fondo
+                                    screen.blit(frame_s, frame_rect.topleft)
+
+                                    # Actualizar sólo el área afectada
+                                    try:
+                                        pygame.display.update(frame_rect)
+                                    except Exception:
+                                        pygame.display.flip()
+
+                                    # Esperar más tiempo (doble lento): 300 ms
+                                    pygame.time.delay(300)
+                                except Exception:
+                                    # Si algo falla con este frame, continuar con el siguiente
+                                    continue
+                        else:
+                            # No hay sprites disponibles: debug
+                            #print("No se encontraron sprites para la animación del cofre.")
+                            pass
+                    except Exception as e:
+                        print(f"Animación del cofre falló: {e}")
                     if i < len(self.cartas):
                         self.cartas[i].mostrar()
                     self.llaves_encontradas -= 1
