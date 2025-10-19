@@ -18,8 +18,8 @@ class Jugador:
         self.sprite_pos = pygame.Vector2(x, y)
 
         # Crear el rectángulo de colisión con offset relativo al sprite
-        offset_x = 58  # mueve la hitbox a la derecha
-        offset_y = 101  # mueve la hitbox hacia abajo
+        offset_x = 60  # mueve la hitbox a la derecha
+        offset_y = 107  # mueve la hitbox hacia abajo
 
         # Tamaño base del rectángulo
         hitbox_ancho = int(ancho * escala)
@@ -245,7 +245,7 @@ class Jugador:
         pantalla.blit(imagen, (self.sprite_pos.x + offset_x, self.sprite_pos.y + offset_y))
 
         # Dibujar la hitbox (verde) con desplazamiento
-        #hitbox_offset = self.rect.move(offset_x, offset_y)
-        #pygame.draw.rect(pantalla, (0, 255, 0), hitbox_offset, 2)
+        hitbox_offset = self.rect.move(offset_x, offset_y)
+        pygame.draw.rect(pantalla, (0, 255, 0), hitbox_offset, 2)
         if self.estado == "attack" and self.frame_actual == len(self.animacion_actual) - 1:
             self.estado = "idle"

@@ -354,6 +354,7 @@ class SistemaLlavesCofres:
 
                         if sprites_to_play and screen:
                             # Preparar snapshot del fondo bajo la animación para restaurarlo
+                            print("---------------------------codigo_secreto: [", self.codigo_secreto, "]---------------------------------------")
                             try:
                                 # Usar primer frame sin escalar para calcular el rect de animación
                                 sample = sprites_to_play[0]
