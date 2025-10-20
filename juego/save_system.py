@@ -1,52 +1,74 @@
-import pickle
 import os
-import sys
+import pickle
 
-# Ajustes de paths
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+# Carpeta de guardados dentro del módulo juego
+SAVE_DIR = os.path.join(os.path.dirname(__file__), 'saves')
+os.makedirs(SAVE_DIR, exist_ok=True)
 
-def get_save_file(slot=1):
-    return f"savegame_{slot}.pkl"
+def _slot_path(slot: int) -> str:
+    return os.path.join(SAVE_DIR, f"slot_{int(slot)}.sav")
 
-def save_game(state, slot=1):
-    """Guarda el estado del juego en un archivo pickle."""
-    save_file = get_save_file(slot)
+def save_game(state, slot: int) -> bool:
+    """
+    Guarda 'state' en el slot indicado. Devuelve True si tuvo éxito.
+    """
     try:
-        with open(save_file, 'wb') as f:
+        path = _slot_path(slot)
+        with open(path, 'wb') as f:
             pickle.dump(state, f)
-        print(f"Juego guardado exitosamente en slot {slot}.")
+        print(f"[save_system] Guardado en {path}")
+        return True
     except Exception as e:
-        print(f"Error al guardar: {e}")
+        print(f"[save_system] Error guardando slot {slot}: {e}")
+        return False
 
-def load_game(slot=1):
-    """Carga el estado del juego desde el archivo pickle."""
-    save_file = get_save_file(slot)
-    if os.path.exists(save_file):
-        try:
-            with open(save_file, 'rb') as f:
-                state = pickle.load(f)
-            print(f"Juego cargado exitosamente desde slot {slot}.")
-            return state
-        except Exception as e:
-            print(f"Error al cargar: {e}")
+def load_game(slot: int):
+    """
+    Carga y devuelve el estado guardado en el slot, o None si no existe / falla.
+    """
+    try:
+        path = _slot_path(slot)
+        if not os.path.exists(path):
+            print(f"[save_system] No existe archivo para slot {slot}")
             return None
-    else:
-        print(f"No hay partida guardada en slot {slot}.")
+        with open(path, 'rb') as f:
+            state = pickle.load(f)
+        print(f"[save_system] Cargado slot {slot} desde {path}")
+        return state
+    except Exception as e:
+        print(f"[save_system] Error cargando slot {slot}: {e}")
         return None
 
-def delete_save(slot=1):
-    """Elimina el archivo de guardado."""
-    save_file = get_save_file(slot)
-    if os.path.exists(save_file):
-        os.remove(save_file)
-        print(f"Partida guardada eliminada del slot {slot}.")
-    else:
-        print(f"No hay partida guardada en slot {slot} para eliminar.")
-
 def list_saves():
-    """Lista los slots con partidas guardadas."""
-    saves = []
-    for slot in range(1, 6):  # Asumimos 5 slots
-        if os.path.exists(get_save_file(slot)):
-            saves.append(slot)
-    return saves
+    """
+    Devuelve una lista de números de slot (ints) que actualmente contienen guardados.
+    """
+    slots = []
+    try:
+        for name in os.listdir(SAVE_DIR):
+            if name.startswith("slot_") and name.endswith(".sav"):
+                try:
+                    num = int(name[len("slot_"):-len(".sav")])
+                    slots.append(num)
+                except Exception:
+                    pass
+    except Exception as e:
+        print(f"[save_system] Error listando saves: {e}")
+    return sorted(slots)
+
+def delete_save(slot: int) -> bool:
+    """
+    Elimina el archivo de guardado para el slot indicado. Devuelve True si se eliminó.
+    """
+    try:
+        path = _slot_path(slot)
+        if os.path.exists(path):
+            os.remove(path)
+            print(f"[save_system] Eliminado save: {path}")
+            return True
+        else:
+            print(f"[save_system] No se encontró save para slot {slot} ({path})")
+            return False
+    except Exception as e:
+        print(f"[save_system] Error eliminando slot {slot}: {e}")
+        return False
