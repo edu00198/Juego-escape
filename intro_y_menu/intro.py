@@ -1,6 +1,18 @@
 import pygame
 import sys
 import math
+try:
+    from .loader import start_background_load, get_progress, is_done
+except Exception:
+    # Si por alguna razón no existe el loader, definimos stubs mínimos
+    def start_background_load(*a, **k):
+        pass
+
+    def get_progress():
+        return {'total': 0, 'loaded': 0, 'errors': {}}
+
+    def is_done():
+        return True
 
 def draw_loading_spinner(surface, center, radius, frame, alpha=255):
     rotation_speed = 6
@@ -43,6 +55,12 @@ def main_intro():
     
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption("Palermo Studios Intro")
+
+    # Iniciar la carga en background en cuanto tengamos una ventana
+    try:
+        start_background_load()
+    except Exception as e:
+        print(f"No se pudo iniciar la precarga en background: {e}")
     
     BLACK = (0, 0, 0)
     WHITE = (255, 255, 255)
@@ -128,8 +146,25 @@ def main_intro():
             
             studio_surface.set_alpha(alpha)
             screen.blit(studio_surface, studio_rect)
-            
+            # Dibujar spinner
             draw_loading_spinner(screen, loading_center, loading_radius, frame, alpha)
+
+            # Mostrar progreso de precarga si está disponible
+            try:
+                prog = get_progress()
+                total = prog.get('total', 0)
+                loaded = prog.get('loaded', 0)
+                if total:
+                    try:
+                        font_prog = pygame.font.Font(None, 28)
+                    except:
+                        font_prog = pygame.font.SysFont('Arial', 28)
+                    text = f"Precargando recursos: {loaded}/{total}"
+                    surf = font_prog.render(text, True, (200, 200, 200))
+                    rect = surf.get_rect(center=(WIDTH // 2, loading_center[1] + 60))
+                    screen.blit(surf, rect)
+            except Exception:
+                pass
         
         pygame.display.flip()
         frame += 1
