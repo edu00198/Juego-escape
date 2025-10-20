@@ -6,7 +6,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from configuracion import ANCHO_PANTALLA, ALTO_PANTALLA, ESCALA_JUGADOR
 from juego.jugador import Jugador
-from juego.mapa_4 import ejecutar_mapa4
+from juego.mapa_5 import ejecutar_mapa5
 from juego.mapa_3_4_en_raya import ejecutar_mapa4_en_raya
 from assets.mapas.mapa3_data_nuevo0 import (
     fondo_mapa,
@@ -20,8 +20,6 @@ from assets.mapas.mapa3_data_nuevo0 import (
     puerta_3_cuatro_en_raya,
     colisiones_escaladas
 )
-
-from .engranajes import minijuego_engranares  # importamos el minijuego
 
 pantalla = pygame.display.set_mode((ANCHO_PANTALLA, ALTO_PANTALLA))
 
@@ -41,8 +39,8 @@ def ejecutar_mapa3():
 
     # Posición inicial del jugador frente a la puerta de entrada
     puerta2pos = puerta_3_entrada.topleft
-    pos_x = puerta2pos[0] - ancho_jugador / 2
-    pos_y = puerta2pos[1] - alto_jugador * 3
+    pos_x = puerta2pos[0] - ancho_jugador * -3
+    pos_y = puerta2pos[1] - alto_jugador * -4
     jugador = Jugador(pos_x, pos_y, ancho_jugador, alto_jugador, escala=ESCALA_JUGADOR, colisiones=colisiones_escaladas)
 
     # Fondo escalado
@@ -68,11 +66,11 @@ def ejecutar_mapa3():
 
         
         #Dibujar colisiones (opcional para depuración)
-        for colision in colisiones_escaladas:
-            pygame.draw.rect(pantalla, (255, 0, 0), colision, 2)
+        """for colision in colisiones_escaladas:
+            pygame.draw.rect(pantalla, (255, 0, 0), colision, 2)"""
 
         #Dibujar puertas (opcional para depuración)
-        pygame.draw.rect(pantalla, (0, 0, 255), puerta_3_entrada, 2)
+        """pygame.draw.rect(pantalla, (0, 0, 255), puerta_3_entrada, 2)"""
         pygame.draw.rect(pantalla, (0, 255, 255), puerta_3_salida, 2)
         pygame.draw.rect(pantalla, (0, 255, 255), puerta_3_engranaje, 2)
         pygame.draw.rect(pantalla, (255, 0, 255), puerta_3_cuatro_en_raya, 2)
@@ -89,8 +87,8 @@ def ejecutar_mapa3():
             
         if jugador.rect.colliderect(puerta_3_entrada):
             print("regresa a mapa 2")
-            running = False  # Aquí puedes llamar al siguiente mapa si lo tienes
-            return 2
+            #running = False  # Aquí puedes llamar al siguiente mapa si lo tienes
+            #return 2
     
         if jugador.rect.colliderect(puerta_3_cuatro_en_raya):
             print("Transición al minijuego de 4 en raya")
@@ -98,52 +96,7 @@ def ejecutar_mapa3():
             ejecutar_mapa4_en_raya()
             
 
-        # Minijuego engranajes: entrar y repetir hasta completar
-        if jugador.rect.colliderect(puerta_3_engranaje):
-            while True:
-                resultado = minijuego_engranares()
-                # Restaurar resolución del juego después del minijuego
-                pygame.display.set_mode((ANCHO_PANTALLA, ALTO_PANTALLA))
-                if resultado == "completado":
-                    print("✅ Mecanismo alineado, puedes continuar en mapa 3")
-                    # Eliminar cualquier rect de colisión que se solape con el área del engranaje
-                    antes = len(colisiones_escaladas)
-                    colisiones_escaladas[:] = [r for r in colisiones_escaladas if not r.colliderect(puerta_3_engranaje)]
-                    despues = len(colisiones_escaladas)
-                    print(f"Colisiones removidas: {antes - despues}")
-                    # Mover al jugador fuera de la zona del engranaje para evitar re-trigger inmediato
-                    try:
-                        # Intentar mover a la derecha del trigger
-                        new_x = int(puerta_3_engranaje.right + 5)
-                        max_x = ANCHO_PANTALLA - jugador.rect.width
-                        if new_x <= max_x:
-                            jugador.rect.x = new_x
-                        else:
-                            # Si no cabe a la derecha, intentar a la izquierda
-                            new_x_left = int(puerta_3_engranaje.left - jugador.rect.width - 5)
-                            if new_x_left >= 0:
-                                jugador.rect.x = new_x_left
-                            else:
-                                # Si no cabe a los lados, intentar abajo
-                                new_y = int(puerta_3_engranaje.bottom + 5)
-                                max_y = ALTO_PANTALLA - jugador.rect.height
-                                if new_y <= max_y:
-                                    jugador.rect.y = new_y
-                                else:
-                                    # Fallback: arriba dentro de la pantalla
-                                    jugador.rect.y = max(0, int(puerta_3_engranaje.top - jugador.rect.height - 5))
-
-                        # Actualizar sprite_pos para que el dibujo no quede desincronizado
-                        offset_x_j = 58
-                        offset_y_j = 101
-                        jugador.sprite_pos.x = jugador.rect.x - offset_x_j
-                        jugador.sprite_pos.y = jugador.rect.y - offset_y_j
-                    except Exception:
-                        pass
-                    break
-                else:
-                    # Mostrar un mensaje y repetir; el minijuego ya maneja reinicios
-                    print("❌ Fallaste el minijuego, intenta de nuevo")
+        
 
     pygame.quit()
     sys.exit()

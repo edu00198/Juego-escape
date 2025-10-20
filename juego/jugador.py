@@ -18,8 +18,8 @@ class Jugador:
         self.sprite_pos = pygame.Vector2(x, y)
 
         # Crear el rectángulo de colisión con offset relativo al sprite
-        offset_x = 60  # mueve la hitbox a la derecha
-        offset_y = 107  # mueve la hitbox hacia abajo
+        offset_x = 0  # mueve la hitbox a la derecha
+        offset_y = 0  # mueve la hitbox hacia abajo
 
         # Tamaño base del rectángulo
         hitbox_ancho = int(ancho * escala)

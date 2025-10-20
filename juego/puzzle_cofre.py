@@ -372,13 +372,16 @@ class SistemaLlavesCofres:
                                 try:
                                     # Escalar el frame al doble de tamaño (scale2x preserva calidad)
                                     try:
-                                        frame_s = pygame.transform.scale2x(frame)
+                                        frame_s = pygame.transform.scale(frame, (frame.get_width() * 3, frame.get_height() * 3))
+
+
                                     except Exception:
                                         # Fallback: escalar manualmente si scale2x falla
                                         frame_s = pygame.transform.scale(frame, (frame.get_width()*5, frame.get_height()*2))
 
                                     # Calcular rect centrado en el cofre
-                                    frame_rect = frame_s.get_rect(center=cofre.rect.center)
+                                    frame_rect = frame_s.get_rect(center=(cofre.rect.centerx, cofre.rect.centery + 8))
+
 
                                     # Restaurar fondo en la zona de la animación para evitar manchas
                                     if background_snapshot and anim_rect:

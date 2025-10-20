@@ -6,6 +6,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from configuracion import ANCHO_PANTALLA, ALTO_PANTALLA, ESCALA_JUGADOR
 from juego.jugador import Jugador
+from juego.mapa_4 import ejecutar_mapa4
 from assets.mapas.mapa3_4_en_raya_data import (
     fondo_mapa,
     SCALED_WIDTH,
@@ -39,6 +40,12 @@ def ejecutar_mapa4_en_raya():
 
     fondo_escalado = pygame.transform.scale(fondo_mapa, (SCALED_WIDTH, SCALED_HEIGHT))
 
+    
+    # Imagen decorativa encima del jugador (opcional)
+    BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+    ruta_pared = os.path.join(BASE_DIR, "assets", "mapas", "tablero.png")
+    imagen_pared = pygame.image.load(ruta_pared).convert_alpha()
+    imagen_escalada = pygame.transform.scale(imagen_pared, (427, 240))
 
     while running:
         for event in pygame.event.get():
@@ -47,9 +54,6 @@ def ejecutar_mapa4_en_raya():
 
         jugador.manejar_teclas()
         
-         #Dibujar colisiones (opcional para depuración)
-        for colision in colisiones_escaladas:
-            pygame.draw.rect(pantalla, (255, 0, 0), colision, 2)
 
         #Dibujar puertas (opcional para depuración)
         pygame.draw.rect(pantalla, (0, 0, 255), puerta, 2)
@@ -67,6 +71,10 @@ def ejecutar_mapa4_en_raya():
         pygame.draw.rect(pantalla, (0, 0, 255), puerta, 2)
 
         jugador.dibujar(pantalla, offset_x, offset_y)  # Primero el jugador
+        
+        centro_x = (ANCHO_PANTALLA - imagen_escalada.get_width()) // 2
+        pantalla.blit(imagen_escalada, (centro_x, 150))
+
 
         
         pygame.display.flip()
@@ -76,7 +84,8 @@ def ejecutar_mapa4_en_raya():
         if jugador.rect.colliderect(puerta):
             print("regresa a mapa 3")
             running = False  # Aquí puedes llamar al siguiente mapa si lo tienes
-            return
+            ejecutar_mapa4()
+            
 
     pygame.quit()
     sys.exit()
