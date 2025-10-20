@@ -2,7 +2,7 @@ import pygame
 import sys
 import random
 import math
-
+from configuracion import ANCHO_PANTALLA, ALTO_PANTALLA
 pygame.init()
 
 # -------------------
@@ -13,7 +13,8 @@ SQUARE_SIZE = 100
 RADIUS = SQUARE_SIZE // 2 - 5
 
 # Resolución de 1280x720
-WIDTH, HEIGHT = 1280, 720
+WIDTH= ANCHO_PANTALLA
+HEIGHT= ALTO_PANTALLA
 SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("4 en Línea")
 
@@ -162,7 +163,7 @@ def cpu_move(board):
 # -------------------
 # Juego principal
 # -------------------
-def main():
+def inicio_juego():
     board = create_board()
     game_over = False
     turn = 0  # 0: jugador, 1: CPU
@@ -230,6 +231,3 @@ def main():
             sys.exit()
         
         pygame.display.update()
-
-if __name__ == "__main__":
-    main()
