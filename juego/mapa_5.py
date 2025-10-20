@@ -1,7 +1,6 @@
 import pygame
 import sys
 import os
-pygame.init()
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from configuracion import ANCHO_PANTALLA, ALTO_PANTALLA, ESCALA_JUGADOR

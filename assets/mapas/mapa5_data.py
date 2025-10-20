@@ -164,16 +164,20 @@ layersData = {
     "l_hitbox_js": l_hitbox_js                # Hitbox (debug o lógica)
 }
 
+IMAGENES_PATH = "imagenes/"
+
+
 tilesets = {
-    "l_piso_js": cargar_tileset("imagenes/paredes.png", TILE_SIZE),
-    "l_sombra": cargar_tileset("imagenes/paredes.png", TILE_SIZE),
-    "l_roturas": cargar_tileset("imagenes/4bd1f88f-bae1-45cb-9eb2-ae60f831a400.png", TILE_SIZE),
-    "l_paredes_exteriores": cargar_tileset("imagenes/paredes.png", TILE_SIZE),
-    "l_New_Layer_7": cargar_tileset("imagenes/paredes.png", TILE_SIZE),
-    "l_uerta": cargar_tileset("imagenes/paredes.png", TILE_SIZE),
-    "collisions": cargar_tileset("imagenes/45c9c5be-c636-42b7-62d6-b8a104bf6200.png", TILE_SIZE),
-    "l_hitbox_js": cargar_tileset("imagenes/45c9c5be-c636-42b7-62d6-b8a104bf6200.png", TILE_SIZE),
+    "l_piso_js": cargar_tileset(IMAGENES_PATH + "paredes.png", TILE_SIZE),
+    "l_sombra": cargar_tileset(IMAGENES_PATH + "paredes.png", TILE_SIZE),
+    "l_roturas": cargar_tileset(IMAGENES_PATH + "4bd1f88f-bae1-45cb-9eb2-ae60f831a400.png", TILE_SIZE),
+    "l_paredes_exteriores": cargar_tileset(IMAGENES_PATH + "paredes.png", TILE_SIZE),
+    "l_New_Layer_7": cargar_tileset(IMAGENES_PATH + "paredes.png", TILE_SIZE),
+    "l_uerta": cargar_tileset(IMAGENES_PATH + "paredes.png", TILE_SIZE),
+    "collisions": cargar_tileset(IMAGENES_PATH + "45c9c5be-c636-42b7-62d6-b8a104bf6200.png", TILE_SIZE),
+    "l_hitbox_js": cargar_tileset(IMAGENES_PATH + "45c9c5be-c636-42b7-62d6-b8a104bf6200.png", TILE_SIZE),
 }
+
 
 # ...resto del código igual...
     

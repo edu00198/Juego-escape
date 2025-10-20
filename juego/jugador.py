@@ -32,7 +32,7 @@ class Jugador:
             hitbox_ancho,
             hitbox_alto
         )
-        self.rect.inflate_ip(-30, -20)  # achica la hitbox horizontal y verticalmente
+        self.rect.inflate_ip(-30, -10)  # achica la hitbox horizontal y verticalmente
 
 
         print("Iniciando carga de animaciones...")
