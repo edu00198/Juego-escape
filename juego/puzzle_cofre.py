@@ -56,7 +56,7 @@ class Cofre:
             self.imagen_cerrado = pygame.image.load(cofre_c).convert_alpha()
             self.imagen_cerrado = pygame.transform.scale(self.imagen_cerrado, (80, 75))
             self.imagen_abierto = pygame.image.load(cofre_a).convert_alpha()
-            self.imagen_abierto = pygame.transform.scale(self.imagen_abierto, (80, 75))
+            self.imagen_abierto = pygame.transform.scale(self.imagen_abierto, (90, 85))
         except Exception as e:
             print(f"No se pudieron cargar las imágenes del cofre: {e}")
             self.imagen_cerrado = None

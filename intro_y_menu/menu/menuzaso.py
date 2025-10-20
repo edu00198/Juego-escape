@@ -1,9 +1,10 @@
 import pygame
 import sys
 import os
+import fnmatch
 from .button import Button
 from .settings import settings_menu
-from juego.save_system import load_game, list_saves
+from juego.save_system import load_game, list_saves, delete_save
 from juego import mapa_1
 
 
@@ -66,6 +67,7 @@ def loading_screen(window):
 def select_load_slot(window):
     """
     Submenú para seleccionar el slot de carga.
+    Permite eliminar un slot con la tecla R (libera el slot).
     """
     from configuracion import ANCHO_PANTALLA, ALTO_PANTALLA
     clock = pygame.time.Clock()
@@ -80,18 +82,44 @@ def select_load_slot(window):
         fondo = pygame.Surface((ANCHO_PANTALLA, ALTO_PANTALLA))
         fondo.fill((50, 50, 50))
 
-    slots = list_saves()
-    buttons = []
+    # obtener raw_slots (lo que devuelva list_saves)
+    try:
+        raw_slots = list_saves() or []
+    except Exception:
+        raw_slots = []
+
+    # construir lista booleana de existencia por slot (1..5)
+    exists = [False] * 5
     for i in range(1, 6):
-        text = f"Slot {i}" + (" (Guardado)" if i in slots else "")
-        button = Button(None, (ANCHO_PANTALLA // 2, 300 + (i-1) * 80), scale=1.0, text=text)
-        buttons.append(button)
+        try:
+            exists[i-1] = i in raw_slots
+        except Exception:
+            exists[i-1] = False
+
+    # Mostrar instrucciones para eliminar
+    instructions_font = pygame.font.Font(None, 24)
+    instructions_surf = instructions_font.render("Presiona 'R' para eliminar el slot seleccionado", True, (255, 255, 255))
+    instructions_rect = instructions_surf.get_rect(center=(ANCHO_PANTALLA // 2, 150))
+
+    # crear botones con texto dinámico
+    buttons = []
+    font = pygame.font.Font(None, 36)
+    for i in range(1, 6):
+        text = f"Slot {i}" + (" (Guardado)" if exists[i-1] else "")
+        text_surf = font.render(text, True, (255, 255, 255))
+        btn = Button(text_surf, (ANCHO_PANTALLA // 2, 300 + (i-1) * 80))
+        buttons.append(btn)
 
     back_button = Button(None, (ANCHO_PANTALLA // 2, 300 + 5 * 80), scale=1.0, text="Volver")
     buttons.append(back_button)
 
     selected_index = 0
     buttons[selected_index].selected = True
+
+    # Mensajes temporales en pantalla (texto, tiempo_inicio, duracion_ms)
+    message = None
+    message_start = 0
+    message_dur = 1500  # ms
 
     while True:
         for event in pygame.event.get():
@@ -110,7 +138,47 @@ def select_load_slot(window):
                     else:  # Back
                         return None
 
+                # --- ELIMINAR SLOT CON R ---
+                elif event.key == pygame.K_r:
+                    if selected_index < 5:  # Solo para slots
+                        target_slot = selected_index + 1
+                        if exists[target_slot - 1]:
+                            deleted = False
+                            try:
+                                deleted = delete_save(target_slot)
+                            except Exception as e:
+                                print(f"Error al eliminar slot {target_slot}: {e}")
+                                deleted = False
+
+                            # refrescar existencia usando list_saves
+                            try:
+                                raw_slots = list_saves() or []
+                            except Exception:
+                                raw_slots = []
+                            for i in range(1, 6):
+                                exists[i-1] = i in raw_slots
+
+                            # actualizar textos de botones
+                            for idx in range(5):
+                                txt = f"Slot {idx+1}" + (" (Guardado)" if exists[idx] else "")
+                                txt_surf = font.render(txt, True, (255, 255, 255))
+                                buttons[idx].image = txt_surf
+                                buttons[idx].rect = buttons[idx].image.get_rect(center=(ANCHO_PANTALLA // 2, 300 + idx * 80))
+
+                            if deleted:
+                                message = f"Slot {target_slot} eliminado"
+                                message_start = pygame.time.get_ticks()
+                            else:
+                                message = f"No se pudo eliminar slot {target_slot}"
+                                message_start = pygame.time.get_ticks()
+                        else:
+                            message = f"Slot {target_slot} está vacío"
+                            message_start = pygame.time.get_ticks()
+
         window.blit(fondo, (0, 0))
+
+        # Dibujar instrucciones
+        window.blit(instructions_surf, instructions_rect)
 
         # Dibujar título
         font_title = pygame.font.Font(None, 48)
@@ -121,6 +189,16 @@ def select_load_slot(window):
             btn.selected = (i == selected_index)
             btn.update()
             btn.draw(window)
+
+        # Mostrar mensaje temporal si existe
+        if message:
+            now = pygame.time.get_ticks()
+            if now - message_start <= message_dur:
+                msg_font = pygame.font.Font(None, 30)
+                msg_surf = msg_font.render(message, True, (255, 100, 100))
+                window.blit(msg_surf, (ANCHO_PANTALLA // 2 - msg_surf.get_width() // 2, 300 + 5 * 80 + 50))
+            else:
+                message = None
 
         pygame.display.flip()
         clock.tick(60)

@@ -246,6 +246,6 @@ class Jugador:
 
         # Dibujar la hitbox (verde) con desplazamiento
         hitbox_offset = self.rect.move(offset_x, offset_y)
-        pygame.draw.rect(pantalla, (0, 255, 0), hitbox_offset, 2)
+        #pygame.draw.rect(pantalla, (0, 255, 0), hitbox_offset, 2)
         if self.estado == "attack" and self.frame_actual == len(self.animacion_actual) - 1:
             self.estado = "idle"

@@ -4,6 +4,7 @@ import os
 pygame.init()
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
+from juego.cuatro_en_raya import inicio_juego
 from configuracion import ANCHO_PANTALLA, ALTO_PANTALLA, ESCALA_JUGADOR
 from juego.jugador import Jugador
 from juego.mapa_4 import ejecutar_mapa4
@@ -20,6 +21,7 @@ from assets.mapas.mapa3_4_en_raya_data import (
 pantalla = pygame.display.set_mode((ANCHO_PANTALLA, ALTO_PANTALLA))
 
 def ejecutar_mapa4_en_raya():
+    acertijo_en_raya = False
     clock = pygame.time.Clock()
     running = True
 
@@ -40,52 +42,87 @@ def ejecutar_mapa4_en_raya():
 
     fondo_escalado = pygame.transform.scale(fondo_mapa, (SCALED_WIDTH, SCALED_HEIGHT))
 
-    
-    # Imagen decorativa encima del jugador (opcional)
+    # Imagen decorativa (tablero)
     BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-    ruta_pared = os.path.join(BASE_DIR, "assets", "mapas", "tablero.png")
-    imagen_pared = pygame.image.load(ruta_pared).convert_alpha()
-    imagen_escalada = pygame.transform.scale(imagen_pared, (427, 240))
+    ruta_tablero = os.path.join(BASE_DIR, "assets", "mapas", "tablero.png")
+    imagen_tablero = pygame.image.load(ruta_tablero).convert_alpha()
+    imagen_escalada = pygame.transform.scale(imagen_tablero, (427, 240))
+    pos_tablero = ((ANCHO_PANTALLA - imagen_escalada.get_width()) // 2, 150)
+
+    # --- NPC ANIMADO (cargado uno por uno) ---
+    ruta_npc_dir = os.path.join(BASE_DIR, "assets", "sprites_vampiro1", "Vampires1_Idle", "idle_abajo")
+
+    npc_idle1 = pygame.image.load(os.path.join(ruta_npc_dir, "vampiro1_idle_abajo (1).png")).convert_alpha()
+    npc_idle2 = pygame.image.load(os.path.join(ruta_npc_dir, "vampiro1_idle_abajo (2).png")).convert_alpha()
+    npc_idle3 = pygame.image.load(os.path.join(ruta_npc_dir, "vampiro1_idle_abajo (3).png")).convert_alpha()
+    npc_idle4 = pygame.image.load(os.path.join(ruta_npc_dir, "vampiro1_idle_abajo (4).png")).convert_alpha()
+
+    # Escalar cada frame 3 veces el tamaño original
+    escala_npc = 3
+    npc_idle1 = pygame.transform.scale(npc_idle1, (npc_idle1.get_width()*escala_npc, npc_idle1.get_height()*escala_npc))
+    npc_idle2 = pygame.transform.scale(npc_idle2, (npc_idle2.get_width()*escala_npc, npc_idle2.get_height()*escala_npc))
+    npc_idle3 = pygame.transform.scale(npc_idle3, (npc_idle3.get_width()*escala_npc, npc_idle3.get_height()*escala_npc))
+    npc_idle4 = pygame.transform.scale(npc_idle4, (npc_idle4.get_width()*escala_npc, npc_idle4.get_height()*escala_npc))
+
+    # Posición arriba a la derecha
+    pos_x_npc = ANCHO_PANTALLA - npc_idle1.get_width() - 30
+    pos_y_npc = 30
+    npc_rect = pygame.Rect(pos_x_npc, pos_y_npc, npc_idle1.get_width(), npc_idle1.get_height())
+
+    npc_frames = [npc_idle1, npc_idle2, npc_idle3, npc_idle4]
+    npc_index = 0
+    npc_anim_timer = 0
+    npc_anim_speed = 0.15
+
+    fuente = pygame.font.Font(None, 40)
+    mostrar_dialogo = False
+    dialogo_texto = "¿Te animas a un 4 en línea?"
 
     while running:
+        dt = clock.tick(60) / 1000
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
 
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                if jugador.rect.colliderect(npc_rect):
+                    if not mostrar_dialogo:
+                        mostrar_dialogo = True
+                    else:
+                        inicio_juego()
+
+        # Animación NPC
+        npc_anim_timer += npc_anim_speed
+        if npc_anim_timer >= 1:
+            npc_anim_timer = 0
+            npc_index = (npc_index + 1) % len(npc_frames)
+        npc_frame_actual = npc_frames[npc_index]
+
         jugador.manejar_teclas()
-        
 
-        #Dibujar puertas (opcional para depuración)
-        pygame.draw.rect(pantalla, (0, 0, 255), puerta, 2)
-        
-        
-        pantalla.fill((0, 0, 0))  # Limpiar pantalla
-
-        pantalla.blit(fondo_escalado, (OFFSET_X, OFFSET_Y))  # Fondo del mapa
-
-        """Dibujar colisiones (opcional para depuración)
-        for colision in colisiones_escaladas:
-            pygame.draw.rect(pantalla, (255, 0, 0), colision, 2)"""
-
-        #Dibujar puertas (opcional para depuración)
+        pantalla.fill((0, 0, 0))
+        pantalla.blit(fondo_escalado, (OFFSET_X, OFFSET_Y))
         pygame.draw.rect(pantalla, (0, 0, 255), puerta, 2)
 
-        jugador.dibujar(pantalla, offset_x, offset_y)  # Primero el jugador
-        
-        centro_x = (ANCHO_PANTALLA - imagen_escalada.get_width()) // 2
-        pantalla.blit(imagen_escalada, (centro_x, 150))
+        jugador.dibujar(pantalla, offset_x, offset_y)
+        pantalla.blit(imagen_escalada, pos_tablero)
+        pantalla.blit(npc_frame_actual, (pos_x_npc, pos_y_npc))
+        # Diálogo
+        if mostrar_dialogo:
+            cuadro_dialogo = pygame.Surface((ANCHO_PANTALLA, 100))
+            cuadro_dialogo.fill((0, 0, 0))
+            cuadro_dialogo.set_alpha(180)
+            pantalla.blit(cuadro_dialogo, (0, ALTO_PANTALLA - 100))
+            texto = fuente.render(dialogo_texto, True, (255, 255, 255))
+            pantalla.blit(texto, (50, ALTO_PANTALLA - 70))
 
-
-        
         pygame.display.flip()
-        clock.tick(60)
 
-        # Transiciones de mapa
-        if jugador.rect.colliderect(puerta):
-            print("regresa a mapa 3")
-            running = False  # Aquí puedes llamar al siguiente mapa si lo tienes
+        if jugador.rect.colliderect(puerta) and acertijo_en_raya:
+            print("Regresa a mapa 3")
+            running = False
             ejecutar_mapa4()
-            
 
     pygame.quit()
     sys.exit()
