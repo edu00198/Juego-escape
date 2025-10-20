@@ -20,6 +20,7 @@ from assets.mapas.mapa3_4_en_raya_data import (
 pantalla = pygame.display.set_mode((ANCHO_PANTALLA, ALTO_PANTALLA))
 
 def ejecutar_mapa4_en_raya():
+    acertijo_en_raya = False
     clock = pygame.time.Clock()
     running = True
 
@@ -81,7 +82,7 @@ def ejecutar_mapa4_en_raya():
         clock.tick(60)
 
         # Transiciones de mapa
-        if jugador.rect.colliderect(puerta):
+        if jugador.rect.colliderect(puerta) and acertijo_en_raya==True:
             print("regresa a mapa 3")
             running = False  # Aquí puedes llamar al siguiente mapa si lo tienes
             ejecutar_mapa4()
