@@ -65,8 +65,8 @@ def ejecutar_mapa4_en_raya():
     npc_idle4 = pygame.transform.scale(npc_idle4, (npc_idle4.get_width()*escala_npc, npc_idle4.get_height()*escala_npc))
 
     # Posición arriba a la derecha
-    pos_x_npc = ANCHO_PANTALLA - npc_idle1.get_width() - 30
-    pos_y_npc = 30
+    pos_x_npc = ANCHO_PANTALLA - npc_idle1.get_width() - 250
+    pos_y_npc = 300
     npc_rect = pygame.Rect(pos_x_npc, pos_y_npc, npc_idle1.get_width(), npc_idle1.get_height())
 
     npc_frames = [npc_idle1, npc_idle2, npc_idle3, npc_idle4]
