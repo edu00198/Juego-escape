@@ -4,6 +4,7 @@ import sys
 import os
 
 from .menu_pausa import pause_menu  # ✅ agregado correctamente
+from .save_system import save_game
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
@@ -28,6 +29,9 @@ from assets.mapas.mapa3_data_nuevo0 import (
 pantalla = pygame.display.set_mode((ANCHO_PANTALLA, ALTO_PANTALLA))
 
 def ejecutar_mapa3():
+    return ejecutar_mapa3_con_estado(None)
+
+def ejecutar_mapa3_con_estado(state=None):
     clock = pygame.time.Clock()
     running = True
 
@@ -41,10 +45,14 @@ def ejecutar_mapa3():
     offset_x = (ANCHO_PANTALLA - fondo_mapa.get_width() * escala) // 2
     offset_y = (ALTO_PANTALLA - fondo_mapa.get_height() * escala) // 2
 
-    # Posición inicial del jugador frente a la puerta de entrada
-    puerta2pos = puerta_3_entrada.topleft
-    pos_x = puerta2pos[0] - ancho_jugador * -3
-    pos_y = puerta2pos[1] - alto_jugador * -4
+    if state and 'pos_jugador' in state:
+        pos_x, pos_y = state['pos_jugador']
+    else:
+        # Posición inicial del jugador frente a la puerta de entrada
+        puerta2pos = puerta_3_entrada.topleft
+        pos_x = puerta2pos[0] - ancho_jugador * -3
+        pos_y = puerta2pos[1] - alto_jugador * -4
+
     jugador = Jugador(pos_x, pos_y, ancho_jugador, alto_jugador, escala=ESCALA_JUGADOR, colisiones=colisiones_escaladas)
 
     # Fondo escalado
@@ -94,18 +102,33 @@ def ejecutar_mapa3():
         # Transición al siguiente mapa
         if jugador.rect.colliderect(puerta_3_salida):
             print("Transición al siguiente mapa")
+            state = {
+                'mapa': 'mapa3',
+                'pos_jugador': (jugador.sprite_pos.x, jugador.sprite_pos.y)
+            }
+            save_game(state)
             running = False
-            ejecutar_mapa4()
+            return ejecutar_mapa4()
             
         if jugador.rect.colliderect(puerta_3_entrada):
             print("regresa a mapa 2")
+            state = {
+                'mapa': 'mapa3',
+                'pos_jugador': (jugador.sprite_pos.x, jugador.sprite_pos.y)
+            }
+            save_game(state)
             # running = False  # Aquí puedes llamar al mapa anterior si lo tienes
             # return 2
     
         if jugador.rect.colliderect(puerta_3_cuatro_en_raya):
             print("Transición al minijuego de 4 en raya")
+            state = {
+                'mapa': 'mapa3',
+                'pos_jugador': (jugador.sprite_pos.x, jugador.sprite_pos.y)
+            }
+            save_game(state)
             running = False
-            ejecutar_mapa4_en_raya()
+            return ejecutar_mapa4_en_raya()
 
     pygame.quit()
     sys.exit()
