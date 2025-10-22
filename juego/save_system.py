@@ -8,7 +8,7 @@ os.makedirs(SAVE_DIR, exist_ok=True)
 def _slot_path(slot: int) -> str:
     return os.path.join(SAVE_DIR, f"slot_{int(slot)}.sav")
 
-def save_game(state, slot: int) -> bool:
+def save_game(state, slot: int = 1) -> bool:
     """
     Guarda 'state' en el slot indicado. Devuelve True si tuvo éxito.
     """

@@ -1,5 +1,4 @@
-import pygame
-import sys
+import pygame 
 import math
 try:
     from .loader import start_background_load, get_progress, is_done
@@ -149,18 +148,24 @@ def main_intro():
             # Dibujar spinner
             draw_loading_spinner(screen, loading_center, loading_radius, frame, alpha)
 
-            # Mostrar mensaje simple de estado de carga: si la precarga terminó,
-            # mostramos 'Carga completa'; en caso contrario no mostramos contador.
+            # Mostrar estado de carga: 'Cargando...' mientras no termine y 'Carga completa' al finalizar.
             try:
-                if is_done():
-                    try:
-                        font_prog = pygame.font.Font(None, 32)
-                    except:
-                        font_prog = pygame.font.SysFont('Arial', 32)
-                    text = "Carga completa"
-                    surf = font_prog.render(text, True, (200, 200, 200))
-                    rect = surf.get_rect(center=(WIDTH // 2, loading_center[1] + 60))
-                    screen.blit(surf, rect)
+                # is_done() puede lanzar si el loader no está disponible; en ese caso
+                # consideramos que ya está "done" para no bloquear la UI.
+                try:
+                    done = is_done()
+                except Exception:
+                    done = True
+
+                try:
+                    font_prog = pygame.font.Font(None, 32)
+                except:
+                    font_prog = pygame.font.SysFont('Arial', 32)
+
+                text = "Carga completa" if done else "Cargando..."
+                surf = font_prog.render(text, True, (200, 200, 200))
+                rect = surf.get_rect(center=(WIDTH // 2, loading_center[1] + 60))
+                screen.blit(surf, rect)
             except Exception:
                 pass
         
