@@ -149,17 +149,15 @@ def main_intro():
             # Dibujar spinner
             draw_loading_spinner(screen, loading_center, loading_radius, frame, alpha)
 
-            # Mostrar progreso de precarga si está disponible
+            # Mostrar mensaje simple de estado de carga: si la precarga terminó,
+            # mostramos 'Carga completa'; en caso contrario no mostramos contador.
             try:
-                prog = get_progress()
-                total = prog.get('total', 0)
-                loaded = prog.get('loaded', 0)
-                if total:
+                if is_done():
                     try:
-                        font_prog = pygame.font.Font(None, 28)
+                        font_prog = pygame.font.Font(None, 32)
                     except:
-                        font_prog = pygame.font.SysFont('Arial', 28)
-                    text = f"Precargando recursos: {loaded}/{total}"
+                        font_prog = pygame.font.SysFont('Arial', 32)
+                    text = "Carga completa"
                     surf = font_prog.render(text, True, (200, 200, 200))
                     rect = surf.get_rect(center=(WIDTH // 2, loading_center[1] + 60))
                     screen.blit(surf, rect)

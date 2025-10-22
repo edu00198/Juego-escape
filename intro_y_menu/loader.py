@@ -31,9 +31,36 @@ def _loader_thread(mods):
 
     for name in mods:
         try:
+            # Heurística: evitar importar módulos que muy probablemente
+            # inicialicen pygame/display o ejecuten bucles en tiempo de import.
+            # Para ello, intentamos localizar el archivo fuente y buscar
+            # patrones como 'pygame.display' o 'pygame.init' y saltarlos.
+            try:
+                spec = importlib.util.find_spec(name)
+                source_ok = True
+                if spec and spec.origin and spec.origin.endswith('.py'):
+                    try:
+                        with open(spec.origin, 'r', encoding='utf-8', errors='ignore') as f:
+                            src = f.read()
+                        lowered = src.lower()
+                        if 'pygame.display' in lowered or 'pygame.init(' in lowered or 'pygame.display.set_mode' in lowered:
+                            # Es muy probable que el módulo abra una ventana al importarlo.
+                            print(f"[Loader] Saltando precarga de {name} (contiene inicialización de pygame)")
+                            _progress['loaded'] += 0
+                            _progress['errors'][name] = 'skipped - gui on import'
+                            # Pequeña pausa y continuar
+                            time.sleep(0.01)
+                            continue
+                    except Exception:
+                        # Si no podemos leer el fichero, dejamos que el import normal lo intente
+                        source_ok = True
+
+            except Exception:
+                # Si find_spec falla, continuamos con el import normal
+                pass
+
             # Importar el módulo; si ya existe en sys.modules esto es rápido.
             if name in sys.modules:
-                # rebinding local variable for easier access later
                 importlib.reload(sys.modules[name])
             else:
                 importlib.import_module(name)
