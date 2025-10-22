@@ -15,7 +15,7 @@ from .save_system import save_game, list_saves
 # ==========================
 
 def pause_menu(pantalla, mapa_actual=1, state=None):
-    """
+    """	
     Menú de pausa que aparece al presionar ESC.
     Usa imágenes de fondo y botones personalizados.
     Solo se mueve con ↑ y ↓, y ENTER para interactuar.
@@ -27,6 +27,7 @@ def pause_menu(pantalla, mapa_actual=1, state=None):
             fondo = pygame.image.load(m1_opciones).convert()
         elif mapa_actual == 2:
             fondo = pygame.image.load(m2_opciones).convert()
+		elif mapa_actual == 3:
         else:
             raise ValueError("Mapa no válido")
         fondo = pygame.transform.scale(fondo, (ANCHO_PANTALLA, ALTO_PANTALLA))

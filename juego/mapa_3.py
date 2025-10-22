@@ -1,6 +1,9 @@
+# mapa_3.py
 import pygame
 import sys
 import os
+
+from .menu_pausa import pause_menu  # ✅ agregado correctamente
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
@@ -9,7 +12,6 @@ from juego.jugador import Jugador
 from juego.mapa_5 import ejecutar_mapa5
 from juego.mapa_3_4_en_raya import ejecutar_mapa4_en_raya
 from juego.mapa_4 import ejecutar_mapa4
-from juego.menu_pausa import pause_menu
 from assets.mapas.mapa3_data_nuevo0 import (
     fondo_mapa,
     SCALED_WIDTH,
@@ -76,18 +78,16 @@ def ejecutar_mapa3():
         jugador.dibujar(pantalla, offset_x, offset_y)
         pantalla.blit(imagen_escalada, (0, 0))
 
-        
-        #Dibujar colisiones (opcional para depuración)
+        # Dibujar colisiones (opcional para depuración)
         """for colision in colisiones_escaladas:
             pygame.draw.rect(pantalla, (255, 0, 0), colision, 2)"""
 
-        #Dibujar puertas (opcional para depuración)
+        # Dibujar puertas (opcional para depuración)
         """pygame.draw.rect(pantalla, (0, 0, 255), puerta_3_entrada, 2)"""
-        pygame.draw.rect(pantalla, (0, 255, 255), puerta_3_salida, 2)
-        pygame.draw.rect(pantalla, (0, 255, 255), puerta_3_engranaje, 2)
-        pygame.draw.rect(pantalla, (255, 0, 255), puerta_3_cuatro_en_raya, 2)
+        #pygame.draw.rect(pantalla, (0, 255, 255), puerta_3_salida, 2)
+        #pygame.draw.rect(pantalla, (0, 255, 255), puerta_3_engranaje, 2)
+        #pygame.draw.rect(pantalla, (255, 0, 255), puerta_3_cuatro_en_raya, 2)
 
-        
         pygame.display.flip()
         clock.tick(60)
 
@@ -99,16 +99,13 @@ def ejecutar_mapa3():
             
         if jugador.rect.colliderect(puerta_3_entrada):
             print("regresa a mapa 2")
-            #running = False  # Aquí puedes llamar al siguiente mapa si lo tienes
-            #return 2
+            # running = False  # Aquí puedes llamar al mapa anterior si lo tienes
+            # return 2
     
         if jugador.rect.colliderect(puerta_3_cuatro_en_raya):
             print("Transición al minijuego de 4 en raya")
             running = False
             ejecutar_mapa4_en_raya()
-            
-
-        
 
     pygame.quit()
     sys.exit()

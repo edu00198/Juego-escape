@@ -38,10 +38,10 @@ def main():
                 print(f"Advertencia: start_background_load falló: {e}")
 
         # Ejecutar intro y menu
-        #main_intro()
+        main_intro()
         # time.sleep(1)
-        #press_any_key_screen()
-        #menus()
+        press_any_key_screen()
+        menus()
 
         print("Llamando a ejecutar_mapa1()...")
 
