@@ -8,7 +8,7 @@ from intro_y_menu.menu.settings import settings_menu
 # Removed top-level import of menus to avoid circular import.
 # We'll import menus() locally when needed to prevent circular import errors.
 from assets.mapas.fondo import resume_button, help_button, settings_button, save_button, quit_button, menu_pause
-from .save_system import save_game, list_saves
+from save_system import save_game, list_saves
 
 # ==========================
 # MENÚ DE PAUSA

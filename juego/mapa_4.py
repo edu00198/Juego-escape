@@ -32,11 +32,14 @@ from assets.mapas.mapa4_data import (
     colisiones_escaladas
 )
 
-"""from .engranajes import minijuego_engranares"""
+from juego.engranajes import minijuego_engranares
 
 
 
-def ejecutar_mapa4(pantalla):
+def ejecutar_mapa4(pantalla, spawn_point=None):
+    """
+    spawn_point puede ser: 'entrada', 'engranajes', None
+    """
     clock = pygame.time.Clock()
     running = True
 
@@ -49,10 +52,17 @@ def ejecutar_mapa4(pantalla):
     offset_x = (ANCHO_PANTALLA - fondo_mapa.get_width() * escala) // 2
     offset_y = (ALTO_PANTALLA - fondo_mapa.get_height() * escala) // 2
 
-    # Posición inicial del jugador frente a la puerta de entrada
-    puerta2pos = puerta_3_entrada.topleft
-    pos_x = puerta2pos[0] - ancho_jugador * -10
-    pos_y = puerta2pos[1] - alto_jugador * -2
+    # Determinar posición inicial del jugador
+    if spawn_point == 'engranajes':
+        # Posicionar cerca de la puerta de engranajes
+        pos_x = puerta_3_engranaje.centerx
+        pos_y = puerta_3_engranaje.centery + alto_jugador * 2
+    else:
+        # Posición por defecto, cerca de la entrada
+        puerta2pos = puerta_3_entrada.topleft
+        pos_x = puerta2pos[0] - ancho_jugador * -10
+        pos_y = puerta2pos[1] - alto_jugador * -2
+    
     jugador = Jugador(pos_x, pos_y, ancho_jugador, alto_jugador, escala=ESCALA_JUGADOR, colisiones=colisiones_escaladas)
 
     # Fondo escalado
@@ -189,53 +199,12 @@ def ejecutar_mapa4(pantalla):
             running = False
             return
             
-        """
-        # Minijuego engranajes: entrar y repetir hasta completar
+        # Minijuego engranajes: verificar colisión y transicionar
         if jugador.rect.colliderect(puerta_3_engranaje):
-            while True:
-                resultado = minijuego_engranares()
-                # Restaurar resolución del juego después del minijuego
-                pygame.display.set_mode((ANCHO_PANTALLA, ALTO_PANTALLA))
-                if resultado == "completado":
-                    print("✅ Mecanismo alineado, puedes continuar en mapa 3")
-                    # Eliminar cualquier rect de colisión que se solape con el área del engranaje
-                    antes = len(colisiones_escaladas)
-                    colisiones_escaladas[:] = [r for r in colisiones_escaladas if not r.colliderect(puerta_3_engranaje)]
-                    despues = len(colisiones_escaladas)
-                    print(f"Colisiones removidas: {antes - despues}")
-                    # Mover al jugador fuera de la zona del engranaje para evitar re-trigger inmediato
-                    try:
-                        # Intentar mover a la derecha del trigger
-                        new_x = int(puerta_3_engranaje.right + 5)
-                        max_x = ANCHO_PANTALLA - jugador.rect.width
-                        if new_x <= max_x:
-                            jugador.rect.x = new_x
-                        else:
-                            # Si no cabe a la derecha, intentar a la izquierda
-                            new_x_left = int(puerta_3_engranaje.left - jugador.rect.width - 5)
-                            if new_x_left >= 0:
-                                jugador.rect.x = new_x_left
-                            else:
-                                # Si no cabe a los lados, intentar abajo
-                                new_y = int(puerta_3_engranaje.bottom + 5)
-                                max_y = ALTO_PANTALLA - jugador.rect.height
-                                if new_y <= max_y:
-                                    jugador.rect.y = new_y
-                                else:
-                                    # Fallback: arriba dentro de la pantalla
-                                    jugador.rect.y = max(0, int(puerta_3_engranaje.top - jugador.rect.height - 5))
-
-                        # Actualizar sprite_pos para que el dibujo no quede desincronizado
-                        offset_x_j = 58
-                        offset_y_j = 101
-                        jugador.sprite_pos.x = jugador.rect.x - offset_x_j
-                        jugador.sprite_pos.y = jugador.rect.y - offset_y_j
-                    except Exception:
-                        pass
-                    break
-                else:
-                    # Mostrar un mensaje y repetir; el minijuego ya maneja reinicios
-                    print("❌ Fallaste el minijuego, intenta de nuevo")"""
+            print("Transición al mapa de engranajes")
+            from juego.mapa3engranajes import ejecutar_mapa3engranajes  # Import here to avoid circular dependency
+            running = False
+            return ejecutar_mapa3engranajes()
 
     pygame.quit()
     sys.exit()
