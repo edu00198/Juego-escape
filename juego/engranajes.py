@@ -81,8 +81,13 @@ def minijuego_engranares():
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    pygame.quit()
-                    return False
+                    try:
+                        from juego.menu_pausa import pause_menu
+                        pause_menu(pantalla, mapa_actual=0, state=None)
+                    except Exception:
+                        # Fallback a comportamiento previo si pause_menu no está disponible
+                        pygame.quit()
+                        return False
 
                 if not terminado and event.key == pygame.K_SPACE:
                     engranaje = engranajes[indice_actual]

@@ -3,6 +3,7 @@ import pygame
 import sys
 import os
 from juego.mapa_3 import ejecutar_mapa3
+from juego.menu_pausa import pause_menu
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
@@ -146,6 +147,19 @@ def ejecutar_mapa2():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+            elif event.type == pygame.KEYDOWN:
+                # Al presionar ESC abrir menú de pausa
+                if event.key == pygame.K_ESCAPE:
+                    # Preparar estado mínimo para guardar (sprite_pos si existe)
+                    try:
+                        state = {
+                            'mapa': 'mapa2',
+                            'pos_jugador': (jugador.sprite_pos.x, jugador.sprite_pos.y)
+                        }
+                    except Exception:
+                        state = None
+                    pause_menu(pantalla, mapa_actual=2, state=state)
+
             dialog_system.handle_input(event)
 
         jugador.manejar_teclas()

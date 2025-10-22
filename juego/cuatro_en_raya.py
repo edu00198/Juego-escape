@@ -3,6 +3,7 @@ import sys
 import random
 import math
 from configuracion import ANCHO_PANTALLA, ALTO_PANTALLA
+from juego.menu_pausa import pause_menu
 pygame.init()
 
 # -------------------
@@ -188,21 +189,25 @@ def inicio_juego():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            if event.type == pygame.KEYDOWN and not game_over and turn == 0:
-                if event.key == pygame.K_LEFT:
-                    cursor_col = max(0, cursor_col - 1)
-                elif event.key == pygame.K_RIGHT:
-                    cursor_col = min(COLS - 1, cursor_col + 1)
-                elif event.key == pygame.K_RETURN:
-                    if is_valid_location(board, cursor_col):
-                        drop_piece_animated(board, cursor_col, 1, board_x, board_y)
-                        win_positions = winning_move(board, 1)
-                        if win_positions:
-                            game_over = True
-                            winner = "Jugador"
-                            winning_line = win_positions
-                        else:
-                            turn = 1
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    # Abrir menú de pausa; minijuego no guarda estado por defecto
+                    pause_menu(SCREEN, mapa_actual=0, state=None)
+                elif not game_over and turn == 0:
+                    if event.key == pygame.K_LEFT:
+                        cursor_col = max(0, cursor_col - 1)
+                    elif event.key == pygame.K_RIGHT:
+                        cursor_col = min(COLS - 1, cursor_col + 1)
+                    elif event.key == pygame.K_RETURN:
+                        if is_valid_location(board, cursor_col):
+                            drop_piece_animated(board, cursor_col, 1, board_x, board_y)
+                            win_positions = winning_move(board, 1)
+                            if win_positions:
+                                game_over = True
+                                winner = "Jugador"
+                                winning_line = win_positions
+                            else:
+                                turn = 1
         
         # Movimiento de la CPU
         if turn == 1 and not game_over:

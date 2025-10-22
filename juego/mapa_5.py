@@ -5,6 +5,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from configuracion import ANCHO_PANTALLA, ALTO_PANTALLA, ESCALA_JUGADOR
 from juego.jugador import Jugador
+from juego.menu_pausa import pause_menu
 from assets.mapas.mapa5_data import (
     fondo_mapa,
     SCALED_WIDTH,
@@ -51,6 +52,16 @@ def ejecutar_mapa5():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    try:
+                        state = {
+                            'mapa': 'mapa5',
+                            'pos_jugador': (jugador.sprite_pos.x, jugador.sprite_pos.y)
+                        }
+                    except Exception:
+                        state = None
+                    pause_menu(pantalla, mapa_actual=5, state=state)
 
         jugador.manejar_teclas()
 

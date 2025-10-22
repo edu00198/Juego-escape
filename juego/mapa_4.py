@@ -15,7 +15,9 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 ESCALA_JUGADOR = 3 # o el valor que uses normalmente
 
+# Pause menu import
 from juego.jugador import Jugador
+from juego.menu_pausa import pause_menu
 #from juego.mapa_5 import ejecutar_mapa5
 from assets.mapas.mapa4_data import (
     fondo_mapa,
@@ -87,6 +89,16 @@ def ejecutar_mapa4(pantalla):
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    try:
+                        state = {
+                            'mapa': 'mapa4',
+                            # no jugador aún en este punto de la animación
+                        }
+                    except Exception:
+                        state = None
+                    pause_menu(pantalla, mapa_actual=4, state=state)
 
         if current_time - animation_timer > animation_speed:
             sprite_index += 1
@@ -128,6 +140,16 @@ def ejecutar_mapa4(pantalla):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    try:
+                        state = {
+                            'mapa': 'mapa4',
+                            'pos_jugador': (jugador.sprite_pos.x, jugador.sprite_pos.y)
+                        }
+                    except Exception:
+                        state = None
+                    pause_menu(pantalla, mapa_actual=4, state=state)
 
         
 

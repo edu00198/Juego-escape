@@ -8,6 +8,8 @@ from configuracion import ANCHO_PANTALLA, ALTO_PANTALLA, ESCALA_JUGADOR
 from juego.jugador import Jugador
 from juego.mapa_5 import ejecutar_mapa5
 from juego.mapa_3_4_en_raya import ejecutar_mapa4_en_raya
+from juego.mapa_4 import ejecutar_mapa4
+from juego.menu_pausa import pause_menu
 from assets.mapas.mapa3_data_nuevo0 import (
     fondo_mapa,
     SCALED_WIDTH,
@@ -56,6 +58,16 @@ def ejecutar_mapa3():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    try:
+                        state = {
+                            'mapa': 'mapa3',
+                            'pos_jugador': (jugador.sprite_pos.x, jugador.sprite_pos.y)
+                        }
+                    except Exception:
+                        state = None
+                    pause_menu(pantalla, mapa_actual=3, state=state)
 
         jugador.manejar_teclas()
 
