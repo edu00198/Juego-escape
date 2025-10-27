@@ -1,6 +1,8 @@
 import pygame
 import sys
 import os
+import threading
+import importlib
 
 # Inicializar Pygame y crear la ventana ANTES de importar módulos que cargan imágenes
 pygame.init()
@@ -143,7 +145,20 @@ def ejecutar_mapa4(pantalla, spawn_point=None):
         clock.tick(60)
 
     # Acá comienza el juego normal
+    # Iniciar preload en background del mapa de engranajes para evitar lag al importar
+    preload_started = False
     running = True
+    def _start_preload():
+        try:
+            importlib.import_module('juego.mapa3engranajes')
+            print('Preload: mapa3engranajes importado en background')
+        except Exception as e:
+            print(f'Preload falló: {e}')
+    # Lanzar preload una vez justo antes del bucle principal
+    if not preload_started:
+        threading.Thread(target=_start_preload, daemon=True).start()
+        preload_started = True
+
     while running:
         current_time = pygame.time.get_ticks()
 
@@ -202,9 +217,17 @@ def ejecutar_mapa4(pantalla, spawn_point=None):
         # Minijuego engranajes: verificar colisión y transicionar
         if jugador.rect.colliderect(puerta_3_engranaje):
             print("Transición al mapa de engranajes")
-            from juego.mapa3engranajes import ejecutar_mapa3engranajes  # Import here to avoid circular dependency
+            # Intentar usar el módulo ya cargado para minimizar latencia
+            try:
+                mod = importlib.import_module('juego.mapa3engranajes')
+                ejecutar = getattr(mod, 'ejecutar_mapa3engranajes')
+            except Exception:
+                # Fallback: import normal
+                from juego.mapa3engranajes import ejecutar_mapa3engranajes
+                ejecutar = ejecutar_mapa3engranajes
+
             running = False
-            return ejecutar_mapa3engranajes()
+            return ejecutar()
 
     pygame.quit()
     sys.exit()
