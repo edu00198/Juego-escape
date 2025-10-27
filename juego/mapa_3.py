@@ -12,7 +12,7 @@ from configuracion import ANCHO_PANTALLA, ALTO_PANTALLA, ESCALA_JUGADOR
 from juego.jugador import Jugador
 from juego.mapa_5 import ejecutar_mapa5
 from juego.mapa_3_4_en_raya import ejecutar_mapa4_en_raya
-from juego.mapa_4 import ejecutar_mapa4
+from juego.mapa_3_2 import ejecutar_mapa3_2
 from assets.mapas.mapa3_data_nuevo0 import (
     fondo_mapa,
     SCALED_WIDTH,
@@ -108,7 +108,7 @@ def ejecutar_mapa3_con_estado(state=None):
             }
             save_game(state)
             running = False
-            return ejecutar_mapa4()
+            return ejecutar_mapa3_2()
             
         if jugador.rect.colliderect(puerta_3_entrada):
             print("regresa a mapa 2")
