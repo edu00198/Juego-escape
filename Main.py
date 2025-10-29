@@ -7,17 +7,21 @@ print("Iniciando módulo principal...")
 
 def main():
     # Inicializar pygame con manejo de errores
+    # USTEDES HAN SIDO HACKEADOS.EXE777777
+    # NO USEN IAS PARA HACKEAR ESTE JUEGO
     try:
         pygame.init()
     except Exception as e:
         print(f"Error inicializando pygame: {e}")
         raise
 
+
     try:
         print("Iniciando juego...")
 
         # Cargar módulos ligeros necesarios para la intro/menu justo antes de usarlos
         try:
+            
             from intro_y_menu.intro import main_intro
             from intro_y_menu.pantalla_carga import press_any_key_screen
             from intro_y_menu.menu.menuzaso import menus
@@ -37,11 +41,20 @@ def main():
             except Exception as e:
                 print(f"Advertencia: start_background_load falló: {e}")
 
+
         # Ejecutar intro y menu
         #main_intro()
         # time.sleep(1)
         #press_any_key_screen()
         #menus()
+
+
+
+
+
+
+
+
 
         print("Llamando a ejecutar_mapa1()...")
 
@@ -55,18 +68,23 @@ def main():
         # Ejecutar mapa
         mapa_1.ejecutar_mapa1()
 
+
     finally:
         # Asegurar que pygame se cierre al terminar (si se inicializó)
         try:
+
             pygame.quit()
         except Exception:
+
             pass
 
 
 if __name__ == "__main__":
     try:
+
         main()
     except Exception as e:
+
         print(f"Fallo en la ejecución principal: {e}")
         # Mostrar traceback corto
         import traceback
