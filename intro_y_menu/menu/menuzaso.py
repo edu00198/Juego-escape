@@ -250,12 +250,25 @@ def game_selection_menu(window):
                             state = load_game(slot)
                             if state:
                                 # Cargar el mapa correspondiente basado en el estado
-                                if state.get('mapa') == 'mapa1':
+                                mapa = state.get('mapa')
+                                if mapa == 'mapa1':
                                     mapa_1.ejecutar_mapa1_con_estado(state)
-                                # Agregar otros mapas si es necesario
+                                elif mapa == 'mapa2':
+                                    from juego import mapa_2
+                                    mapa_2.ejecutar_mapa2_con_estado(state)
+                                elif mapa == 'mapa3':
+                                    from juego import mapa_3
+                                    mapa_3.ejecutar_mapa3_con_estado(state)
+                                elif mapa == 'mapa4':
+                                    from juego import mapa_4
+                                    mapa_4.ejecutar_mapa4_con_estado(state)
+                                elif mapa == 'mapa5':
+                                    from juego import mapa_5
+                                    mapa_5.ejecutar_mapa5_con_estado(state)
+                                else:
+                                    print(f"[ERROR] Mapa no reconocido: {mapa}")
                             else:
-                                # Mostrar mensaje de no hay partida guardada en ese slot
-                                pass
+                                print("[ERROR] No se pudo cargar el estado del juego")
                         return
                     elif buttons[selected_index] == back_button:
                         return

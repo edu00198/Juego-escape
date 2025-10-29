@@ -232,7 +232,7 @@ def inicio_juego():
             SCREEN.blit(msg_txt, (WIDTH//2 - msg_txt.get_width()//2, 50))
             pygame.display.flip()
             pygame.time.wait(2000)
-            pygame.quit()
-            sys.exit()
+            # Return True if player won, False if CPU won
+            return winner == "Jugador"
         
         pygame.display.update()

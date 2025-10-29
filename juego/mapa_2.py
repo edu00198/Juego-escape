@@ -5,6 +5,7 @@ import os
 
 from .menu_pausa import pause_menu  # ✅ agregado correctamente
 from juego.mapa_3 import ejecutar_mapa3
+from .save_system import save_game  # Add save system import
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
@@ -95,6 +96,9 @@ class DialogSystem:
         )
 
 def ejecutar_mapa2():
+    return ejecutar_mapa2_con_estado(None)
+
+def ejecutar_mapa2_con_estado(state=None):
     clock = pygame.time.Clock()
     running = True
 
@@ -108,9 +112,13 @@ def ejecutar_mapa2():
     offset_x = (ANCHO_PANTALLA - fondo_mapa.get_width() * escala) // 2
     offset_y = (ALTO_PANTALLA - fondo_mapa.get_height() * escala) // 2
 
-    puerta2pos = puerta_2_entrada.topleft
-    pos_x = puerta2pos[0]
-    pos_y = puerta2pos[1] - alto_jugador * 10
+    if state and 'pos_jugador' in state:
+        pos_x, pos_y = state['pos_jugador']
+    else:
+        puerta2pos = puerta_2_entrada.topleft
+        pos_x = puerta2pos[0]
+        pos_y = puerta2pos[1] - alto_jugador * 10
+    
     jugador = Jugador(pos_x, pos_y, ancho_jugador, alto_jugador, escala=ESCALA_JUGADOR, colisiones=colisiones_escaladas)
 
     fondo_escalado = pygame.transform.scale(fondo_mapa, (SCALED_WIDTH, SCALED_HEIGHT))
@@ -168,8 +176,14 @@ def ejecutar_mapa2():
 
         if jugador.rect.colliderect(puerta_2_salida):
             print("Transición al mapa 3")
+            # Guardar estado antes de cambiar de mapa
+            state = {
+                'mapa': 'mapa2',
+                'pos_jugador': (jugador.sprite_pos.x, jugador.sprite_pos.y)
+            }
+            save_game(state)
             running = False
-            ejecutar_mapa3()
+            return ejecutar_mapa3()
 
     pygame.quit()
     sys.exit()

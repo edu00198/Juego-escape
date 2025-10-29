@@ -6,7 +6,7 @@ import random
 # ============================
 # CONFIGURACIÓN
 # ============================
-ANCHO, ALTO = 800, 600
+ANCHO, ALTO = 1280, 720  # Misma resolución que el juego principal
 FPS = 60
 
 # ============================
@@ -57,16 +57,21 @@ class Engranaje:
 # FUNCIÓN PRINCIPAL
 # ============================
 def minijuego_engranares():
-    pygame.init()
-    pantalla = pygame.display.set_mode((ANCHO, ALTO))
+    # No crear una nueva ventana, usar la existente
+    pantalla = pygame.display.get_surface()
+    if not pantalla:
+        pantalla = pygame.display.set_mode((ANCHO, ALTO))
     pygame.display.set_caption("🌀 Alinear los Engranajes")
     clock = pygame.time.Clock()
     font = pygame.font.Font(None, 36)
 
+    # Ajustar el tamaño y espaciado de los engranajes para la nueva resolución
+    radio_engranaje = 100  # Engranajes más grandes
+    espaciado = 300  # Más espacio entre engranajes
     engranajes = [
-        Engranaje(ANCHO//2 - 200, ALTO//2, 80, 2, tolerancia=25, ref_radio=12),
-        Engranaje(ANCHO//2, ALTO//2, 80, 3, tolerancia=18, ref_radio=8),
-        Engranaje(ANCHO//2 + 200, ALTO//2, 80, 4, tolerancia=12, ref_radio=5)
+        Engranaje(ANCHO//2 - espaciado, ALTO//2, radio_engranaje, 2, tolerancia=25, ref_radio=15),
+        Engranaje(ANCHO//2, ALTO//2, radio_engranaje, 3, tolerancia=18, ref_radio=12),
+        Engranaje(ANCHO//2 + espaciado, ALTO//2, radio_engranaje, 4, tolerancia=12, ref_radio=8)
     ]
 
     indice_actual = 0

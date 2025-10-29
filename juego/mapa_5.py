@@ -1,11 +1,13 @@
 import pygame
 import sys
 import os
+import random
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from configuracion import ANCHO_PANTALLA, ALTO_PANTALLA, ESCALA_JUGADOR
 from juego.jugador import Jugador
 from juego.menu_pausa import pause_menu
+from juego.combat_system import CombatSystem, Enemy, CombatPlayer
 from assets.mapas.mapa5_data import (
     fondo_mapa,
     SCALED_WIDTH,
@@ -37,6 +39,15 @@ def ejecutar_mapa5():
     pos_x = puerta4pos[0]
     pos_y = puerta4pos[1] - alto_jugador * 10
     jugador = Jugador(pos_x, pos_y, ancho_jugador, alto_jugador, escala=ESCALA_JUGADOR, colisiones=colisiones_escaladas)
+    combat_player = CombatPlayer(jugador)
+    combat_system = CombatSystem()
+    
+    # Crear algunos enemigos iniciales
+    for _ in range(3):
+        x = random.randint(100, ANCHO_PANTALLA - 100)
+        y = random.randint(100, ALTO_PANTALLA - 100)
+        enemy = Enemy(x, y)
+        combat_system.add_enemy(enemy)
 
     fondo_escalado = pygame.transform.scale(fondo_mapa, (SCALED_WIDTH, SCALED_HEIGHT))
 
@@ -77,10 +88,40 @@ def ejecutar_mapa5():
         pygame.draw.rect(pantalla, (0, 0, 255), puerta_4_entrada, 2)
         pygame.draw.rect(pantalla, (0, 255, 255), puerta_4_salida, 2)
 
-        jugador.dibujar(pantalla, offset_x, offset_y)  # Primero el jugador
+        # Manejo del combate
+        current_time = pygame.time.get_ticks()
+        
+        # Actualizar y dibujar enemigos
+        for enemy in combat_system.enemies[:]:  # Usar una copia de la lista para evitar problemas al eliminar
+            enemy.move_towards_player(jugador.rect)
+            enemy.draw(pantalla, offset_x, offset_y)
+            
+            # Ataque del enemigo
+            if enemy.can_attack(current_time):
+                if pygame.Rect(enemy.rect).colliderect(jugador.rect):
+                    if combat_player.take_damage(enemy.attack_power, current_time):
+                        print("Game Over")
+                        running = False
+                    enemy.last_attack = current_time
+        
+        # Manejo del ataque del jugador
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_SPACE] and combat_player.can_attack(current_time):
+            jugador.estado = "attack"
+            combat_player.attack(current_time, combat_system.enemies)
+            
+        # Actualizar jugador y sistema de combate
+        combat_player.update(current_time)
+        jugador.dibujar(pantalla, offset_x, offset_y)
+        combat_player.draw_health(pantalla)
 
         if imagen_escalada:
             pantalla.blit(imagen_escalada, (0, 0))  # Después la imagen → queda arriba del jugador
+
+        # Debug: dibujar área de ataque cuando el jugador está atacando
+        if jugador.estado == "attack":
+            attack_rect = combat_player.get_attack_rect()
+            pygame.draw.rect(pantalla, (255, 255, 0), attack_rect.move(offset_x, offset_y), 2)
 
         pygame.display.flip()
         clock.tick(60)

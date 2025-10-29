@@ -90,7 +90,12 @@ def ejecutar_mapa4_en_raya():
                     if not mostrar_dialogo:
                         mostrar_dialogo = True
                     else:
-                        inicio_juego()
+                        # Jugar y actualizar acertijo_en_raya según el resultado
+                        acertijo_en_raya = inicio_juego()
+                        if acertijo_en_raya:
+                            dialogo_texto = "¡Felicidades! Has ganado. Puedes continuar."
+                        else:
+                            dialogo_texto = "Has perdido. ¿Quieres intentarlo de nuevo?"
 
         # Animación NPC
         npc_anim_timer += npc_anim_speed
@@ -122,7 +127,11 @@ def ejecutar_mapa4_en_raya():
         if jugador.rect.colliderect(puerta) and acertijo_en_raya:
             print("Regresa a mapa 3")
             running = False
-            ejecutar_mapa4()
+            # Llamar a ejecutar_mapa4 pasando la superficie (evita TypeError)
+            try:
+                ejecutar_mapa4(pantalla)
+            except TypeError:
+                # Fallback por si ejecutar_mapa4 cambió firma: llamamos sin argumentos
+                ejecutar_mapa4()
 
-    pygame.quit()
-    sys.exit()
+    return

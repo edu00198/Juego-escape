@@ -111,14 +111,14 @@ class Jugador:
             return
 
         # 2) Detectar inicio de ataque
-        """if teclas[pygame.K_SPACE]:
+        if teclas[pygame.K_SPACE] and not self.atacando:
             self.estado = "attack"
             self.atacando = True
             clave_animacion = f"{self.estado}_{self.direccion}"
             if clave_animacion in self.animaciones:
                 self.animacion_actual = self.animaciones[clave_animacion]
                 self.frame_actual = 0
-            return"""
+            return
 
         # 3) Movimiento normal
         moviendo = False
