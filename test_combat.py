@@ -2,15 +2,18 @@ import pygame
 import sys
 import os
 import random
+import sys
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+from configuracion import VELOCIDAD_JUGADOR, ESCALA_JUGADOR
 from juego.combat_system import CombatSystem, Enemy, CombatPlayer
 
 class JugadorTest:
-    def __init__(self, x, y, ancho, alto, escala=2.0):
+    def __init__(self, x, y, ancho, alto, escala=ESCALA_JUGADOR):
+        # Usar la escala y velocidad del juego para que coincida visualmente
         self.rect = pygame.Rect(x, y, ancho * escala, alto * escala)
         self.direccion = "abajo"
         self.estado = "idle"
-        self.velocidad = 5
+        self.velocidad = VELOCIDAD_JUGADOR
         self.escala = escala
         self.sprite_pos = pygame.Vector2(x, y)
         self.atacando = False
@@ -30,6 +33,8 @@ class JugadorTest:
             "run_izquierda": self.cargar_sprites("Run_personaje_lvl2", "run_izquierda"),
             "run_derecha": self.cargar_sprites("Run_personaje_lvl2", "run_derecha"),
             
+            ""
+
             "attack_abajo": self.cargar_sprites("Attack_personaje_lvl2", "attack_abajo"),
             "attack_arriba": self.cargar_sprites("Attack_personaje_lvl2", "attack_arriba"),
             "attack_izquierda": self.cargar_sprites("Attack_personaje_lvl2", "attack_izquierda"),
@@ -166,41 +171,45 @@ def main():
     # Inicializar sistema de combate
     combat_system = CombatSystem()
     
-    # Crear algunos enemigos iniciales
-    for _ in range(5):
-        x = random.randint(100, ANCHO_PANTALLA - 100)
-        y = random.randint(100, ALTO_PANTALLA - 100)
-        enemy = Enemy(x, y)
-        combat_system.add_enemy(enemy)
+    # Crear un solo vampiro en una posición específica
+    enemy = Enemy(ANCHO_PANTALLA - 200, 200)  # Posicionarlo en la parte derecha de la pantalla
+    combat_system.add_enemy(enemy)
+    # Ajustar la hitbox de ataque del vampiro para que sea más realista
+    try:
+        enemy.set_attack_hitbox(attack_range=30, attack_width=30, attack_height=int(enemy.rect.height * 0.7))
+    except Exception:
+        pass
     
     # Loop principal
     while running:
         current_time = pygame.time.get_ticks()
-        
+
         # Manejo de eventos
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-                
+
         # Manejo de teclas para el jugador
         jugador.manejar_teclas()
-        
+
         # Limpiar pantalla
         pantalla.fill(BLANCO)
-        
+
         # Actualizar y dibujar enemigos
         for enemy in combat_system.enemies[:]:
             enemy.move_towards_player(jugador.rect)
             enemy.draw(pantalla)
-            
-            # Ataque del enemigo
-            if enemy.can_attack(current_time):
-                if pygame.Rect(enemy.rect).colliderect(jugador.rect):
-                    if combat_player.take_damage(enemy.attack_power, current_time):
-                        print("Game Over")
-                        running = False
-                    enemy.last_attack = current_time
-        
+
+        # Ataque del enemigo (solo si está vivo)
+        for enemy in combat_system.enemies[:]:
+            if not getattr(enemy, 'is_dead', False):
+                if enemy.can_attack(current_time, jugador.rect):
+                    if pygame.Rect(enemy.rect).colliderect(jugador.rect):
+                        if combat_player.take_damage(enemy.attack_power, current_time):
+                            print("Game Over")
+                            running = False
+                        enemy.last_attack = current_time
+
         # Manejo del ataque del jugador
         keys = pygame.key.get_pressed()
         if keys[pygame.K_SPACE] and combat_player.can_attack(current_time) and not jugador.atacando:
@@ -211,22 +220,22 @@ def main():
             if clave_animacion in jugador.animaciones:
                 jugador.animacion_actual = jugador.animaciones[clave_animacion]
             combat_player.attack(current_time, combat_system.enemies)
-        
+
         # Actualizar jugador y sistema de combate
         combat_player.update(current_time)
         jugador.dibujar(pantalla)
         combat_player.draw_health(pantalla)
-        
+
         # Debug: dibujar área de ataque cuando el jugador está atacando
         if jugador.estado == "attack":
             attack_rect = combat_player.get_attack_rect()
             pygame.draw.rect(pantalla, (255, 255, 0), attack_rect, 2)
-            
+
         # Mostrar instrucciones
         font = pygame.font.Font(None, 36)
         text = font.render("ESPACIO para atacar", True, NEGRO)
         pantalla.blit(text, (10, ALTO_PANTALLA - 40))
-        
+
         pygame.display.flip()
         clock.tick(60)
 

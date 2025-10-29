@@ -42,12 +42,9 @@ def ejecutar_mapa5():
     combat_player = CombatPlayer(jugador)
     combat_system = CombatSystem()
     
-    # Crear algunos enemigos iniciales
-    for _ in range(3):
-        x = random.randint(100, ANCHO_PANTALLA - 100)
-        y = random.randint(100, ALTO_PANTALLA - 100)
-        enemy = Enemy(x, y)
-        combat_system.add_enemy(enemy)
+    # Crear un solo vampiro en una posición específica
+    enemy = Enemy(ANCHO_PANTALLA - 200, ALTO_PANTALLA//2)  # Posicionarlo en el centro-derecha de la pantalla
+    combat_system.add_enemy(enemy)
 
     fondo_escalado = pygame.transform.scale(fondo_mapa, (SCALED_WIDTH, SCALED_HEIGHT))
 
@@ -96,8 +93,8 @@ def ejecutar_mapa5():
             enemy.move_towards_player(jugador.rect)
             enemy.draw(pantalla, offset_x, offset_y)
             
-            # Ataque del enemigo
-            if enemy.can_attack(current_time):
+            # Ataque del enemigo (iniciar solo si en rango)
+            if enemy.can_attack(current_time, jugador.rect):
                 if pygame.Rect(enemy.rect).colliderect(jugador.rect):
                     if combat_player.take_damage(enemy.attack_power, current_time):
                         print("Game Over")

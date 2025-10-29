@@ -6,9 +6,6 @@ import time
 print("Iniciando módulo principal...")
 
 def main():
-    # Inicializar pygame con manejo de errores
-    # USTEDES HAN SIDO HACKEADOS.EXE777777
-    # NO USEN IAS PARA HACKEAR ESTE JUEGO
     try:
         pygame.init()
     except Exception as e:
@@ -47,14 +44,6 @@ def main():
         # time.sleep(1)
         #press_any_key_screen()
         #menus()
-
-
-
-
-
-
-
-
 
         print("Llamando a ejecutar_mapa1()...")
 

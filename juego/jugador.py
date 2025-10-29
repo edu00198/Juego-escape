@@ -8,27 +8,14 @@ from configuracion import VELOCIDAD_JUGADOR, ANCHO_PANTALLA, ALTO_PANTALLA, VELO
 class Jugador:
     def __init__(self, x, y, ancho, alto, escala=1.0, colisiones=None):
         self.colisiones = colisiones or []
-
-
-
         self.velocidad = VELOCIDAD_JUGADOR
-        
-
-
-
         self.escala = escala
-
         # Posición visual del sprite (sin desplazamiento manual)
         self.sprite_pos = pygame.Vector2(x, y)
-
-
         # Crear el rectángulo de colisión con offset relativo al sprite
-
         offset_x = 0  # mueve la hitbox a la derecha
-        
-        offset_y = 0  # mueve la hitbox hacia abajo
-
-
+        offset_y = 0  
+        # mueve la hitbox hacia abajo
         # Tamaño base del rectángulo
         hitbox_ancho = int(ancho * escala)
         hitbox_alto = int(alto * escala)
