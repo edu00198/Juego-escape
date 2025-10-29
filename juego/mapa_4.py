@@ -17,6 +17,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
     
 
 # Pause menu import
+from juego import jugador
 from juego.jugador import Jugador
 from juego.menu_pausa import pause_menu
 #from juego.mapa_5 import ejecutar_mapa5
@@ -32,10 +33,6 @@ from assets.mapas.mapa4_data import (
     puerta_3_cuatro_en_raya,
     colisiones_escaladas
 )
-
-"""from .engranajes import minijuego_engranares"""
-
-
 
 def ejecutar_mapa4(pantalla):
     clock = pygame.time.Clock()
@@ -93,6 +90,10 @@ def ejecutar_mapa4(pantalla):
     animation_speed = 300  # milisegundos entre frames
     animacion_terminada = False
 
+    # Puntos de profundidad visual (ajustalos según el diseño de tus sprites)
+    pie_y_pared = 450  # punto visual donde la pared toca el suelo
+    pie_y_imagen_escalada = 600  # ajustá este valor si querés que imagen_escalada tenga profundidad
+
     while not animacion_terminada:
         current_time = pygame.time.get_ticks()
 
@@ -120,9 +121,36 @@ def ejecutar_mapa4(pantalla):
 
         pantalla.fill((0, 0, 0))
         pantalla.blit(fondo_escalado, (OFFSET_X, OFFSET_Y))
-        jugador.dibujar(pantalla, offset_x, offset_y)
-        pantalla.blit(imagen_escalada, (0, 0))
-        pantalla.blit(imagen_estand_de_armadura_lleno_escalado, (0, 0))
+
+        # Usar el mismo sistema de profundidad visual
+        objetos_animacion = [
+            {'tipo': 'imagen', 'obj': imagen_estand_de_armadura_lleno_escalado, 'pos': (0, 0), 'pie_y': pie_y_pared},
+            {'tipo': 'jugador', 'obj': jugador, 'pie_y': jugador.rect.bottom},
+            {'tipo': 'imagen', 'obj': imagen_escalada, 'pos': (0, 0), 'pie_y': pie_y_imagen_escalada},
+        ]
+
+        objetos_animacion.sort(key=lambda item: item['pie_y'])
+
+        if jugador.sprite_pos.y > 450:
+            jugador.dibujar(pantalla, offset_x, offset_y)
+            pantalla.blit(imagen_estand_de_armadura_lleno_escalado, (0, 0))
+            pantalla.blit(imagen_escalada, (0, 0))
+
+        else:
+            pantalla.blit(imagen_estand_de_armadura_lleno_escalado, (0, 0))
+            pantalla.blit(imagen_escalada, (0, 0))
+            jugador.dibujar(pantalla, offset_x, offset_y)
+
+        for item in objetos_animacion:
+            if item['tipo'] == 'jugador':
+                item['obj'].dibujar(pantalla, offset_x, offset_y)
+            else:
+                pantalla.blit(item['obj'], item['pos'])
+
+        
+
+
+                
         
         
         """
@@ -134,10 +162,7 @@ def ejecutar_mapa4(pantalla):
         pygame.draw.rect(pantalla, (0, 255, 255), puerta_3_engranaje, 2)
         pygame.draw.rect(pantalla, (255, 0, 255), puerta_3_cuatro_en_raya, 2)
 
-        sprite_original = sprites_animacion_puerta[sprite_index]
-        sprite_escalado = pygame.transform.scale(sprite_original, (1280, 720))
-        pantalla.blit(sprite_escalado, (0, 0))
-
+       
 
 
         # 🔥 ESTA LÍNEA ES CLAVE PARA VER LA ANIMACIÓN
@@ -167,11 +192,19 @@ def ejecutar_mapa4(pantalla):
 
         pantalla.fill((0, 0, 0))
         pantalla.blit(fondo_escalado, (OFFSET_X, OFFSET_Y))
-        pantalla.blit(imagen_estand_de_armadura_lleno_escalado, (0, 0))
-        jugador.dibujar(pantalla, offset_x, offset_y)
-        pantalla.blit(imagen_escalada, (0, 0))
-        
-        
+
+        # Dibujo condicional según posición del jugador
+        if jugador.sprite_pos.y + jugador.rect.height > 450:
+            jugador.dibujar(pantalla, offset_x, offset_y)
+            pantalla.blit(imagen_estand_de_armadura_lleno_escalado, (0, 0))
+            pantalla.blit(imagen_escalada, (0, 0))
+
+        else:
+            pantalla.blit(imagen_estand_de_armadura_lleno_escalado, (0, 0))
+            pantalla.blit(imagen_escalada, (0, 0))
+            jugador.dibujar(pantalla, offset_x, offset_y)
+
+
         """
         # Dibujar colisiones
         for colision in colisiones_escaladas:
@@ -187,6 +220,8 @@ def ejecutar_mapa4(pantalla):
 
         pygame.display.flip()
         clock.tick(60)
+
+
 
         # Transición al siguiente mapa
         if jugador.rect.colliderect(puerta_3_salida):
