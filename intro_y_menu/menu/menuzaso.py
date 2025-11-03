@@ -260,8 +260,8 @@ def game_selection_menu(window):
                                     from juego import mapa_3
                                     mapa_3.ejecutar_mapa3_con_estado(state)
                                 elif mapa == 'mapa4':
-                                    from juego import mapa_4
-                                    mapa_4.ejecutar_mapa4_con_estado(state)
+                                    from juego import mapa_3_2
+                                    mapa_3_2.ejecutar_mapa3_2_con_estado(state)
                                 elif mapa == 'mapa5':
                                     from juego import mapa_5
                                     mapa_5.ejecutar_mapa5_con_estado(state)

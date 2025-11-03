@@ -7,7 +7,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from juego.cuatro_en_raya import inicio_juego
 from configuracion import ANCHO_PANTALLA, ALTO_PANTALLA, ESCALA_JUGADOR
 from juego.jugador import Jugador
-from juego.mapa_4 import ejecutar_mapa4
+from juego.mapa_3_2 import ejecutar_mapa3_2
 from assets.mapas.mapa3_4_en_raya_data import (
     fondo_mapa,
     SCALED_WIDTH,
@@ -127,11 +127,11 @@ def ejecutar_mapa4_en_raya():
         if jugador.rect.colliderect(puerta) and acertijo_en_raya:
             print("Regresa a mapa 3")
             running = False
-            # Llamar a ejecutar_mapa4 pasando la superficie (evita TypeError)
+            # Llamar a ejecutar_mapa3_2 pasando la superficie (evita TypeError)
             try:
-                ejecutar_mapa4(pantalla)
+                ejecutar_mapa3_2(pantalla)
             except TypeError:
-                # Fallback por si ejecutar_mapa4 cambió firma: llamamos sin argumentos
-                ejecutar_mapa4()
+                # Fallback por si ejecutar_mapa3_2 cambió firma: llamamos sin argumentos
+                ejecutar_mapa3_2()
 
     return

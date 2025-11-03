@@ -56,12 +56,17 @@ class DialogSystem:
         self.active = True
 
     def handle_input(self, event):
-        if self.active and event.type == pygame.KEYDOWN:
-            if event.key in (pygame.K_SPACE, pygame.K_RETURN):
-                self.current_index += 1
-                if self.current_index >= len(self.dialogs):
-                    self.active = False
-                    return True
+        if not self.active:
+            return False
+
+        if event.type == pygame.KEYDOWN and event.key in (pygame.K_SPACE, pygame.K_RETURN):
+            self.current_index += 1
+            if self.current_index >= len(self.dialogs):
+                self.active = False
+                # Limpiar solo eventos específicos del diálogo para evitar efectos secundarios
+                for e in pygame.event.get([pygame.K_SPACE, pygame.K_RETURN]):
+                    pass
+                return True
         return False
 
     def draw(self):
@@ -490,7 +495,9 @@ def ejecutar_mapa1_con_estado(state):
         pantalla.blit(fondo_escalado, (OFFSET_X, OFFSET_Y))
         sistema_cofres.dibujar(pantalla)
         panel_visible = sistema_cofres.panel_codigo and sistema_cofres.panel_codigo.visible
-        if not panel_visible:
+        # Dibujar al jugador siempre que no esté visible el panel de código
+        # y el diálogo no esté activo
+        if not panel_visible and not dialog_system.active:
             jugador.dibujar(pantalla, 0, 0)
         dialog_system.draw()
 

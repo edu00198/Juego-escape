@@ -56,7 +56,7 @@ class Engranaje:
 # ============================
 # FUNCIÓN PRINCIPAL
 # ============================
-def minijuego_engranares():
+def minijuego_engranajes():
     # No crear una nueva ventana, usar la existente
     pantalla = pygame.display.get_surface()
     if not pantalla:

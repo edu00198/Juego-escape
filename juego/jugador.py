@@ -41,11 +41,6 @@ class Jugador:
             "run_arriba": self.cargar_sprites("run_personaje_lvl1", "run_arriba"),
             "run_izquierda": self.cargar_sprites("run_personaje_lvl1", "run_izquierda"),
             "run_derecha": self.cargar_sprites("run_personaje_lvl1", "run_derecha"),
-            "attack_abajo": self.cargar_sprites("attack_personaje_lvl1", "attack_abajo"),
-            "attack_arriba": self.cargar_sprites("attack_personaje_lvl1", "attack_arriba"),
-            "attack_izquierda": self.cargar_sprites("attack_personaje_lvl1", "attack_izquierda"),
-            "attack_derecha": self.cargar_sprites("attack_personaje_lvl1", "attack_derecha"),
-
         }
         print("Animaciones cargadas:", list(self.animaciones.keys()))
         print("Número de frames en idle_abajo:", len(self.animaciones["idle_abajo"]) if "idle_abajo" in self.animaciones else 0)
@@ -97,14 +92,9 @@ class Jugador:
         if self.atacando:
             return
 
-        # 2) Detectar inicio de ataque
+        # 2) Detectar inicio de ataque - temporalmente deshabilitado hasta que se agreguen las animaciones
         if teclas[pygame.K_SPACE] and not self.atacando:
-            self.estado = "attack"
-            self.atacando = True
-            clave_animacion = f"{self.estado}_{self.direccion}"
-            if clave_animacion in self.animaciones:
-                self.animacion_actual = self.animaciones[clave_animacion]
-                self.frame_actual = 0
+            # Por ahora, no cambiamos a animación de ataque ya que no existe
             return
 
         # 3) Movimiento normal

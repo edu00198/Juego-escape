@@ -41,7 +41,7 @@ from juego.engranajes import minijuego_engranajes
 
 
 
-def ejecutar_mapa4(pantalla, spawn_point=None):
+def ejecutar_mapa3_2(pantalla=None, spawn_point=None):
     """
     spawn_point puede ser: 'entrada', 'engranajes', None
     """
@@ -314,4 +314,4 @@ def ejecutar_mapa4(pantalla, spawn_point=None):
 if __name__ == "__main__":
     pygame.init()
     pantalla = pygame.display.set_mode((ANCHO_PANTALLA, ALTO_PANTALLA))
-    ejecutar_mapa4(pantalla)
+    ejecutar_mapa3_2(pantalla)

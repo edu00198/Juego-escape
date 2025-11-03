@@ -78,8 +78,8 @@ def ejecutar_mapa3engranajes():
         # Verificar si el jugador puede pasar al siguiente mapa
         if jugador.rect.colliderect(puerta_4) and minijuego_completado:
             print("¡Pasando al mapa 4!")
-            from juego.mapa_4 import ejecutar_mapa4  # Import here to avoid circular dependency
-            return ejecutar_mapa4(pantalla, spawn_point='engranajes')
+            from juego.mapa_3_2 import ejecutar_mapa3_2  # Import here to avoid circular dependency
+            return ejecutar_mapa3_2(pantalla, spawn_point='engranajes')
 
         # Dibujar todo
         pantalla.fill((0, 0, 0))  # Fondo negro

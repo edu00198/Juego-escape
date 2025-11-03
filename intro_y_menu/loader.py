@@ -18,7 +18,7 @@ _MODULES_TO_LOAD = [
     'juego.mapa_2',
     'juego.jugador',
     'juego.mapa_3',
-    'juego.mapa_4',
+    'juego.mapa_3_2',
     'juego.mapa_5',
 ]
 
