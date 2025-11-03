@@ -8,15 +8,11 @@ ANCHO_PANTALLA = 1280
 ALTO_PANTALLA = 720
 from jugador_lvl2 import JugadorLvl2
 
-
-
 pantalla = pygame.display.set_mode((ANCHO_PANTALLA, ALTO_PANTALLA))
 
 # Ahora sí podés importar módulos que usan convert_alpha()
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-
-    
 
 # Pause menu import
 from juego import jugador
@@ -81,88 +77,84 @@ def ejecutar_mapa4(pantalla):
 
     print("Tamaño original pared:", imagen_pared.get_size())
     print("Tamaño original estandarte:", imagen_estand_de_armadura_lleno.get_size())
-
-    # Cargar sprites de animación de puerta
-    sprites_animacion_puerta = [
-        pygame.image.load("assets/animaciones/puerta_reja_abriendose_animacion_pared/door_reja_abriendose(1).png"),
-        pygame.image.load("assets/animaciones/puerta_reja_abriendose_animacion_pared/door_reja_abriendose(2).png"),
-        pygame.image.load("assets/animaciones/puerta_reja_abriendose_animacion_pared/door_reja_abriendose(3).png"),
-        pygame.image.load("assets/animaciones/puerta_reja_abriendose_animacion_pared/door_reja_abriendose(4).png"),
-        pygame.image.load("assets/animaciones/puerta_reja_abriendose_animacion_pared/door_reja_abriendose(5).png"),
-        
-    ]
+    
+    def animacion_puerta_abierta(pantalla):
+        # Cargar sprites de la animación de la puerta
+        sprites_animacion_puerta = [
+            pygame.image.load("assets/animaciones/puerta_reja_abriendose_animacion_pared/door_reja_abriendose(1).png"),
+            pygame.image.load("assets/animaciones/puerta_reja_abriendose_animacion_pared/door_reja_abriendose(2).png"),
+            pygame.image.load("assets/animaciones/puerta_reja_abriendose_animacion_pared/door_reja_abriendose(3).png"),
+            pygame.image.load("assets/animaciones/puerta_reja_abriendose_animacion_pared/door_reja_abriendose(4).png"),
+            pygame.image.load("assets/animaciones/puerta_reja_abriendose_animacion_pared/door_reja_abriendose(5).png"),
+        ]
 
         # Variables de animación
-        # Reproducir animación de puerta con fondo y jugador visibles
-    sprite_index = 0
-    animation_timer = pygame.time.get_ticks()
-    animation_speed = 300  # milisegundos entre frames
-    animacion_terminada = False
+        sprite_index = 0
+        animation_timer = pygame.time.get_ticks()
+        animation_speed = 300  # milisegundos entre frames
+        animacion_terminada = False
 
-    while not animacion_terminada:
-        current_time = pygame.time.get_ticks()
+        # Bucle de animación
+        while not animacion_terminada:
+            current_time = pygame.time.get_ticks()
 
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
+            # Manejo de eventos
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                     try:
                         state = {'mapa': 'mapa4'}
                     except Exception:
                         state = None
                     pause_menu(pantalla, mapa_actual=4, state=state)
 
-        # Dibujar fondo si lo tenés
-        pantalla.blit(fondo_escalado, (0, 0))  # opcional
-        pantalla.blit(imagen_escalada, (0, 0))  # pared encima del jugador
+            pantalla.fill((0, 0, 0))
+            pantalla.blit(fondo_escalado, (OFFSET_X, OFFSET_Y))
+            pantalla.blit(imagen_escalada, (0, 0))
+            pantalla.blit(imagen_estand_de_armadura_actual, (0, 0))
+            jugador.dibujar(pantalla, offset_x, offset_y)    # Jugador
 
-        # Dibujar sprite actual de la puerta
-        if sprite_index < len(sprites_animacion_puerta):
-            imagen_puerta = sprites_animacion_puerta[sprite_index]
-            pantalla.blit(imagen_puerta, (0, 0))  # ajustá posición
-        # Dibujar jugador si corresponde
+            # Dibujar sprite actual de la puerta
+            if sprite_index < len(sprites_animacion_puerta):
+                imagen_puerta = sprites_animacion_puerta[sprite_index]
+                pantalla.blit(imagen_puerta, (0, 0))               # Posición de la puerta
+
+            pygame.display.update()
+
+            # Avanzar al siguiente frame si pasó el tiempo
+            if current_time - animation_timer > animation_speed:
+                sprite_index += 1
+                animation_timer = current_time
+                if sprite_index >= len(sprites_animacion_puerta):
+                    animacion_terminada = True
+
+        # Redibujar escena final después de la animación
+        pantalla.fill((0, 0, 0))
+        pantalla.blit(fondo_escalado, (OFFSET_X, OFFSET_Y))
+        pantalla.blit(imagen_escalada, (0, 0))
+        pantalla.blit(imagen_estand_de_armadura_actual, (0, 0))
         jugador.dibujar(pantalla, offset_x, offset_y)
-
-        pygame.display.update()
-
-        # Avanzar animación
-        if current_time - animation_timer > animation_speed:
-            sprite_index += 1
-            animation_timer = current_time
-            if sprite_index >= len(sprites_animacion_puerta):
-                animacion_terminada = True
+        
         
 
+        # Dibujar colisiones visibles (opcional)
+        # for colision in colisiones_escaladas:
+        #     pygame.draw.rect(pantalla, (255, 0, 0), colision, 2)
 
+        # Dibujar zonas de interacción
+        pygame.draw.rect(pantalla, (0, 0, 255), puerta_3_entrada, 2)
+        pygame.draw.rect(pantalla, (0, 255, 255), puerta_3_salida, 2)
+        pygame.draw.rect(pantalla, (0, 255, 255), puerta_3_engranaje, 2)
+        pygame.draw.rect(pantalla, (255, 0, 255), puerta_3_cuatro_en_raya, 2)
 
-    pantalla.fill((0, 0, 0))
-    pantalla.blit(fondo_escalado, (OFFSET_X, OFFSET_Y))
+        # Actualizar pantalla final
+        pygame.display.flip()
+        clock.tick(60)
 
-
-    jugador.dibujar(pantalla, offset_x, offset_y)
-    pantalla.blit(imagen_estand_de_armadura_actual, (0, 0))
-    pantalla.blit(imagen_escalada, (0, 0))
-
-    
-    
-    """
-    for colision in colisiones_escaladas:
-        pygame.draw.rect(pantalla, (255, 0, 0), colision, 2)"""
-
-    pygame.draw.rect(pantalla, (0, 0, 255), puerta_3_entrada, 2)
-    pygame.draw.rect(pantalla, (0, 255, 255), puerta_3_salida, 2)
-    pygame.draw.rect(pantalla, (0, 255, 255), puerta_3_engranaje, 2)
-    pygame.draw.rect(pantalla, (255, 0, 255), puerta_3_cuatro_en_raya, 2)
-
-    
-
-
-    # 🔥 ESTA LÍNEA ES CLAVE PARA VER LA ANIMACIÓN
-    pygame.display.flip()
-    clock.tick(60)
-
+    #hace a animacion
+    animacion_puerta_abierta(pantalla)
     # Acá comienza el juego normal
     running = True
     while running:
