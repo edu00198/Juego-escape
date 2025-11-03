@@ -63,6 +63,9 @@ def ejecutar_mapa3_2(pantalla=None, spawn_point=None):
     pos_x = puerta2pos[0] - ancho_jugador * -10
     pos_y = puerta2pos[1] - alto_jugador * -2
     jugador = Jugador(pos_x, pos_y, ancho_jugador, alto_jugador, escala= ESCALA_JUGADOR, colisiones=colisiones_escaladas)
+    
+    if not hasattr(jugador, "sprite_pos"):
+        jugador.sprite_pos = pygame.Vector2(jugador.rect.x, jugador.rect.y)
 
     # Fondo escalado
     fondo_escalado = pygame.transform.scale(fondo_mapa, (SCALED_WIDTH, SCALED_HEIGHT))

@@ -2,26 +2,33 @@ import pygame
 import sys
 import math
 import random
+from assets.mapas.fondo import engranajes_foto
 
 # ============================
 # CONFIGURACIÓN
 # ============================
-ANCHO, ALTO = 1280, 720  # Misma resolución que el juego principal
+ANCHO, ALTO = 1280, 720
 FPS = 60
 
 # ============================
 # CLASE ENGRANAJE
 # ============================
 class Engranaje:
-    def __init__(self, x, y, radio, velocidad, tolerancia, ref_radio):
+    def __init__(self, x, y, radio, velocidad, tolerancia, ref_radio, imagen):
         self.x = x
         self.y = y
         self.radio = radio
         self.velocidad = velocidad
         self.tolerancia = tolerancia
-        self.ref_radio = ref_radio  # tamaño del punto rojo de referencia
+        self.ref_radio = ref_radio
         self.angulo = random.randint(0, 360)
         self.detenido = False
+
+        # Escalar la imagen del engranaje según el radio
+        size = radio * 2
+        self.original_img = pygame.transform.smoothscale(imagen, (size, size))
+        self.img = self.original_img
+        self.rect = self.img.get_rect(center=(x, y))
 
     def actualizar(self):
         if not self.detenido:
@@ -35,18 +42,19 @@ class Engranaje:
         self.angulo = random.randint(0, 360)
 
     def alineado(self):
-        # 270° representa la dirección "arriba"
         angulo_mod = self.angulo % 360
         return abs(angulo_mod - 270) < self.tolerancia or abs(angulo_mod + 90) < self.tolerancia
 
     def dibujar(self, pantalla):
-        # Engranaje base
-        pygame.draw.circle(pantalla, (160, 160, 160), (self.x, self.y), self.radio, 5)
-        
-        # Línea que marca la posición actual
+        # Rotar el engranaje alrededor de su centro
+        self.img = pygame.transform.rotate(self.original_img, -self.angulo)
+        rect_rotado = self.img.get_rect(center=(self.x, self.y))
+        pantalla.blit(self.img, rect_rotado.topleft)
+
+        # Línea de posición actual (donde apunta el engranaje)
         punta_x = self.x + math.cos(math.radians(self.angulo)) * self.radio
         punta_y = self.y + math.sin(math.radians(self.angulo)) * self.radio
-        pygame.draw.line(pantalla, (255, 215, 0), (self.x, self.y), (punta_x, punta_y), 5)
+        pygame.draw.line(pantalla, (255, 0, 0), (self.x, self.y), (punta_x, punta_y), 4)
 
         # Marca fija de referencia (arriba)
         ref_x = self.x
@@ -57,27 +65,35 @@ class Engranaje:
 # FUNCIÓN PRINCIPAL
 # ============================
 def minijuego_engranajes():
-    # No crear una nueva ventana, usar la existente
     pantalla = pygame.display.get_surface()
     if not pantalla:
         pantalla = pygame.display.set_mode((ANCHO, ALTO))
     pygame.display.set_caption("🌀 Alinear los Engranajes")
+
     clock = pygame.time.Clock()
     font = pygame.font.Font(None, 36)
 
-    # Ajustar el tamaño y espaciado de los engranajes para la nueva resolución
-    radio_engranaje = 100  # Engranajes más grandes
-    espaciado = 300  # Más espacio entre engranajes
+    # Cargar imagen del engranaje
+    try:
+        imagen_engranaje = engranajes_foto
+    except:
+        print("⚠️ No se encontró 'engranajes.png'.")
+        return
+
+    # Crear engranajes
+    radio_engranaje = 100
+    espaciado = 300
     engranajes = [
-        Engranaje(ANCHO//2 - espaciado, ALTO//2, radio_engranaje, 2, tolerancia=25, ref_radio=15),
-        Engranaje(ANCHO//2, ALTO//2, radio_engranaje, 3, tolerancia=18, ref_radio=12),
-        Engranaje(ANCHO//2 + espaciado, ALTO//2, radio_engranaje, 4, tolerancia=12, ref_radio=8)
+        Engranaje(ANCHO//2 - espaciado, ALTO//2, radio_engranaje, 2, tolerancia=25, ref_radio=15, imagen=imagen_engranaje),
+        Engranaje(ANCHO//2, ALTO//2, radio_engranaje, 3, tolerancia=18, ref_radio=12, imagen=imagen_engranaje),
+        Engranaje(ANCHO//2 + espaciado, ALTO//2, radio_engranaje, 4, tolerancia=12, ref_radio=8, imagen=imagen_engranaje)
     ]
 
     indice_actual = 0
     terminado = False
     exito = False
     mensaje_final = ""
+
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -90,7 +106,6 @@ def minijuego_engranajes():
                         from juego.menu_pausa import pause_menu
                         pause_menu(pantalla, mapa_actual=0, state=None)
                     except Exception:
-                        # Fallback a comportamiento previo si pause_menu no está disponible
                         pygame.quit()
                         return False
 
@@ -113,14 +128,13 @@ def minijuego_engranajes():
                     if exito:
                         return "completado"
                     else:
-                        # Reiniciar todos los engranajes para permitir reintentos infinitos
                         for engranaje in engranajes:
                             engranaje.reiniciar()
                         indice_actual = 0
                         terminado = False
                         mensaje_final = ""
 
-        # Actualización de engranajes
+        # Actualizar engranaje actual
         if not terminado:
             engranajes[indice_actual].actualizar()
 
@@ -150,4 +164,3 @@ def minijuego_engranajes():
 
         pygame.display.flip()
         clock.tick(FPS)
-

@@ -27,3 +27,4 @@ button_game5=os.path.join(os.path.dirname(os.path.dirname(__file__)), "mapas", "
 button_empty=os.path.join(os.path.dirname(os.path.dirname(__file__)), "mapas", "game_empty_button.png")
 img_boss=os.path.join(os.path.dirname(os.path.dirname(__file__)), "mapas", "img_boss.png")
 img_jug=os.path.join(os.path.dirname(os.path.dirname(__file__)), "mapas", "img_jugador.png")
+engranajes_foto=os.path.join(os.path.dirname(os.path.dirname(__file__)), "mapas", "engranajes.png")
