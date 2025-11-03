@@ -6,6 +6,8 @@ import os
 pygame.init()
 ANCHO_PANTALLA = 1280
 ALTO_PANTALLA = 720
+from jugador_lvl2 import JugadorLvl2
+
 
 
 pantalla = pygame.display.set_mode((ANCHO_PANTALLA, ALTO_PANTALLA))
@@ -31,6 +33,7 @@ from assets.mapas.mapa4_data import (
     puerta_3_salida_al_mapa_4 as puerta_3_salida,
     puerta_3_engranaje,
     puerta_3_cuatro_en_raya,
+    estandarte_de_armaduras,
     colisiones_escaladas
 )
 
@@ -68,10 +71,16 @@ def ejecutar_mapa4(pantalla):
     ruta_estand_de_armadura_lleno = os.path.join(BASE_DIR, "assets", "mapas", "estand_de_armadura_lleno.png")
     imagen_estand_de_armadura_lleno = pygame.image.load(ruta_estand_de_armadura_lleno).convert_alpha()
     imagen_estand_de_armadura_lleno_escalado = pygame.transform.scale(imagen_estand_de_armadura_lleno, (1280, 720))
+    
+    
+    ruta_estand_de_armadura_vacio = os.path.join(BASE_DIR, "assets", "mapas", "estand_de_armadura_vacio.png") 
+    imagen_estand_de_armadura_vacio = pygame.image.load(ruta_estand_de_armadura_vacio).convert_alpha()
+    imagen_estand_de_armadura_vacio_escalado = pygame.transform.scale(imagen_estand_de_armadura_vacio, (1280, 720))
+
+    imagen_estand_de_armadura_actual = imagen_estand_de_armadura_lleno_escalado
 
     print("Tamaño original pared:", imagen_pared.get_size())
     print("Tamaño original estandarte:", imagen_estand_de_armadura_lleno.get_size())
-
 
     # Cargar sprites de animación de puerta
     sprites_animacion_puerta = [
@@ -90,10 +99,6 @@ def ejecutar_mapa4(pantalla):
     animation_speed = 300  # milisegundos entre frames
     animacion_terminada = False
 
-    # Puntos de profundidad visual (ajustalos según el diseño de tus sprites)
-    pie_y_pared = 450  # punto visual donde la pared toca el suelo
-    pie_y_imagen_escalada = 600  # ajustá este valor si querés que imagen_escalada tenga profundidad
-
     while not animacion_terminada:
         current_time = pygame.time.get_ticks()
 
@@ -104,70 +109,59 @@ def ejecutar_mapa4(pantalla):
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     try:
-                        state = {
-                            'mapa': 'mapa4',
-                            # no jugador aún en este punto de la animación
-                        }
+                        state = {'mapa': 'mapa4'}
                     except Exception:
                         state = None
                     pause_menu(pantalla, mapa_actual=4, state=state)
 
+        # Dibujar fondo si lo tenés
+        pantalla.blit(fondo_escalado, (0, 0))  # opcional
+        pantalla.blit(imagen_escalada, (0, 0))  # pared encima del jugador
+
+        # Dibujar sprite actual de la puerta
+        if sprite_index < len(sprites_animacion_puerta):
+            imagen_puerta = sprites_animacion_puerta[sprite_index]
+            pantalla.blit(imagen_puerta, (0, 0))  # ajustá posición
+        # Dibujar jugador si corresponde
+        jugador.dibujar(pantalla, offset_x, offset_y)
+
+        pygame.display.update()
+
+        # Avanzar animación
         if current_time - animation_timer > animation_speed:
             sprite_index += 1
             animation_timer = current_time
             if sprite_index >= len(sprites_animacion_puerta):
                 animacion_terminada = True
-                break
-
-        pantalla.fill((0, 0, 0))
-        pantalla.blit(fondo_escalado, (OFFSET_X, OFFSET_Y))
-
-        # Usar el mismo sistema de profundidad visual
-        objetos_animacion = [
-            {'tipo': 'imagen', 'obj': imagen_estand_de_armadura_lleno_escalado, 'pos': (0, 0), 'pie_y': pie_y_pared},
-            {'tipo': 'jugador', 'obj': jugador, 'pie_y': jugador.rect.bottom},
-            {'tipo': 'imagen', 'obj': imagen_escalada, 'pos': (0, 0), 'pie_y': pie_y_imagen_escalada},
-        ]
-
-        objetos_animacion.sort(key=lambda item: item['pie_y'])
-
-        if jugador.sprite_pos.y > 450:
-            jugador.dibujar(pantalla, offset_x, offset_y)
-            pantalla.blit(imagen_estand_de_armadura_lleno_escalado, (0, 0))
-            pantalla.blit(imagen_escalada, (0, 0))
-
-        else:
-            pantalla.blit(imagen_estand_de_armadura_lleno_escalado, (0, 0))
-            pantalla.blit(imagen_escalada, (0, 0))
-            jugador.dibujar(pantalla, offset_x, offset_y)
-
-        for item in objetos_animacion:
-            if item['tipo'] == 'jugador':
-                item['obj'].dibujar(pantalla, offset_x, offset_y)
-            else:
-                pantalla.blit(item['obj'], item['pos'])
-
         
 
 
-                
-        
-        
-        """
-        for colision in colisiones_escaladas:
-            pygame.draw.rect(pantalla, (255, 0, 0), colision, 2)"""
 
-        pygame.draw.rect(pantalla, (0, 0, 255), puerta_3_entrada, 2)
-        pygame.draw.rect(pantalla, (0, 255, 255), puerta_3_salida, 2)
-        pygame.draw.rect(pantalla, (0, 255, 255), puerta_3_engranaje, 2)
-        pygame.draw.rect(pantalla, (255, 0, 255), puerta_3_cuatro_en_raya, 2)
-
-       
+    pantalla.fill((0, 0, 0))
+    pantalla.blit(fondo_escalado, (OFFSET_X, OFFSET_Y))
 
 
-        # 🔥 ESTA LÍNEA ES CLAVE PARA VER LA ANIMACIÓN
-        pygame.display.flip()
-        clock.tick(60)
+    jugador.dibujar(pantalla, offset_x, offset_y)
+    pantalla.blit(imagen_estand_de_armadura_actual, (0, 0))
+    pantalla.blit(imagen_escalada, (0, 0))
+
+    
+    
+    """
+    for colision in colisiones_escaladas:
+        pygame.draw.rect(pantalla, (255, 0, 0), colision, 2)"""
+
+    pygame.draw.rect(pantalla, (0, 0, 255), puerta_3_entrada, 2)
+    pygame.draw.rect(pantalla, (0, 255, 255), puerta_3_salida, 2)
+    pygame.draw.rect(pantalla, (0, 255, 255), puerta_3_engranaje, 2)
+    pygame.draw.rect(pantalla, (255, 0, 255), puerta_3_cuatro_en_raya, 2)
+
+    
+
+
+    # 🔥 ESTA LÍNEA ES CLAVE PARA VER LA ANIMACIÓN
+    pygame.display.flip()
+    clock.tick(60)
 
     # Acá comienza el juego normal
     running = True
@@ -193,15 +187,21 @@ def ejecutar_mapa4(pantalla):
         pantalla.fill((0, 0, 0))
         pantalla.blit(fondo_escalado, (OFFSET_X, OFFSET_Y))
 
+        """
+        #depuracion de alturas
+        print("Posición Y del jugador:", jugador.sprite_pos.y)
+        print("Altura del jugador:", jugador.rect.height)
+        print("Suma:", jugador.sprite_pos.y + jugador.rect.height)"""
+
         # Dibujo condicional según posición del jugador
-        if jugador.sprite_pos.y + jugador.rect.height > 450:
+        if float(jugador.sprite_pos.y + jugador.rect.height) < 310.0:  
             jugador.dibujar(pantalla, offset_x, offset_y)
-            pantalla.blit(imagen_estand_de_armadura_lleno_escalado, (0, 0))
             pantalla.blit(imagen_escalada, (0, 0))
+            pantalla.blit(imagen_estand_de_armadura_actual, (0, 0))
 
         else:
-            pantalla.blit(imagen_estand_de_armadura_lleno_escalado, (0, 0))
             pantalla.blit(imagen_escalada, (0, 0))
+            pantalla.blit(imagen_estand_de_armadura_actual, (0, 0))
             jugador.dibujar(pantalla, offset_x, offset_y)
 
 
@@ -215,6 +215,7 @@ def ejecutar_mapa4(pantalla):
         pygame.draw.rect(pantalla, (0, 255, 255), puerta_3_salida, 2)
         pygame.draw.rect(pantalla, (0, 255, 255), puerta_3_engranaje, 2)
         pygame.draw.rect(pantalla, (255, 0, 255), puerta_3_cuatro_en_raya, 2)
+        pygame.draw.rect(pantalla, (255, 255, 0), estandarte_de_armaduras, 2)  
 
         jugador.manejar_teclas()
 
@@ -239,9 +240,34 @@ def ejecutar_mapa4(pantalla):
             running = False
             return
             
-
         if jugador.rect.colliderect(puerta_3_engranaje):
             continue
+            
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE and jugador.rect.colliderect(estandarte_de_armaduras):
+                    print("¡Interacción con el estandarte activada! Subiendo a nivel 2...")
+
+                    # Cambiar imagen del estandarte
+                    imagen_estand_de_armadura_actual = imagen_estand_de_armadura_vacio_escalado
+
+                    # Guardar posición actual
+                    pos_x = jugador.sprite_pos.x
+                    pos_y = jugador.sprite_pos.y
+
+                    # Crear nuevo jugador de nivel 2 en la misma posición
+                    jugador = JugadorLvl2(
+                        x=pos_x,
+                        y=pos_y,
+                        ancho=jugador.rect.width,
+                        alto=jugador.rect.height,
+                        escala=jugador.escala,
+                        colisiones=jugador.colisiones
+            )
+
             
     pygame.quit()
     sys.exit()

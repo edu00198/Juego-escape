@@ -6,6 +6,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from configuracion import VELOCIDAD_JUGADOR, ANCHO_PANTALLA, ALTO_PANTALLA, VELOCIDAD_ANIMACION
 
 class Jugador:
+
     def __init__(self, x, y, ancho, alto, escala=1.0, colisiones=None):
         self.colisiones = colisiones or []
 
@@ -19,11 +20,11 @@ class Jugador:
 
         # Crear el rectángulo de colisión con offset relativo al sprite
         offset_x = 0  # mueve la hitbox a la derecha
-        offset_y = 0  # mueve la hitbox hacia abajo
+        offset_y = 10  # mueve la hitbox hacia abajo
 
         # Tamaño base del rectángulo
         hitbox_ancho = int(ancho * escala)
-        hitbox_alto = int(alto * escala)
+        hitbox_alto = int(alto * escala) -8
 
         # Crear la hitbox desplazada y ajustada
         self.rect = pygame.Rect(
@@ -35,8 +36,11 @@ class Jugador:
         self.rect.inflate_ip(-30, -10)  # achica la hitbox horizontal y verticalmente
 
 
+
         print("Iniciando carga de animaciones...")
         # Animaciones (como ya tenías)
+      
+        
         self.animaciones = {
             "idle_abajo": self.cargar_sprites("idle_personaje_lvl1", "idle_abajo"),
             "idle_arriba": self.cargar_sprites("idle_personaje_lvl1", "idle_arriba"),
@@ -46,10 +50,6 @@ class Jugador:
             "run_arriba": self.cargar_sprites("run_personaje_lvl1", "run_arriba"),
             "run_izquierda": self.cargar_sprites("run_personaje_lvl1", "run_izquierda"),
             "run_derecha": self.cargar_sprites("run_personaje_lvl1", "run_derecha"),
-            "attack_abajo": self.cargar_sprites("attack_personaje_lvl1", "attack_abajo"),
-            "attack_arriba": self.cargar_sprites("attack_personaje_lvl1", "attack_arriba"),
-            "attack_izquierda": self.cargar_sprites("attack_personaje_lvl1", "attack_izquierda"),
-            "attack_derecha": self.cargar_sprites("attack_personaje_lvl1", "attack_derecha"),
 
         }
         print("Animaciones cargadas:", list(self.animaciones.keys()))
@@ -72,6 +72,8 @@ class Jugador:
                                            (int(img.get_width() * escala), int(img.get_height() * escala))) 
                                            for img in lista]
 
+    #def cambiar_animaciones(self):
+
     def cargar_sprites(self, carpeta_principal, subcarpeta):
         ruta_base = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets", "sprites_jugador", carpeta_principal, subcarpeta)
         imagenes = []
@@ -90,31 +92,15 @@ class Jugador:
                 except Exception as e:
                     print(f"[ERROR] No se pudo cargar {ruta}: {e}")
 
-        return imagenes
-
-        return imagenes
-  
-
+        return imagenes     
+        
     def manejar_teclas(self):
         teclas = pygame.key.get_pressed()
-
-        # 1) Si ya está atacando, no proceses movimiento ni otro ataque
-        if self.atacando:
-            return
-
-        # 2) Detectar inicio de ataque
-        """if teclas[pygame.K_SPACE]:
-            self.estado = "attack"
-            self.atacando = True
-            clave_animacion = f"{self.estado}_{self.direccion}"
-            if clave_animacion in self.animaciones:
-                self.animacion_actual = self.animaciones[clave_animacion]
-                self.frame_actual = 0
-            return"""
-
-        # 3) Movimiento normal
         moviendo = False
         colisiones = self.colisiones
+
+        print("Animación actual:", self.animacion_actual)
+
 
         izquierda = teclas[pygame.K_LEFT]
         derecha   = teclas[pygame.K_RIGHT]
@@ -198,26 +184,27 @@ class Jugador:
                         self.sprite_pos.y -= self.velocidad
                         break
 
-        if not self.atacando:
-            self.estado = "run" if moviendo else "idle"
-            clave_animacion = f"{self.estado}_{self.direccion}"
+        # Animación según movimiento
+        self.estado = "run" if moviendo else "idle"
+        clave_animacion = f"{self.estado}_{self.direccion}"
 
-            if clave_animacion in self.animaciones and self.animaciones[clave_animacion]:
-                if self.animacion_actual != self.animaciones[clave_animacion]:
-                    self.animacion_actual = self.animaciones[clave_animacion]
-                    self.frame_actual = 0
+        if clave_animacion in self.animaciones and self.animaciones[clave_animacion]:
+            if self.animacion_actual != self.animaciones[clave_animacion]:
+                self.animacion_actual = self.animaciones[clave_animacion]
+                self.frame_actual = 0
 
-
+        # Limitar dentro de pantalla
         self.rect.left = max(self.rect.left, 0)
         self.rect.right = min(self.rect.right, ANCHO_PANTALLA)
         self.rect.top = max(self.rect.top, 0)
         self.rect.bottom = min(self.rect.bottom, ALTO_PANTALLA)
 
-        # Synchronize sprite_pos with rect after clamping
-        offset_x = 70  # same offset as in __init__
+        # Sincronizar sprite_pos con rect
+        offset_x = 70
         offset_y = 101
         self.sprite_pos.x = self.rect.x - offset_x
         self.sprite_pos.y = self.rect.y - offset_y
+        
 
     def dibujar(self, pantalla, offset_x=0, offset_y=0):
         if not self.animacion_actual:
@@ -246,6 +233,6 @@ class Jugador:
 
         # Dibujar la hitbox (verde) con desplazamiento
         hitbox_offset = self.rect.move(offset_x, offset_y)
-        #pygame.draw.rect(pantalla, (0, 255, 0), hitbox_offset, 2)
+        pygame.draw.rect(pantalla, (0, 255, 0), hitbox_offset, 2)
         if self.estado == "attack" and self.frame_actual == len(self.animacion_actual) - 1:
             self.estado = "idle"
