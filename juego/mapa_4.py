@@ -36,6 +36,9 @@ from assets.mapas.mapa4_data import (
 def ejecutar_mapa4(pantalla):
     clock = pygame.time.Clock()
     running = True
+    
+    os.system('cls')
+
 
     ancho_jugador = 23
     alto_jugador = 15
@@ -75,9 +78,7 @@ def ejecutar_mapa4(pantalla):
 
     imagen_estand_de_armadura_actual = imagen_estand_de_armadura_lleno_escalado
 
-    print("Tamaño original pared:", imagen_pared.get_size())
-    print("Tamaño original estandarte:", imagen_estand_de_armadura_lleno.get_size())
-    
+
     def animacion_puerta_abierta(pantalla):
         # Cargar sprites de la animación de la puerta
         sprites_animacion_puerta = [
@@ -109,17 +110,22 @@ def ejecutar_mapa4(pantalla):
                     except Exception:
                         state = None
                     pause_menu(pantalla, mapa_actual=4, state=state)
-
+            
+            # Dibujar fondo y jugador
             pantalla.fill((0, 0, 0))
+            
             pantalla.blit(fondo_escalado, (OFFSET_X, OFFSET_Y))
             pantalla.blit(imagen_escalada, (0, 0))
             pantalla.blit(imagen_estand_de_armadura_actual, (0, 0))
             jugador.dibujar(pantalla, offset_x, offset_y)    # Jugador
-
+            
+            
+            
             # Dibujar sprite actual de la puerta
             if sprite_index < len(sprites_animacion_puerta):
                 imagen_puerta = sprites_animacion_puerta[sprite_index]
-                pantalla.blit(imagen_puerta, (0, 0))               # Posición de la puerta
+                imagen_puerta_escalado= pygame.transform.scale(imagen_puerta, (1280, 720))
+                pantalla.blit(imagen_puerta_escalado, (0, 0))               # Posición de la puerta
 
             pygame.display.update()
 
@@ -130,28 +136,11 @@ def ejecutar_mapa4(pantalla):
                 if sprite_index >= len(sprites_animacion_puerta):
                     animacion_terminada = True
 
-        # Redibujar escena final después de la animación
-        pantalla.fill((0, 0, 0))
-        pantalla.blit(fondo_escalado, (OFFSET_X, OFFSET_Y))
-        pantalla.blit(imagen_escalada, (0, 0))
-        pantalla.blit(imagen_estand_de_armadura_actual, (0, 0))
-        jugador.dibujar(pantalla, offset_x, offset_y)
-        
-        
+          
 
-        # Dibujar colisiones visibles (opcional)
-        # for colision in colisiones_escaladas:
-        #     pygame.draw.rect(pantalla, (255, 0, 0), colision, 2)
-
-        # Dibujar zonas de interacción
-        pygame.draw.rect(pantalla, (0, 0, 255), puerta_3_entrada, 2)
-        pygame.draw.rect(pantalla, (0, 255, 255), puerta_3_salida, 2)
-        pygame.draw.rect(pantalla, (0, 255, 255), puerta_3_engranaje, 2)
-        pygame.draw.rect(pantalla, (255, 0, 255), puerta_3_cuatro_en_raya, 2)
-
-        # Actualizar pantalla final
-        pygame.display.flip()
-        clock.tick(60)
+            # Actualizar pantalla final
+            pygame.display.flip()
+            clock.tick(60)
 
     #hace a animacion
     animacion_puerta_abierta(pantalla)
@@ -197,10 +186,10 @@ def ejecutar_mapa4(pantalla):
             jugador.dibujar(pantalla, offset_x, offset_y)
 
 
-        """
+        
         # Dibujar colisiones
         for colision in colisiones_escaladas:
-            pygame.draw.rect(pantalla, (255, 0, 0), colision, 2)"""
+            pygame.draw.rect(pantalla, (255, 0, 0), colision, 2)
 
         #Dibujar puertas (opcional para depuración)
         pygame.draw.rect(pantalla, (0, 0, 255), puerta_3_entrada, 2)

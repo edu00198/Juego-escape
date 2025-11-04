@@ -78,7 +78,6 @@ class Jugador:
         ruta_base = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets", "sprites_jugador", carpeta_principal, subcarpeta)
         imagenes = []
 
-        print(f"Intentando cargar sprites desde: {ruta_base}")
         if not os.path.exists(ruta_base):
             print(f"[ADVERTENCIA] Carpeta no encontrada: {ruta_base}")
             return imagenes
@@ -98,8 +97,6 @@ class Jugador:
         teclas = pygame.key.get_pressed()
         moviendo = False
         colisiones = self.colisiones
-
-        print("Animación actual:", self.animacion_actual)
 
 
         izquierda = teclas[pygame.K_LEFT]
@@ -224,15 +221,43 @@ class Jugador:
             self.frame_actual = (self.frame_actual + 1) % len(self.animacion_actual)
             self.contador_tiempo = 0
 
+        
 
         # Obtener el sprite actual
         imagen = self.animacion_actual[self.frame_actual]
 
         # Dibujar el sprite con desplazamiento
         pantalla.blit(imagen, (self.sprite_pos.x + offset_x, self.sprite_pos.y + offset_y))
-
+        
         # Dibujar la hitbox (verde) con desplazamiento
         hitbox_offset = self.rect.move(offset_x, offset_y)
         pygame.draw.rect(pantalla, (0, 255, 0), hitbox_offset, 2)
         if self.estado == "attack" and self.frame_actual == len(self.animacion_actual) - 1:
             self.estado = "idle"
+            
+            
+    def dibujar_escalado(self, pantalla, offset_x=0, offset_y=0, escala=1.0 ):
+        if not self.animacion_actual:
+            print("No hay animación actual disponible")
+            return
+        
+        # Actualizar el frame de animación
+        self.contador_tiempo += 1
+
+        # Elegir velocidad según estado
+        if self.estado == "attack":
+            velocidad_actual = self.velocidad_animacion_attack
+        else:
+            velocidad_actual = self.velocidad_animacion
+
+        if self.contador_tiempo >= velocidad_actual:
+            self.frame_actual = (self.frame_actual + 1) % len(self.animacion_actual)
+            self.contador_tiempo = 0
+
+
+        # Obtener el sprite actual
+        imagen = self.animacion_actual[self.frame_actual]
+        imagen_escalada = pygame.transform.scale(imagen, (55*escala, 55*escala)) 
+        # Dibujar el sprite con desplazamiento
+        pantalla.blit(imagen_escalada, (self.sprite_pos.x + offset_x, self.sprite_pos.y + offset_y))
+
