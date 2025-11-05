@@ -191,3 +191,35 @@ class JugadorLvl2(Jugador):
         offset_y = 101
         self.sprite_pos.x = self.rect.x - offset_x
         self.sprite_pos.y = self.rect.y - offset_y
+
+def dibujar(self, pantalla, offset_x=0, offset_y=0):
+        if not self.animacion_actual:
+            print("No hay animación actual disponible")
+            return
+        
+        # Actualizar el frame de animación
+        self.contador_tiempo += 1
+
+        # Elegir velocidad según estado
+        if self.estado == "attack":
+            velocidad_actual = self.velocidad_animacion_attack
+        else:
+            velocidad_actual = self.velocidad_animacion
+
+        if self.contador_tiempo >= velocidad_actual:
+            self.frame_actual = (self.frame_actual + 1) % len(self.animacion_actual)
+            self.contador_tiempo = 0
+
+        
+
+        # Obtener el sprite actual
+        imagen = self.animacion_actual[self.frame_actual]
+
+        # Dibujar el sprite con desplazamiento
+        pantalla.blit(imagen, (self.sprite_pos.x + offset_x, self.sprite_pos.y + offset_y))
+        
+        # Dibujar la hitbox (verde) con desplazamiento
+        hitbox_offset = self.rect.move(offset_x, offset_y)
+        pygame.draw.rect(pantalla, (0, 255, 0), hitbox_offset, 2)
+        if self.estado == "attack" and self.frame_actual == len(self.animacion_actual) - 1:
+            self.estado = "idle"

@@ -202,7 +202,6 @@ class Jugador:
         self.sprite_pos.x = self.rect.x - offset_x
         self.sprite_pos.y = self.rect.y - offset_y
         
-
     def dibujar(self, pantalla, offset_x=0, offset_y=0):
         if not self.animacion_actual:
             print("No hay animación actual disponible")
@@ -234,7 +233,6 @@ class Jugador:
         pygame.draw.rect(pantalla, (0, 255, 0), hitbox_offset, 2)
         if self.estado == "attack" and self.frame_actual == len(self.animacion_actual) - 1:
             self.estado = "idle"
-            
             
     def dibujar_escalado(self, pantalla, offset_x=0, offset_y=0, escala=1.0 ):
         if not self.animacion_actual:

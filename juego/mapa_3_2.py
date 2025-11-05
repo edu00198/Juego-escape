@@ -32,6 +32,9 @@ from assets.mapas.mapa4_data import (
     colisiones_escaladas
 )
 
+animacion_puerta_abierta_hecha = False
+nivel_jugador = 1  # Nivel inicial del jugador
+
 def ejecutar_mapa4(pantalla):
     clock = pygame.time.Clock()
     running = True
@@ -116,7 +119,10 @@ def ejecutar_mapa4(pantalla):
             pantalla.blit(fondo_escalado, (OFFSET_X, OFFSET_Y))
             pantalla.blit(imagen_escalada, (0, 0))
             pantalla.blit(imagen_estand_de_armadura_actual, (0, 0))
-            jugador.dibujar(pantalla, offset_x, offset_y)    # Jugador
+            if nivel_jugador >=2:
+                JugadorLvl2.dibujar(jugador, pantalla, offset_x, offset_y)    # Jugador lvl2
+            else:
+                jugador.dibujar(pantalla, offset_x, offset_y)    # Jugador
             
             
             
@@ -133,16 +139,16 @@ def ejecutar_mapa4(pantalla):
                 sprite_index += 1
                 animation_timer = current_time
                 if sprite_index >= len(sprites_animacion_puerta):
+                    animacion_puerta_abierta_hecha = True
                     animacion_terminada = True
-
-          
-
             # Actualizar pantalla final
             pygame.display.flip()
             clock.tick(60)
 
+
+    if animacion_puerta_abierta_hecha:
     #hace a animacion
-    animacion_puerta_abierta(pantalla)
+        animacion_puerta_abierta(pantalla)
     # Acá comienza el juego normal
     running = True
     while running:
@@ -174,15 +180,21 @@ def ejecutar_mapa4(pantalla):
         print("Suma:", jugador.sprite_pos.y + jugador.rect.height)"""
 
         # Dibujo condicional según posición del jugador
-        if float(jugador.sprite_pos.y + jugador.rect.height) < 310.0:  
-            jugador.dibujar(pantalla, offset_x, offset_y)
+        if float(jugador.sprite_pos.y + jugador.rect.height) < 310.0: 
+            if nivel_jugador >=2:
+                JugadorLvl2.dibujar(jugador, pantalla, offset_x, offset_y)    # Jugador lvl2
+            else: 
+                jugador.dibujar(pantalla, offset_x, offset_y)
             pantalla.blit(imagen_escalada, (0, 0))
             pantalla.blit(imagen_estand_de_armadura_actual, (0, 0))
 
         else:
             pantalla.blit(imagen_escalada, (0, 0))
             pantalla.blit(imagen_estand_de_armadura_actual, (0, 0))
-            jugador.dibujar(pantalla, offset_x, offset_y)
+            if nivel_jugador >=2:
+                JugadorLvl2.dibujar(jugador, pantalla, offset_x, offset_y)    # Jugador lvl2
+            else: 
+                jugador.dibujar(pantalla, offset_x, offset_y)
 
 
         '''
@@ -245,8 +257,7 @@ def ejecutar_mapa4(pantalla):
                         ancho=jugador.rect.width,
                         alto=jugador.rect.height,
                         escala=jugador.escala,
-                        colisiones=jugador.colisiones
-            )
+                        colisiones=jugador.colisiones)
 
             
     pygame.quit()
