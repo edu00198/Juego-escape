@@ -6,7 +6,7 @@ import os
 pygame.init()
 ANCHO_PANTALLA = 1280
 ALTO_PANTALLA = 720
-from jugador_lvl2 import JugadorLvl2
+from .jugador_lvl2 import JugadorLvl2
 
 pantalla = pygame.display.set_mode((ANCHO_PANTALLA, ALTO_PANTALLA))
 
@@ -15,9 +15,8 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 
 # Pause menu import
-from juego import jugador
-from juego.jugador import Jugador
-from juego.menu_pausa import pause_menu
+from .jugador import Jugador
+from .menu_pausa import pause_menu
 #from juego.mapa_5 import ejecutar_mapa5
 from assets.mapas.mapa4_data import (
     fondo_mapa,
@@ -186,16 +185,16 @@ def ejecutar_mapa4(pantalla):
             jugador.dibujar(pantalla, offset_x, offset_y)
 
 
-        
+        '''
         # Dibujar colisiones
         for colision in colisiones_escaladas:
-            pygame.draw.rect(pantalla, (255, 0, 0), colision, 2)
+            pygame.draw.rect(pantalla, (255, 0, 0), colision, 2)'''
 
         #Dibujar puertas (opcional para depuración)
-        pygame.draw.rect(pantalla, (0, 0, 255), puerta_3_entrada, 2)
-        pygame.draw.rect(pantalla, (0, 255, 255), puerta_3_salida, 2)
+        #pygame.draw.rect(pantalla, (0, 0, 255), puerta_3_entrada, 2)
+        #pygame.draw.rect(pantalla, (0, 255, 255), puerta_3_salida, 2)
         pygame.draw.rect(pantalla, (0, 255, 255), puerta_3_engranaje, 2)
-        pygame.draw.rect(pantalla, (255, 0, 255), puerta_3_cuatro_en_raya, 2)
+        #pygame.draw.rect(pantalla, (255, 0, 255), puerta_3_cuatro_en_raya, 2)
         pygame.draw.rect(pantalla, (255, 255, 0), estandarte_de_armaduras, 2)  
 
         jugador.manejar_teclas()

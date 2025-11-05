@@ -1,9 +1,7 @@
 #jugador lv2
 import pygame
-import os
-import sys
 
-from jugador import Jugador  # Importa la clase Jugador desde el módulo jugador.py
+from .jugador import Jugador  # Importa la clase Jugador desde el módulo jugador.py
 from configuracion import VELOCIDAD_JUGADOR, ANCHO_PANTALLA, ALTO_PANTALLA, VELOCIDAD_ANIMACION
 
 class JugadorLvl2(Jugador):

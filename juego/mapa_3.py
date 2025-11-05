@@ -10,9 +10,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from configuracion import ANCHO_PANTALLA, ALTO_PANTALLA, ESCALA_JUGADOR
 from juego.jugador import Jugador
-from juego.mapa_5 import ejecutar_mapa5
 from juego.mapa_3_4_en_raya import ejecutar_mapa4_en_raya
-from juego.mapa_3_2 import ejecutar_mapa3_2
 from assets.mapas.mapa3_data_nuevo0 import (
     fondo_mapa,
     SCALED_WIDTH,
@@ -99,16 +97,7 @@ def ejecutar_mapa3_con_estado(state=None):
         pygame.display.flip()
         clock.tick(60)
 
-        # Transición al siguiente mapa
-        if jugador.rect.colliderect(puerta_3_salida):
-            print("Transición al siguiente mapa")
-            state = {
-                'mapa': 'mapa3',
-                'pos_jugador': (jugador.sprite_pos.x, jugador.sprite_pos.y)
-            }
-            save_game(state)
-            running = False
-            return ejecutar_mapa3_2()
+        # Transición al siguiente map
             
         if jugador.rect.colliderect(puerta_3_entrada):
             print("regresa a mapa 2")

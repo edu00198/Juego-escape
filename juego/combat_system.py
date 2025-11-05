@@ -444,10 +444,34 @@ class CombatPlayer:
                     enemies.remove(enemy)
                     
     def get_attack_rect(self):
-        # Simplemente devolver el mismo rectángulo del jugador
-        return self.player.rect.copy()
-            
-        return attack_rect
+        """Crear un rectángulo de ataque en la dirección que mira el jugador"""
+        attack_width = self.attack_range
+        attack_height = int(self.player.rect.height * 0.7)
+
+        # Posición base es el centro del jugador
+        player_center = self.player.rect.center
+        
+        # Crear rectángulo según la dirección
+        if self.player.direccion == "derecha":
+            return pygame.Rect(self.player.rect.right, 
+                             player_center[1] - attack_height//2,
+                             attack_width, 
+                             attack_height)
+        elif self.player.direccion == "izquierda":
+            return pygame.Rect(self.player.rect.left - attack_width,
+                             player_center[1] - attack_height//2,
+                             attack_width,
+                             attack_height)
+        elif self.player.direccion == "arriba":
+            return pygame.Rect(player_center[0] - attack_height//2,
+                             self.player.rect.top - attack_width,
+                             attack_height,
+                             attack_width)
+        else:  # abajo
+            return pygame.Rect(player_center[0] - attack_height//2,
+                             self.player.rect.bottom,
+                             attack_height,
+                             attack_width)
         
     def take_damage(self, amount, current_time):
         if self.invulnerable:

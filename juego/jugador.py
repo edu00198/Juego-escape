@@ -50,7 +50,6 @@ class Jugador:
             "run_arriba": self.cargar_sprites("run_personaje_lvl1", "run_arriba"),
             "run_izquierda": self.cargar_sprites("run_personaje_lvl1", "run_izquierda"),
             "run_derecha": self.cargar_sprites("run_personaje_lvl1", "run_derecha"),
-
         }
         print("Animaciones cargadas:", list(self.animaciones.keys()))
         print("Número de frames en idle_abajo:", len(self.animaciones["idle_abajo"]) if "idle_abajo" in self.animaciones else 0)
@@ -80,7 +79,10 @@ class Jugador:
 
         if not os.path.exists(ruta_base):
             print(f"[ADVERTENCIA] Carpeta no encontrada: {ruta_base}")
-            return imagenes
+                # Si no hay imágenes, crear una imagen por defecto
+                default_img = pygame.Surface((32*self.escala, 32*self.escala))
+                default_img.fill((255, 0, 0))  # Cuadrado rojo como fallback
+                return [default_img]
 
         for archivo in sorted(os.listdir(ruta_base)):
             if archivo.lower().endswith(".png"):
@@ -91,10 +93,24 @@ class Jugador:
                 except Exception as e:
                     print(f"[ERROR] No se pudo cargar {ruta}: {e}")
 
-        return imagenes     
-        
+        return imagenes
+
+        return imagenes
+  
+
     def manejar_teclas(self):
         teclas = pygame.key.get_pressed()
+
+        # 1) Si ya está atacando, no proceses movimiento ni otro ataque
+        if self.atacando:
+            return
+
+        # 2) Detectar inicio de ataque - temporalmente deshabilitado hasta que se agreguen las animaciones
+        if teclas[pygame.K_SPACE] and not self.atacando:
+            # Por ahora, no cambiamos a animación de ataque ya que no existe
+            return
+
+        # 3) Movimiento normal
         moviendo = False
         colisiones = self.colisiones
 
@@ -221,7 +237,6 @@ class Jugador:
             self.frame_actual = (self.frame_actual + 1) % len(self.animacion_actual)
             self.contador_tiempo = 0
 
-        
 
         # Obtener el sprite actual
         imagen = self.animacion_actual[self.frame_actual]
@@ -231,33 +246,6 @@ class Jugador:
         
         # Dibujar la hitbox (verde) con desplazamiento
         hitbox_offset = self.rect.move(offset_x, offset_y)
-        pygame.draw.rect(pantalla, (0, 255, 0), hitbox_offset, 2)
+        #pygame.draw.rect(pantalla, (0, 255, 0), hitbox_offset, 2)
         if self.estado == "attack" and self.frame_actual == len(self.animacion_actual) - 1:
             self.estado = "idle"
-            
-            
-    def dibujar_escalado(self, pantalla, offset_x=0, offset_y=0, escala=1.0 ):
-        if not self.animacion_actual:
-            print("No hay animación actual disponible")
-            return
-        
-        # Actualizar el frame de animación
-        self.contador_tiempo += 1
-
-        # Elegir velocidad según estado
-        if self.estado == "attack":
-            velocidad_actual = self.velocidad_animacion_attack
-        else:
-            velocidad_actual = self.velocidad_animacion
-
-        if self.contador_tiempo >= velocidad_actual:
-            self.frame_actual = (self.frame_actual + 1) % len(self.animacion_actual)
-            self.contador_tiempo = 0
-
-
-        # Obtener el sprite actual
-        imagen = self.animacion_actual[self.frame_actual]
-        imagen_escalada = pygame.transform.scale(imagen, (55*escala, 55*escala)) 
-        # Dibujar el sprite con desplazamiento
-        pantalla.blit(imagen_escalada, (self.sprite_pos.x + offset_x, self.sprite_pos.y + offset_y))
-
