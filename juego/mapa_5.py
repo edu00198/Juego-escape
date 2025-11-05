@@ -14,6 +14,8 @@ from assets.mapas.mapa5_data import (
     SCALED_HEIGHT,
     OFFSET_X,
     OFFSET_Y,
+    TILE_SIZE,
+    SCALE_FACTOR,
     puerta_4_entrada,
     puerta_4_salida,
     colisiones_escaladas
@@ -39,12 +41,25 @@ def ejecutar_mapa5():
     pos_x = puerta4pos[0]
     pos_y = puerta4pos[1] - alto_jugador * 10
     jugador = Jugador(pos_x, pos_y, ancho_jugador, alto_jugador, escala=ESCALA_JUGADOR, colisiones=colisiones_escaladas)
+    
+    # Crear sistema de combate pero no activarlo aún
     combat_player = CombatPlayer(jugador)
     combat_system = CombatSystem()
+    combate_activo = False
     
-    # Crear un solo vampiro en una posición específica
-    enemy = Enemy(ANCHO_PANTALLA - 200, ALTO_PANTALLA//2)  # Posicionarlo en el centro-derecha de la pantalla
-    combat_system.add_enemy(enemy)
+    # Definir zona de combate en la parte superior del mapa
+    # (basado en el mapa, es la zona abierta cerca de la salida)
+    zona_combate = pygame.Rect(
+        offset_x + 11 * TILE_SIZE * SCALE_FACTOR,  # x: desde columna 11
+        offset_y + 3 * TILE_SIZE * SCALE_FACTOR,   # y: desde fila 3
+        8 * TILE_SIZE * SCALE_FACTOR,              # ancho: 8 tiles
+        2 * TILE_SIZE * SCALE_FACTOR               # alto: 2 tiles
+    )
+    # Ajustar la hitbox de ataque del vampiro para que sea más realista (igual que en test_combat)
+    try:
+        enemy.set_attack_hitbox(attack_range=30, attack_width=30, attack_height=int(enemy.rect.height * 0.7))
+    except Exception:
+        pass
 
     fondo_escalado = pygame.transform.scale(fondo_mapa, (SCALED_WIDTH, SCALED_HEIGHT))
 
@@ -101,16 +116,64 @@ def ejecutar_mapa5():
                         running = False
                     enemy.last_attack = current_time
         
-        # Manejo del ataque del jugador
+        # Manejo del ataque del jugador (integrado desde test_combat.py)
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_SPACE] and combat_player.can_attack(current_time):
+        if keys[pygame.K_SPACE] and combat_player.can_attack(current_time) and not jugador.atacando:
+            # activar animación de ataque en el jugador (igual comportamiento que en test_combat)
             jugador.estado = "attack"
+            jugador.atacando = True
+            jugador.frame_actual = 0
+            jugador.contador_tiempo = 0  # Resetear contador de animación
+            clave_animacion = f"{jugador.estado}_{jugador.direccion}"
+            if clave_animacion in jugador.animaciones:
+                jugador.animacion_actual = jugador.animaciones[clave_animacion]
             combat_player.attack(current_time, combat_system.enemies)
             
+        # Activar combate si el jugador entra en la zona
+        if not combate_activo and jugador.rect.colliderect(zona_combate):
+            combate_activo = True
+            # Crear enemigo cuando se active el combate
+            enemy = Enemy(
+                zona_combate.centerx,  # Centrado en x en la zona
+                zona_combate.centery - TILE_SIZE * SCALE_FACTOR  # Un poco arriba del centro
+            )
+            try:
+                enemy.set_attack_hitbox(attack_range=30, attack_width=30, attack_height=int(enemy.rect.height * 0.7))
+            except Exception:
+                pass
+            combat_system.add_enemy(enemy)
+            # Mostrar mensaje de inicio de combate
+            font = pygame.font.Font(None, 36)
+            text = font.render("¡Combate iniciado!", True, (255, 0, 0))
+            pantalla.blit(text, (ANCHO_PANTALLA//2 - text.get_width()//2, 50))
+
         # Actualizar jugador y sistema de combate
         combat_player.update(current_time)
         jugador.dibujar(pantalla, offset_x, offset_y)
-        combat_player.draw_health(pantalla)
+        
+        # Solo mostrar la barra de vida y enemigos si el combate está activo
+        if combate_activo:
+            combat_player.draw_health(pantalla)
+            # Debug: dibujar área de ataque cuando el jugador está atacando
+            if jugador.estado == "attack":
+                attack_rect = combat_player.get_attack_rect()
+                pygame.draw.rect(pantalla, (255, 255, 0), attack_rect.move(offset_x, offset_y), 2)
+            
+            # Debug: mostrar zona de combate
+            pygame.draw.rect(pantalla, (0, 0, 255), zona_combate, 2)
+
+            # Actualizar y dibujar enemigos solo si el combate está activo
+            for enemy in combat_system.enemies[:]:
+                enemy.move_towards_player(jugador.rect)
+                enemy.draw(pantalla, offset_x, offset_y)
+                
+                # Ataque del enemigo
+                if enemy.can_attack(current_time, jugador.rect):
+                    if pygame.Rect(enemy.rect).colliderect(jugador.rect):
+                        if combat_player.take_damage(enemy.attack_power, current_time):
+                            print("Game Over")
+                            running = False
+                        enemy.last_attack = current_time
 
         if imagen_escalada:
             pantalla.blit(imagen_escalada, (0, 0))  # Después la imagen → queda arriba del jugador
