@@ -111,7 +111,7 @@ hitbox_mapa_4 = [
   [0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1],
   [1,1,1,1,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1],
   [1,1,1,1,1,1,1,0,0,1,1,1,1,0,0,0,0,0,0,1],
-  [1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1],
+  [1,1,1,1,1,0,0,0,0,0,0,0,1,0,0,0,0,1,1,1],
   [1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1],
   [1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,1,1],
   [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
@@ -298,3 +298,10 @@ puerta_3_cuatro_en_raya = pygame.Rect(
     int(2 * TILE_SIZE * SCALE_FACTOR),
     int(1 * TILE_SIZE * SCALE_FACTOR)
 )
+estandarte_de_armaduras = pygame.Rect(
+    int(OFFSET_X + 9 * TILE_SIZE * SCALE_FACTOR),
+    int(OFFSET_Y + 6.5 * TILE_SIZE * SCALE_FACTOR),
+    int(3 * TILE_SIZE * SCALE_FACTOR),
+    int(1 * TILE_SIZE * SCALE_FACTOR)
+)
+
