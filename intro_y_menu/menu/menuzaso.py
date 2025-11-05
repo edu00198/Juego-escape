@@ -7,6 +7,27 @@ from .settings import settings_menu
 from juego.save_system import load_game, list_saves, delete_save
 from juego import mapa_1
 
+BASE_RES = (1280, 720)
+base_surface = pygame.Surface(BASE_RES)
+fullscreen = False
+
+
+def aplicar_resolucion(window, nueva_res):
+    global fullscreen
+
+    if nueva_res == "PANTALLA COMPLETA":
+        fullscreen = True
+        window = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+        info = pygame.display.Info()
+        ancho, alto = info.current_w, info.current_h
+    else:
+        fullscreen = False
+        ancho, alto = map(int, nueva_res.split("x"))
+        window = pygame.display.set_mode((ancho, alto), pygame.RESIZABLE)
+
+    print(f"✅ Resolución aplicada: {ancho}x{alto} | fullscreen={fullscreen}")
+    return window, ancho, alto
+
 
 def loading_screen(window):
     from configuracion import ANCHO_PANTALLA, ALTO_PANTALLA
