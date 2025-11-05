@@ -41,6 +41,11 @@ class Jugador:
             "run_arriba": self.cargar_sprites("run_personaje_lvl1", "run_arriba"),
             "run_izquierda": self.cargar_sprites("run_personaje_lvl1", "run_izquierda"),
             "run_derecha": self.cargar_sprites("run_personaje_lvl1", "run_derecha"),
+            # Añadir animaciones de ataque desde el nivel 2
+            "attack_abajo": self.cargar_sprites_lvl2("Attack_personaje_lvl2", "attack_abajo"),
+            "attack_arriba": self.cargar_sprites_lvl2("Attack_personaje_lvl2", "attack_arriba"),
+            "attack_izquierda": self.cargar_sprites_lvl2("Attack_personaje_lvl2", "attack_izquierda"),
+            "attack_derecha": self.cargar_sprites_lvl2("Attack_personaje_lvl2", "attack_derecha"),
         }
         print("Animaciones cargadas:", list(self.animaciones.keys()))
         print("Número de frames en idle_abajo:", len(self.animaciones["idle_abajo"]) if "idle_abajo" in self.animaciones else 0)
@@ -69,7 +74,10 @@ class Jugador:
         print(f"Intentando cargar sprites desde: {ruta_base}")
         if not os.path.exists(ruta_base):
             print(f"[ADVERTENCIA] Carpeta no encontrada: {ruta_base}")
-            return imagenes
+                # Si no hay imágenes, crear una imagen por defecto
+                default_img = pygame.Surface((32*self.escala, 32*self.escala))
+                default_img.fill((255, 0, 0))  # Cuadrado rojo como fallback
+                return [default_img]
 
         for archivo in sorted(os.listdir(ruta_base)):
             if archivo.lower().endswith(".png"):
@@ -80,19 +88,50 @@ class Jugador:
                 except Exception as e:
                     print(f"[ERROR] No se pudo cargar {ruta}: {e}")
 
-        return imagenes
+            # Si no se cargó ninguna imagen, usar imagen por defecto
+            if not imagenes:
+                default_img = pygame.Surface((32*self.escala, 32*self.escala))
+                default_img.fill((255, 0, 0))  # Cuadrado rojo como fallback
+                return [default_img]
 
         return imagenes
+
+    def cargar_sprites_lvl2(self, carpeta_principal, subcarpeta):
+        """Cargar sprites desde la carpeta de nivel 2"""
+        ruta_base = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets", "sprites_jugador lvl 2", carpeta_principal, subcarpeta)
+        imagenes = []
+
+        print(f"Intentando cargar sprites de lvl2 desde: {ruta_base}")
+        if not os.path.exists(ruta_base):
+            print(f"[ADVERTENCIA] Carpeta no encontrada: {ruta_base}")
+                # Si no hay imágenes, crear una imagen por defecto
+                default_img = pygame.Surface((32*self.escala, 32*self.escala))
+                default_img.fill((0, 0, 255))  # Cuadrado azul como fallback para nivel 2
+                return [default_img]
+
+        for archivo in sorted(os.listdir(ruta_base)):
+            if archivo.lower().endswith(".png"):
+                ruta = os.path.join(ruta_base, archivo)
+                try:
+                    imagen = pygame.image.load(ruta).convert_alpha()
+                    imagenes.append(imagen)
+                    print(f"Cargada imagen de ataque: {archivo}")
+                except Exception as e:
+                    print(f"[ERROR] No se pudo cargar {ruta}: {e}")
+
+            # Si no se cargó ninguna imagen, usar imagen por defecto
+            if not imagenes:
+                default_img = pygame.Surface((32*self.escala, 32*self.escala))
+                default_img.fill((0, 0, 255))  # Cuadrado azul como fallback para nivel 2
+                return [default_img]
+
+            return imagenes
   
 
     def manejar_teclas(self):
         teclas = pygame.key.get_pressed()
 
-        # 1) Si ya está atacando, no proceses movimiento ni otro ataque
-        if self.atacando:
-            return
-
-        # 2) Detectar inicio de ataque - temporalmente deshabilitado hasta que se agreguen las animaciones
+        # 2) Detectar inicio de ataque - permitir movimiento mientras ataca
         if teclas[pygame.K_SPACE] and not self.atacando:
             # Por ahora, no cambiamos a animación de ataque ya que no existe
             return
@@ -221,7 +260,10 @@ class Jugador:
         if self.contador_tiempo >= velocidad_actual:
             self.frame_actual = (self.frame_actual + 1) % len(self.animacion_actual)
             self.contador_tiempo = 0
-
+            # Si terminamos la animación de ataque, volver a idle
+            if self.estado == "attack" and self.frame_actual == 0:  # volvió al principio
+                self.estado = "idle"
+                self.atacando = False  # Importante: resetear flag de ataque
 
         # Obtener el sprite actual
         imagen = self.animacion_actual[self.frame_actual]
@@ -232,5 +274,3 @@ class Jugador:
         # Dibujar la hitbox (verde) con desplazamiento
         hitbox_offset = self.rect.move(offset_x, offset_y)
         #pygame.draw.rect(pantalla, (0, 255, 0), hitbox_offset, 2)
-        if self.estado == "attack" and self.frame_actual == len(self.animacion_actual) - 1:
-            self.estado = "idle"
