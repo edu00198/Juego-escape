@@ -7,7 +7,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from juego.cuatro_en_raya import inicio_juego
 from configuracion import ANCHO_PANTALLA, ALTO_PANTALLA, ESCALA_JUGADOR
 from juego.jugador import Jugador
-from juego.mapa_3_2 import ejecutar_mapa3_2
+from juego.mapa_3_2 import ejecutar_mapa4
 from assets.mapas.mapa3_4_en_raya_data import (
     fondo_mapa,
     SCALED_WIDTH,
@@ -129,9 +129,8 @@ def ejecutar_mapa4_en_raya():
             running = False
             # Llamar a ejecutar_mapa3_2 pasando la superficie (evita TypeError)
             try:
-                ejecutar_mapa3_2(pantalla)
-            except TypeError:
-                # Fallback por si ejecutar_mapa3_2 cambió firma: llamamos sin argumentos
-                ejecutar_mapa3_2()
-
+                ejecutar_mapa4(pantalla)
+                running = True # cuando se regrese del mapa4            
+            except Exception as e:
+                print(f"Error al ejecutar mapa 3_2: {e}")
     return
