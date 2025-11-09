@@ -36,8 +36,6 @@ class Jugador:
         self.rect.inflate_ip(-30, -10)  # achica la hitbox horizontal y verticalmente
 
 
-
-        print("Iniciando carga de animaciones...")
         # Animaciones (como ya tenías)
       
         
@@ -52,9 +50,7 @@ class Jugador:
             "run_derecha": self.cargar_sprites("run_personaje_lvl1", "run_derecha"),
 
         }
-        print("Animaciones cargadas:", list(self.animaciones.keys()))
-        print("Número de frames en idle_abajo:", len(self.animaciones["idle_abajo"]) if "idle_abajo" in self.animaciones else 0)
-
+       
         self.direccion = "abajo"
         self.estado = "idle"
         self.animacion_actual = self.animaciones.get("idle_abajo", [])

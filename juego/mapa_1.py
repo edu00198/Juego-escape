@@ -24,6 +24,8 @@ from . import puzzle_cofre
 from .save_system import save_game
 
 
+def limpiar_terminal():
+    os.system('cls' if os.name == 'nt' else 'clear')
 
 
 
@@ -253,6 +255,7 @@ def ejecutar_mapa1():
                         if cerca_puerta and (hay_cofre_abierto or sistema_cofres.codigo_correcto):
                             if sistema_cofres.codigo_correcto:
                                 # Código ya ingresado: pasar a mapa2 (no retorno a mapa1)
+                                limpiar_terminal()
                                 ejecutar_mapa2()
                                 # Ensure interfaces reset (no return to mapa1)
                                 if sistema_cofres.panel_codigo:

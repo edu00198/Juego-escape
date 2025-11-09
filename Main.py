@@ -1,9 +1,11 @@
 import pygame
 import sys
-import time
+import time, os
 
 # No importar mapas pesados al inicio: se precargarán en background durante la intro
 print("Iniciando módulo principal...")
+def limpiar_terminal():
+    os.system('cls' if os.name == 'nt' else 'clear')
 
 def main():
     try:
@@ -55,6 +57,7 @@ def main():
             raise
 
         # Ejecutar mapa
+        limpiar_terminal()
         mapa_1.ejecutar_mapa1()
 
 

@@ -32,14 +32,17 @@ from assets.mapas.mapa4_data import (
     colisiones_escaladas
 )
 
-animacion_puerta_abierta_hecha = False
-nivel_jugador = 1  # Nivel inicial del jugador
 
 def ejecutar_mapa4(pantalla):
     clock = pygame.time.Clock()
     running = True
     
-    os.system('cls')
+    os.system('cls')  
+    
+    animacion_puerta_abierta_hecha = False
+
+    nivel_jugador = 1  # Nivel inicial del jugador
+
 
 
     ancho_jugador = 23
@@ -119,6 +122,7 @@ def ejecutar_mapa4(pantalla):
             pantalla.blit(fondo_escalado, (OFFSET_X, OFFSET_Y))
             pantalla.blit(imagen_escalada, (0, 0))
             pantalla.blit(imagen_estand_de_armadura_actual, (0, 0))
+            
             if nivel_jugador >=2:
                 JugadorLvl2.dibujar(jugador, pantalla, offset_x, offset_y)    # Jugador lvl2
             else:
@@ -144,15 +148,17 @@ def ejecutar_mapa4(pantalla):
             # Actualizar pantalla final
             pygame.display.flip()
             clock.tick(60)
+ 
 
-
-    if animacion_puerta_abierta_hecha:
+    if not animacion_puerta_abierta_hecha:
     #hace a animacion
         animacion_puerta_abierta(pantalla)
     # Acá comienza el juego normal
     running = True
     while running:
         current_time = pygame.time.get_ticks()
+        
+        
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -181,33 +187,28 @@ def ejecutar_mapa4(pantalla):
 
         # Dibujo condicional según posición del jugador
         if float(jugador.sprite_pos.y + jugador.rect.height) < 310.0: 
-            if nivel_jugador >=2:
-                JugadorLvl2.dibujar(jugador, pantalla, offset_x, offset_y)    # Jugador lvl2
-            else: 
-                jugador.dibujar(pantalla, offset_x, offset_y)
+            
+            jugador.dibujar(pantalla, offset_x, offset_y)
             pantalla.blit(imagen_escalada, (0, 0))
             pantalla.blit(imagen_estand_de_armadura_actual, (0, 0))
 
         else:
             pantalla.blit(imagen_escalada, (0, 0))
             pantalla.blit(imagen_estand_de_armadura_actual, (0, 0))
-            if nivel_jugador >=2:
-                JugadorLvl2.dibujar(jugador, pantalla, offset_x, offset_y)    # Jugador lvl2
-            else: 
-                jugador.dibujar(pantalla, offset_x, offset_y)
+           
+            jugador.dibujar(pantalla, offset_x, offset_y)
 
 
-        '''
         # Dibujar colisiones
         for colision in colisiones_escaladas:
-            pygame.draw.rect(pantalla, (255, 0, 0), colision, 2)'''
+            pygame.draw.rect(pantalla, (255, 0, 0), colision, 2)
 
         #Dibujar puertas (opcional para depuración)
         #pygame.draw.rect(pantalla, (0, 0, 255), puerta_3_entrada, 2)
         #pygame.draw.rect(pantalla, (0, 255, 255), puerta_3_salida, 2)
         pygame.draw.rect(pantalla, (0, 255, 255), puerta_3_engranaje, 2)
         #pygame.draw.rect(pantalla, (255, 0, 255), puerta_3_cuatro_en_raya, 2)
-        pygame.draw.rect(pantalla, (255, 255, 0), estandarte_de_armaduras, 2)  
+        pygame.draw.rect(pantalla, (255, 255, 0), estandarte_de_armaduras, 2)
 
         jugador.manejar_teclas()
 
@@ -246,18 +247,28 @@ def ejecutar_mapa4(pantalla):
                     # Cambiar imagen del estandarte
                     imagen_estand_de_armadura_actual = imagen_estand_de_armadura_vacio_escalado
 
-                    # Guardar posición actual
-                    pos_x = jugador.sprite_pos.x
-                    pos_y = jugador.sprite_pos.y
+                    # Guardar posición real del jugador (rect)
+                    pos_x = jugador.rect.x
+                    pos_y = jugador.rect.y
+                    
+                    nivel_jugador = 2  # Actualizar el nivel del jugador
 
                     # Crear nuevo jugador de nivel 2 en la misma posición
                     jugador = JugadorLvl2(
-                        x=pos_x,
-                        y=pos_y,
+                        x=pos_x-88,
+                        y=pos_y-105,
                         ancho=jugador.rect.width,
                         alto=jugador.rect.height,
                         escala=jugador.escala,
-                        colisiones=jugador.colisiones)
+                        colisiones=colisiones_escaladas
+                    )
+
+                    # Sincronizar sprite_pos con rect (por si el constructor no lo hace)
+                    offset_x = 70  # o el valor que uses en tu clase base
+                    offset_y = 101
+                    jugador.sprite_pos.x = jugador.rect.x - offset_x
+                    jugador.sprite_pos.y = jugador.rect.y - offset_y
+
 
             
     pygame.quit()
