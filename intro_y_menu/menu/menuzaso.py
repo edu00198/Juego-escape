@@ -134,6 +134,7 @@ def select_load_slot(window):
     back_button = Button(None, (ANCHO_PANTALLA // 2, 300 + 5 * 80), scale=1.0, text="Volver")
     buttons.append(back_button)
 
+    # Default: select the first slot
     selected_index = 0
     buttons[selected_index].selected = True
 
@@ -149,6 +150,7 @@ def select_load_slot(window):
                 sys.exit()
 
             if event.type == pygame.KEYDOWN:
+                # Navegación: abajo/derecha = siguiente, arriba/izquierda = anterior
                 if event.key in [pygame.K_DOWN, pygame.K_RIGHT]:
                     selected_index = (selected_index + 1) % len(buttons)
                 elif event.key in [pygame.K_UP, pygame.K_LEFT]:
@@ -246,7 +248,8 @@ def game_selection_menu(window):
     back_button = Button(None, (ANCHO_PANTALLA // 2, 600), scale=1.0, text="Volver")
 
     buttons = [new_game_button, load_game_button, back_button]
-    selected_index = 0
+    # start with no selection so no button is highlighted by default
+    selected_index = -1
     buttons[selected_index].selected = True
 
     while True:
@@ -256,6 +259,7 @@ def game_selection_menu(window):
                 sys.exit()
 
             if event.type == pygame.KEYDOWN:
+                # Navegación: abajo/derecha = siguiente, arriba/izquierda = anterior
                 if event.key in [pygame.K_DOWN, pygame.K_RIGHT]:
                     selected_index = (selected_index + 1) % len(buttons)
                 elif event.key in [pygame.K_UP, pygame.K_LEFT]:
@@ -332,7 +336,7 @@ def menus():
     BASE_DIR = os.path.dirname(__file__)
 
     # Fondo
-    ruta_fondo = os.path.join(BASE_DIR, "assets", "fondo_titulo.png")
+    ruta_fondo = os.path.join(BASE_DIR, "assets", "fondito.png")
     if os.path.exists(ruta_fondo):
         fondo = pygame.image.load(ruta_fondo).convert()
         fondo = pygame.transform.scale(fondo, (ANCHO_PANTALLA, ALTO_PANTALLA))
@@ -340,20 +344,85 @@ def menus():
         fondo = pygame.Surface((ANCHO_PANTALLA, ALTO_PANTALLA))
         fondo.fill((50, 50, 50))
 
-    ruta_start = os.path.join(BASE_DIR, "assets", "DEFINITIVO.png")
-    ruta_exit = os.path.join(BASE_DIR, "assets", "salir.png")
-    ruta_options = os.path.join(BASE_DIR, "assets", "options.png")
+    # We'll draw three wide, semi-transparent buttons with a pixel-like font
+    labels = ["PLAY", "SETTINGS", "QUIT"]
 
-    start_button = Button(ruta_start if os.path.exists(ruta_start) else None,
-                          (400, 500), scale=1.25, text=None)
-    exit_button = Button(ruta_exit if os.path.exists(ruta_exit) else None,
-                         (800, 500), scale=1.25, text=None)
-    options_button = Button(ruta_options if os.path.exists(ruta_options) else None,
-                            (1200, 40), scale=0.75, text=None)
+    # Prepare font (pixel-like if available)
+    try:
+        font = get_font(36)
+    except Exception:
+        font = pygame.font.SysFont("couriernew", 36)
 
-    buttons = [start_button, exit_button, options_button]
-    selected_index = 0
-    buttons[selected_index].selected = True
+    # Button sizing: make wide rectangles so labels (like 'Settings') fit comfortably
+    spacing = 40
+    padding_w = 120  # horizontal padding inside the rect
+    padding_h = 30   # vertical padding inside the rect
+
+    # widest label width
+    max_text_w = max(font.size(lbl)[0] for lbl in labels)
+    desired_w = max(400, max_text_w + padding_w)
+
+    # cap width so it doesn't overflow too much
+    max_w_allowed = ANCHO_PANTALLA - 200
+    btn_w = int(min(desired_w, max_w_allowed))
+
+    # height proportional to width but not too small
+    btn_h = int(max(80, btn_w * 0.28))
+
+    # If vertical space is insufficient for all buttons, reduce height
+    total_height = btn_h * len(labels) + spacing * (len(labels) - 1)
+    if total_height > ALTO_PANTALLA - 80:
+        btn_h = max(60, (ALTO_PANTALLA - 80 - spacing * (len(labels) - 1)) // len(labels))
+        total_height = btn_h * len(labels) + spacing * (len(labels) - 1)
+
+    start_y = (ALTO_PANTALLA - total_height) // 2
+    center_x = ANCHO_PANTALLA // 2
+
+    # Precompute button rects with custom layout:
+    # - Play and Settings: left side, much lower on the screen
+    # - Quit: right side, vertically centered between Play and Settings
+    margin_side = 60
+    left_x = margin_side
+    right_x = ANCHO_PANTALLA - btn_w - margin_side
+
+    spacing_v = 30  # vertical spacing between Play and Settings
+    margin_bottom = 80
+
+    # Place Settings near the bottom, Play above it
+    y_settings = ALTO_PANTALLA - margin_bottom - btn_h
+    y_play = y_settings - (btn_h + spacing_v)
+
+    # Quit centered vertically between Play and Settings
+    center_play = y_play + btn_h / 2
+    center_settings = y_settings + btn_h / 2
+    center_quit = (center_play + center_settings) / 2
+    y_quit = int(center_quit - btn_h / 2)
+
+    # Clamp Y so buttons remain on-screen
+    y_play = max(20, int(y_play))
+    y_settings = max(y_play + btn_h + 8, int(y_settings))
+    y_quit = max(20, int(y_quit))
+
+    buttons = []
+    for lbl in labels:
+        # labels were converted to uppercase (PLAY, SETTINGS, QUIT)
+        if lbl == "PLAY":
+            x = left_x
+            y = y_play
+        elif lbl == "SETTINGS":
+            x = left_x
+            y = y_settings
+        else:  # "QUIT"
+            x = right_x
+            y = y_quit
+
+        # clamp X so buttons don't go off-screen
+        x = max(20, min(x, ANCHO_PANTALLA - btn_w - 20))
+        rect = pygame.Rect(x, y, btn_w, btn_h)
+        buttons.append({"label": lbl, "rect": rect, "hover": False})
+
+    # start with no selection so no button is highlighted by default
+    selected_index = -1
 
     while True:
         for event in pygame.event.get():
@@ -362,30 +431,72 @@ def menus():
                 sys.exit()
 
             if event.type == pygame.KEYDOWN:
+                # Keyboard navigation: abajo/derecha = siguiente, arriba/izquierda = anterior
                 if event.key in [pygame.K_DOWN, pygame.K_RIGHT]:
-                    selected_index = (selected_index + 1) % len(buttons)
+                    if selected_index == -1:
+                        selected_index = 0
+                    else:
+                        selected_index = (selected_index + 1) % len(buttons)
                 elif event.key in [pygame.K_UP, pygame.K_LEFT]:
-                    selected_index = (selected_index - 1) % len(buttons)
+                    if selected_index == -1:
+                        selected_index = len(buttons) - 1
+                    else:
+                        selected_index = (selected_index - 1) % len(buttons)
                 elif event.key == pygame.K_RETURN:
-                    # Acción según el botón seleccionado
-                    if buttons[selected_index] == start_button:
-                        print("Iniciar juego")
-                        game_selection_menu(window)
-                    elif buttons[selected_index] == exit_button:
-                        pygame.quit()
-                        sys.exit()
-                    elif buttons[selected_index] == options_button:
-                        pygame.event.clear()
-                        settings_menu(window)
-                        pygame.event.clear()
+                    if selected_index != -1:
+                        sel = buttons[selected_index]["label"]
+                        if sel == "PLAY":
+                            game_selection_menu(window)
+                        elif sel == "SETTINGS":
+                            pygame.event.clear()
+                            settings_menu(window)
+                            pygame.event.clear()
+                        elif sel == "QUIT":
+                            pygame.quit()
+                            sys.exit()
+
+            # Ignore mouse movement for changing selection: only keyboard arrows move the menu
+
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                mx, my = event.pos
+                for b in buttons:
+                    if b["rect"].collidepoint(mx, my):
+                        sel = b["label"]
+                        if sel == "PLAY":
+                            game_selection_menu(window)
+                        elif sel == "SETTINGS":
+                            pygame.event.clear()
+                            settings_menu(window)
+                            pygame.event.clear()
+                        elif sel == "QUIT":
+                            pygame.quit()
+                            sys.exit()
 
         window.blit(fondo, (0, 0))
 
-        # Actualizar y dibujar botones
-        for i, btn in enumerate(buttons):
-            btn.selected = (i == selected_index)
-            btn.update()
-            btn.draw(window)
+        # Draw buttons (selection only follows keyboard arrows; mouse won't move selection)
+        for idx, b in enumerate(buttons):
+            rect = b["rect"]
+            is_hover = (idx == selected_index)
+
+            # filled gray background surface (slightly transparent), lighter on hover
+            surf = pygame.Surface((rect.w, rect.h), pygame.SRCALPHA)
+            if is_hover:
+                bg_color = (100, 100, 100, 230)  # lighter gray when hovered
+            else:
+                bg_color = (60, 60, 60, 200)  # base gray
+            surf.fill(bg_color)
+
+            # no border: removed outline per request
+
+            # blit the surf
+            window.blit(surf, rect.topleft)
+
+            # render label centered
+            label = b["label"]
+            txt_surf = font.render(label, True, (255, 255, 255))
+            txt_rect = txt_surf.get_rect(center=rect.center)
+            window.blit(txt_surf, txt_rect)
 
         pygame.display.flip()
         clock.tick(60)
