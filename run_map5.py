@@ -19,7 +19,8 @@ if __name__ == '__main__':
             pass
 
         from juego.mapa_5 import ejecutar_mapa5
-        ejecutar_mapa5()
+        # Ejecutar mapa5 en modo aislado: no respetar el save (así siempre aparece el enemigo)
+        ejecutar_mapa5(respect_saved=False)
     except Exception as e:
         print(f"Error ejecutando mapa_5: {e}")
         import traceback

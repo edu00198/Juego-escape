@@ -15,141 +15,141 @@ from .save_system import save_game, list_saves
 # ==========================
 
 def pause_menu(pantalla, mapa_actual=1, state=None):
-	"""
-	Menú de pausa que aparece al presionar ESC.
-	Usa imágenes de fondo y botones personalizados.
-	Solo se mueve con ↑ y ↓, y ENTER para interactuar.
-	"""
+    """
+    Menú de pausa que aparece al presionar ESC.
+    Usa imágenes de fondo y botones personalizados.
+    Solo se mueve con ↑ y ↓, y ENTER para interactuar.
+    """
 
-	# --- FONDO SEGÚN EL MAPA ---
-	try:
-		if mapa_actual == 1:
-			fondo = pygame.image.load(m1_opciones).convert()
-		elif mapa_actual == 2:
-			fondo = pygame.image.load(m2_opciones).convert()
-		elif mapa_actual == 3:
-			fondo = pygame.image.load(m3_opciones).convert()
-		else:
-			raise ValueError("Mapa no válido")
-		fondo = pygame.transform.scale(fondo, (ANCHO_PANTALLA, ALTO_PANTALLA))
-	except Exception as e:
-		print(f"No se pudo cargar el fondo: {e}")
-		fondo = pygame.Surface((ANCHO_PANTALLA, ALTO_PANTALLA))
-		fondo.fill(BLANCO)
+    # --- FONDO SEGÚN EL MAPA ---
+    try:
+        # Selección de fondo: soportar mapas recientes mapeando >=3 al mismo fondo que el mapa 3
+        if mapa_actual == 1:
+            fondo = pygame.image.load(m1_opciones).convert()
+        elif mapa_actual == 2:
+            fondo = pygame.image.load(m2_opciones).convert()
+        else:
+            # Para mapa 3 y superiores usar el mismo recurso (m3_opciones)
+            fondo = pygame.image.load(m3_opciones).convert()
+        fondo = pygame.transform.scale(fondo, (ANCHO_PANTALLA, ALTO_PANTALLA))
+    except Exception as e:
+        print(f"No se pudo cargar el fondo: {e}")
+        fondo = pygame.Surface((ANCHO_PANTALLA, ALTO_PANTALLA))
+        fondo.fill(BLANCO)
 
 	# --- CONTENEDOR CENTRAL (menu_pause) ---
-	try:
-		menu_fondo = pygame.image.load(menu_pause).convert_alpha()
-	except Exception as e:
-		print(f"No se pudo cargar menu_pause: {e}")
-		menu_fondo = None
+    try:
+        menu_fondo = pygame.image.load(menu_pause).convert_alpha()
+    except Exception as e:
+        print(f"No se pudo cargar menu_pause: {e}")
+        menu_fondo = None
 
-	# --- CREAR BOTONES ---
-	btn_width = 300
-	btn_height = 70
-	spacing = 20
-	start_y = (ALTO_PANTALLA - (btn_height * 5 + spacing * 4)) // 2
+    # --- CREAR BOTONES ---
+    btn_width = 300
+    btn_height = 70
+    spacing = 20
+    start_y = (ALTO_PANTALLA - (btn_height * 5 + spacing * 4)) // 2
 
-	# Cada botón usa su imagen importada
-	reanudar_button = Button(resume_button, (ANCHO_PANTALLA // 2, start_y))
-	ayuda_button = Button(help_button, (ANCHO_PANTALLA // 2, start_y + (btn_height + spacing)))
-	config_button = Button(settings_button, (ANCHO_PANTALLA // 2, start_y + 2 * (btn_height + spacing)))
-	guardar_button = Button(save_button, (ANCHO_PANTALLA // 2, start_y + 3 * (btn_height + spacing)))
-	salir_button = Button(quit_button, (ANCHO_PANTALLA // 2, start_y + 4 * (btn_height + spacing)))
+    # Cada botón usa su imagen importada
+    reanudar_button = Button(resume_button, (ANCHO_PANTALLA // 2, start_y))
+    ayuda_button = Button(help_button, (ANCHO_PANTALLA // 2, start_y + (btn_height + spacing)))
+    config_button = Button(settings_button, (ANCHO_PANTALLA // 2, start_y + 2 * (btn_height + spacing)))
+    guardar_button = Button(save_button, (ANCHO_PANTALLA // 2, start_y + 3 * (btn_height + spacing)))
+    salir_button = Button(quit_button, (ANCHO_PANTALLA // 2, start_y + 4 * (btn_height + spacing)))
 
-	buttons = [reanudar_button, ayuda_button, config_button, guardar_button, salir_button]
+    buttons = [reanudar_button, ayuda_button, config_button, guardar_button, salir_button]
 
-	selected_index = 0
-	buttons[selected_index].selected = True
+    selected_index = 0
+    buttons[selected_index].selected = True
 
-	clock = pygame.time.Clock()
-	paused = True
+    clock = pygame.time.Clock()
+    paused = True
 
-	# Mensajes temporales en pantalla (texto, tiempo_inicio, duracion_ms)
-	message = None
-	message_start = 0
-	message_dur = 2000  # ms
+    # Mensajes temporales en pantalla (texto, tiempo_inicio, duracion_ms)
+    message = None
+    message_start = 0
+    message_dur = 2000  # ms
 
 	# ==========================
-	# LOOP PRINCIPAL DEL MENÚ
-	# ==========================
-	while paused:
-		for event in pygame.event.get():
-			if event.type == pygame.QUIT:
-				pygame.quit()
-				sys.exit()
+    # LOOP PRINCIPAL DEL MENÚ
+    # ==========================
+    while paused:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
 
-			if event.type == pygame.KEYDOWN:
-				# --- Navegación solo con ↑ y ↓ ---
-				if event.key == pygame.K_DOWN:
-					selected_index = (selected_index + 1) % len(buttons)
-				elif event.key == pygame.K_UP:
-					selected_index = (selected_index - 1) % len(buttons)
-				elif event.key == pygame.K_ESCAPE:
-					return  # vuelve al juego
-				elif event.key == pygame.K_RETURN:
-					# --- Acción del botón seleccionado ---
-					clicked_button = buttons[selected_index]
+            if event.type == pygame.KEYDOWN:
+                # --- Navegación solo con ↑ y ↓ ---
+                if event.key == pygame.K_DOWN:
+                    selected_index = (selected_index + 1) % len(buttons)
+                elif event.key == pygame.K_UP:
+                    selected_index = (selected_index - 1) % len(buttons)
+                elif event.key == pygame.K_ESCAPE:
+                    return  # vuelve al juego
+                elif event.key == pygame.K_RETURN:
+                    # --- Acción del botón seleccionado ---
+                    clicked_button = buttons[selected_index]
 
-					if clicked_button == reanudar_button:
-						return
-					elif clicked_button == guardar_button:
-						if state:
-							# Mostrar submenu para elegir slot
-							slot = select_save_slot(pantalla, mapa_actual)
-							if slot:
-								save_game(state, slot)
-								print(f"Partida guardada en slot {slot}.")
-								# Mostrar mensaje de guardado exitoso y regresar al juego
-								# No salir al menú principal
-								# Agregar mensaje temporal en pantalla
-								message = f"Partida guardada en slot {slot}"
-								message_start = pygame.time.get_ticks()
-								message_dur = 2000  # ms
-								# Dibujar mensaje en el loop
-						else:
-							print("No hay estado para guardar.")
-					elif clicked_button == ayuda_button:
-						print("Abrir ayuda...")
-					elif clicked_button == config_button:
-						settings_menu(pantalla)
-					elif clicked_button == salir_button:
-						# Importar menus() localmente para evitar import circular / NameError
-						try:
-							from intro_y_menu.menu.menuzaso import menus
-						except Exception as e:
-							print(f"No se pudo importar menus(): {e}")
-						else:
-							try:
-								menus()
-							except Exception as e:
-								print(f"Error al ejecutar menus(): {e}")
+                    if clicked_button == reanudar_button:
+                        return
+                    elif clicked_button == guardar_button:
+                        if state:
+                            # Mostrar submenu para elegir slot
+                            slot = select_save_slot(pantalla, mapa_actual)
+                            if slot:
+                                save_game(state, slot)
+                                print(f"Partida guardada en slot {slot}.")
+                                # Mostrar mensaje de guardado exitoso y regresar al juego
+                                # No salir al menú principal
+                                # Agregar mensaje temporal en pantalla
+                                message = f"Partida guardada en slot {slot}"
+                                message_start = pygame.time.get_ticks()
+                                message_dur = 2000  # ms
+                                # Dibujar mensaje en el loop
+                        else:
+                            print("No hay estado para guardar.")
+                    elif clicked_button == ayuda_button:
+                        print("Abrir ayuda...")
+                    elif clicked_button == config_button:
+                        settings_menu(pantalla)
+                    elif clicked_button == salir_button:
+                        # Importar menus() localmente para evitar import circular / NameError
+                        try:
+                            from intro_y_menu.menu.menuzaso import menus
+                        except Exception as e:
+                            print(f"No se pudo importar menus(): {e}")
+                        else:
+                            try:
+                                menus()
+                            except Exception as e:
+                                print(f"Error al ejecutar menus(): {e}")
 
-		# --- DIBUJAR FONDO ---
-		pantalla.blit(fondo, (0, 0))
+        # --- DIBUJAR FONDO ---
+        pantalla.blit(fondo, (0, 0))
 
-		# --- DIBUJAR CONTENEDOR CENTRAL ---
-		if menu_fondo:
-			pantalla.blit(menu_fondo, ((ANCHO_PANTALLA - 500) // 2, (ALTO_PANTALLA - 715) // 2))
+        # --- DIBUJAR CONTENEDOR CENTRAL ---
+        if menu_fondo:
+            pantalla.blit(menu_fondo, ((ANCHO_PANTALLA - 500) // 2, (ALTO_PANTALLA - 715) // 2))
 
-		# --- DIBUJAR BOTONES ---
-		for i, btn in enumerate(buttons):
-			btn.selected = (i == selected_index)
-			btn.update()  # esto aplica el efecto de agrandado
-			btn.draw(pantalla)
+        # --- DIBUJAR BOTONES ---
+        for i, btn in enumerate(buttons):
+            btn.selected = (i == selected_index)
+            btn.update()  # esto aplica el efecto de agrandado
+            btn.draw(pantalla)
 
-		# Mostrar mensaje temporal si existe
-		if message:
-			now = pygame.time.get_ticks()
-			if now - message_start <= message_dur:
-				msg_font = pygame.font.Font(None, 30)
-				msg_surf = msg_font.render(message, True, (100, 255, 100))
-				pantalla.blit(msg_surf, (ANCHO_PANTALLA // 2 - msg_surf.get_width() // 2, start_y + btn_height * 5 + 50))
-			else:
-				message = None
+        # Mostrar mensaje temporal si existe
+        if message:
+            now = pygame.time.get_ticks()
+            if now - message_start <= message_dur:
+                msg_font = pygame.font.Font(None, 30)
+                msg_surf = msg_font.render(message, True, (100, 255, 100))
+                pantalla.blit(msg_surf, (ANCHO_PANTALLA // 2 - msg_surf.get_width() // 2, start_y + btn_height * 5 + 50))
+            else:
+                message = None
 
-		pygame.display.flip()
-		clock.tick(60)
+        pygame.display.flip()
+        clock.tick(60)
 
 
 # Helper: rutas donde buscar archivos de guardado
@@ -250,7 +250,8 @@ def select_save_slot(pantalla, mapa_actual):
         elif mapa_actual == 2:
             fondo = pygame.image.load(m2_opciones).convert()
         else:
-            raise ValueError("Mapa no válido")
+            # Para mapa 3 y superiores usar el mismo recurso (m3_opciones)
+            fondo = pygame.image.load(m3_opciones).convert()
         fondo = pygame.transform.scale(fondo, (ANCHO_PANTALLA, ALTO_PANTALLA))
     except Exception as e:
         print(f"No se pudo cargar el fondo: {e}")

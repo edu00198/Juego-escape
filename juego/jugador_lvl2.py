@@ -19,12 +19,13 @@ class JugadorLvl2(Jugador):
         )
         self.rect.inflate_ip(-25, -10)  # achica la hitbox horizontal y verticalmente
 
+        # Variables de control de ataque
         self.atacando = False
         self.tiempo_ataque = 0
-        self.duracion_ataque = 300  # duración del ataque en milisegundos
-        
-
-
+        self.duracion_ataque = 500  # duración del ataque en milisegundos
+        self.velocidad_animacion_attack = 5  # velocidad de animación de ataque (frames más rápidos)
+        self.velocidad_animacion = 8  # velocidad de animación normal
+        self.contador_tiempo = 0
 
         # Sobrescribe las animaciones para el nivel 2
         self.animaciones = {
@@ -67,10 +68,8 @@ class JugadorLvl2(Jugador):
         self.animacion_actual = self.animaciones.get("idle_abajo", [])
         self.frame_actual = 0
 
-        # Parámetros de ataque
-        self.atacando = False
-        self.tiempo_ataque = 0
-        self.duracion_ataque = 1000  # Duración del ataque en milisegundos
+        # No necesitamos volver a definir los parámetros de ataque aquí
+        # ya que los definimos arriba en el __init__
 
     def cargar_sprites(self, carpeta_principal, subcarpeta):
         ruta_base = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets", "sprites_jugador lvl 2", carpeta_principal, subcarpeta)
@@ -206,14 +205,16 @@ class JugadorLvl2(Jugador):
                             self.sprite_pos.y = self.rect.y - 0
                             break
 
-            # Animación según movimiento
-            self.estado = "run" if moviendo else "idle"
+            # Animación según movimiento y estado de ataque
+            if not self.atacando:
+                self.estado = "run" if moviendo else "idle"
+            
             clave_animacion = f"{self.estado}_{self.direccion}"
-
             if clave_animacion in self.animaciones and self.animaciones[clave_animacion]:
                 if self.animacion_actual != self.animaciones[clave_animacion]:
                     self.animacion_actual = self.animaciones[clave_animacion]
                     self.frame_actual = 0
+                    self.contador_tiempo = 0  # Resetear el contador de tiempo al cambiar de animación
 
         # Limitar dentro de pantalla
         self.rect.left = max(self.rect.left, 0)
