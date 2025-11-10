@@ -416,13 +416,16 @@ class CombatPlayer:
         self.health = 100
         self.max_health = 100
         self.attack_power = 25
-        self.attack_range = 30  # Reducido de 50 a 30
+        self.attack_range = 30
         self.last_attack = 0
-        self.attack_cooldown = 500  # Medio segundo entre ataques
+        self.attack_cooldown = 400  # Reducido a 400ms para ataques más rápidos
         self.is_attacking = False
         self.invulnerable = False
-        self.invulnerable_time = 1000  # 1 segundo de invulnerabilidad después de recibir daño
+        self.invulnerable_time = 1200  # Aumentado a 1.2 segundos de invulnerabilidad
         self.last_hit = 0
+        self.combo_window = 1000  # Ventana de 1 segundo para combos
+        self.combo_hits = 0
+        self.last_successful_hit = 0
         
     def can_attack(self, current_time):
         return current_time - self.last_attack >= self.attack_cooldown
@@ -434,44 +437,79 @@ class CombatPlayer:
         self.is_attacking = True
         self.last_attack = current_time
         
-        # Crear un rectángulo de ataque en la dirección que mira el jugador
-        attack_rect = self.get_attack_rect()
+        # Crear múltiples áreas de ataque para mayor cobertura
+        base_rect = self.get_attack_rect()
         
-        # Comprobar colisiones con enemigos
+        # Crear varias áreas de ataque con diferentes tamaños
+        attack_areas = [
+            base_rect,  # Área base
+            base_rect.inflate(40, 40),  # Área expandida
+            base_rect.inflate(-20, -20),  # Área interior
+            pygame.Rect(base_rect.centerx - 30, base_rect.centery - 30, 60, 60)  # Área circular aproximada
+        ]
+        
+        # Ajustar la posición de las áreas según la dirección
+        if self.player.direccion == "derecha":
+            for rect in attack_areas:
+                rect.move_ip(10, 0)
+        elif self.player.direccion == "izquierda":
+            for rect in attack_areas:
+                rect.move_ip(-10, 0)
+        elif self.player.direccion == "arriba":
+            for rect in attack_areas:
+                rect.move_ip(0, -10)
+        elif self.player.direccion == "abajo":
+            for rect in attack_areas:
+                rect.move_ip(0, 10)
+        
+        # Comprobar colisiones con enemigos usando todas las áreas
         for enemy in enemies:
-            if attack_rect.colliderect(enemy.rect):
+            hit = False
+            for attack_area in attack_areas:
+                # Verificar colisión con cualquiera de las áreas de ataque
+                if (attack_area.colliderect(enemy.rect) or
+                    attack_area.collidepoint(enemy.rect.center)):
+                    hit = True
+                    break
+            
+            # Si hubo hit, aplicar daño
+            if hit:
                 if enemy.take_damage(self.attack_power):
                     enemies.remove(enemy)
                     
     def get_attack_rect(self):
         """Crear un rectángulo de ataque en la dirección que mira el jugador"""
-        attack_width = self.attack_range
-        attack_height = int(self.player.rect.height * 0.7)
-
+        # Aumentar significativamente el tamaño base del área de ataque
+        attack_width = self.attack_range * 2.0  # Duplicar el ancho
+        attack_height = int(self.player.rect.height * 1.5)  # 50% más alto
+        
+        # Añadir un área extra más grande alrededor del jugador
+        extra_range = 40  # Duplicado el área extra
+        
         # Posición base es el centro del jugador
         player_center = self.player.rect.center
         
-        # Crear rectángulo según la dirección
+        # Crear rectángulo según la dirección con área extra
         if self.player.direccion == "derecha":
-            return pygame.Rect(self.player.rect.right, 
+            return pygame.Rect(self.player.rect.right - extra_range, 
                              player_center[1] - attack_height//2,
-                             attack_width, 
+                             attack_width + extra_range, 
                              attack_height)
         elif self.player.direccion == "izquierda":
             return pygame.Rect(self.player.rect.left - attack_width,
                              player_center[1] - attack_height//2,
-                             attack_width,
+                             attack_width + extra_range,
                              attack_height)
         elif self.player.direccion == "arriba":
             return pygame.Rect(player_center[0] - attack_height//2,
                              self.player.rect.top - attack_width,
                              attack_height,
-                             attack_width)
+                             attack_width + extra_range)
         else:  # abajo
             return pygame.Rect(player_center[0] - attack_height//2,
-                             self.player.rect.bottom,
+                             self.player.rect.bottom - extra_range,
                              attack_height,
-                             attack_width)
+                             attack_width + extra_range)
         
     def take_damage(self, amount, current_time):
         if self.invulnerable:
