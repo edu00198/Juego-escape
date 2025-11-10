@@ -5,7 +5,6 @@ import random
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from configuracion import ANCHO_PANTALLA, ALTO_PANTALLA, ESCALA_JUGADOR
-from juego.jugador import Jugador
 from juego.jugador_lvl2 import JugadorLvl2
 from juego.menu_pausa import pause_menu
 from juego.combat_system import CombatSystem, Enemy, CombatPlayer
