@@ -28,16 +28,21 @@ GREEN = (0, 255, 0)
 
 # --- después de crear SCREEN y antes del loop ---
 USE_PIECE_IMAGES = True
+
 try:
     TABLERO_IMG = pygame.image.load("intro_y_menu/menu/assets/tablero.png").convert_alpha()
-except Exception:
+    print("✓ Tablero cargado correctamente")
+except Exception as e:
+    print(f"✗ Error al cargar tablero: {e}")
     TABLERO_IMG = None
     USE_PIECE_IMAGES = False
 
 try:
     ficha_r = pygame.image.load("intro_y_menu/menu/assets/ficha_roja.png").convert_alpha()
-    ficha_a = pygame.image.load("intro_y_menu/menu/assets/ficha_amarillo.png").convert_alpha()
-except Exception:
+    ficha_a = pygame.image.load("intro_y_menu/menu/assets/ficha_amarilla.png").convert_alpha()
+    print("✓ Fichas cargadas correctamente")
+except Exception as e:
+    print(f"✗ Error al cargar fichas: {e}")
     ficha_r = None
     ficha_a = None
     USE_PIECE_IMAGES = False
@@ -58,8 +63,27 @@ def draw_static_board(board, board_x, board_y):
     board_height = (ROWS + 1) * SQUARE_SIZE
     # Si existe la imagen del tablero, escalar y blitear; si no, dibujar un fallback
     if TABLERO_IMG is not None:
-        tablero_scaled = pygame.transform.smoothscale(TABLERO_IMG, (board_width, board_height))
-        SCREEN.blit(tablero_scaled, (board_x, board_y))
+        # Calcular el ratio de aspecto original de la imagen
+        img_ratio = TABLERO_IMG.get_width() / TABLERO_IMG.get_height()
+        # Decidir si ajustar por ancho o por alto para mantener proporción
+        if board_width / board_height > img_ratio:
+            # Ajustar por altura
+            new_height = board_height
+            new_width = int(new_height * img_ratio)
+            x_offset = board_x + (board_width - new_width) // 2
+            tablero_scaled = pygame.transform.smoothscale(TABLERO_IMG, (new_width, new_height))
+            SCREEN.blit(tablero_scaled, (x_offset, board_y))
+            # Actualizar board_x para alinear las fichas con el tablero
+            board_x = x_offset
+        else:
+            # Ajustar por ancho
+            new_width = board_width
+            new_height = int(new_width / img_ratio)
+            y_offset = board_y + (board_height - new_height) // 2
+            tablero_scaled = pygame.transform.smoothscale(TABLERO_IMG, (new_width, new_height))
+            SCREEN.blit(tablero_scaled, (board_x, y_offset))
+            # Actualizar board_y para alinear las fichas con el tablero
+            board_y = y_offset
     else:
         pygame.draw.rect(SCREEN, BLUE, (board_x, board_y, board_width, board_height))
         # Dibujar 'huecos' negros para las casillas
@@ -70,35 +94,57 @@ def draw_static_board(board, board_x, board_y):
                 pygame.draw.circle(SCREEN, BLACK, (cx, cy), RADIUS)
 
     # Dibujar fichas ya colocadas: preferir imágenes PNG, si no están disponibles usar círculos
-    piece_size = SQUARE_SIZE - 10
+    piece_size = int(SQUARE_SIZE * 0.8)  # Hacer las fichas un poco más pequeñas
     use_images = USE_PIECE_IMAGES and ficha_r is not None and ficha_a is not None
+    
+    # Debug info
+    print(f"USE_PIECE_IMAGES: {USE_PIECE_IMAGES}")
+    print(f"ficha_r is None: {ficha_r is None}")
+    print(f"ficha_a is None: {ficha_a is None}")
+    print(f"use_images final: {use_images}")
+
     if use_images:
-        ficha_r_scaled = pygame.transform.smoothscale(ficha_r, (piece_size, piece_size))
-        ficha_a_scaled = pygame.transform.smoothscale(ficha_a, (piece_size, piece_size))
+        try:
+            ficha_r_scaled = pygame.transform.smoothscale(ficha_r, (piece_size, piece_size))
+            ficha_a_scaled = pygame.transform.smoothscale(ficha_a, (piece_size, piece_size))
+            print("Fichas escaladas correctamente")
+        except Exception as e:
+            print(f"Error al escalar fichas: {e}")
+            use_images = False
 
     for c in range(COLS):
         for r in range(ROWS):
-            if board[r][c] == 1:
+            if board[r][c] == 1 or board[r][c] == 2:
                 draw_x = board_x + c * SQUARE_SIZE + (SQUARE_SIZE - piece_size) // 2
                 draw_y = board_y + r * SQUARE_SIZE + (SQUARE_SIZE - piece_size) // 2
+                
                 if use_images:
-                    SCREEN.blit(ficha_r_scaled, (draw_x, draw_y))
+                    try:
+                        if board[r][c] == 1:
+                            SCREEN.blit(ficha_r_scaled, (draw_x, draw_y))
+                            print(f"Dibujando ficha roja en ({c}, {r})")
+                        else:
+                            SCREEN.blit(ficha_a_scaled, (draw_x, draw_y))
+                            print(f"Dibujando ficha amarilla en ({c}, {r})")
+                    except Exception as e:
+                        print(f"Error al dibujar ficha en ({c}, {r}): {e}")
+                        # Fallback a círculos si hay error
+                        color = RED if board[r][c] == 1 else YELLOW
+                        pygame.draw.circle(SCREEN, color, 
+                                        (draw_x + piece_size//2, draw_y + piece_size//2), 
+                                        int(piece_size * 0.4))
                 else:
-                    pygame.draw.circle(SCREEN, RED, (draw_x + piece_size//2, draw_y + piece_size//2), RADIUS)
-            elif board[r][c] == 2:
-                draw_x = board_x + c * SQUARE_SIZE + (SQUARE_SIZE - piece_size) // 2
-                draw_y = board_y + r * SQUARE_SIZE + (SQUARE_SIZE - piece_size) // 2
-                if use_images:
-                    SCREEN.blit(ficha_a_scaled, (draw_x, draw_y))
-                else:
-                    pygame.draw.circle(SCREEN, YELLOW, (draw_x + piece_size//2, draw_y + piece_size//2), RADIUS)
+                    color = RED if board[r][c] == 1 else YELLOW
+                    pygame.draw.circle(SCREEN, color, 
+                                    (draw_x + piece_size//2, draw_y + piece_size//2), 
+                                    int(piece_size * 0.4))
 
 def draw_board(board, cursor_col):
     # Calcular la posición del tablero para centrarlo
     board_width = COLS * SQUARE_SIZE
     board_height = (ROWS + 1) * SQUARE_SIZE
     board_x = (WIDTH - board_width) // 2
-    board_y = (HEIGHT - board_height) // 2 + SQUARE_SIZE // 2
+    board_y = (HEIGHT - board_height) // 4  # Cambiado de //2 a //4 para subir el tablero
 
     # Usar draw_static_board para pintar el tablero y las fichas
     draw_static_board(board, board_x, board_y)
