@@ -1,11 +1,11 @@
 import pygame
 import sys
 import os
+from configuracion import ANCHO_PANTALLA, ALTO_PANTALLA
 
 # Inicializar Pygame y crear la ventana ANTES de importar módulos que cargan imágenes
 pygame.init()
-ANCHO_PANTALLA = 1280
-ALTO_PANTALLA = 720
+
 from .jugador_lvl2 import JugadorLvl2
 
 pantalla = pygame.display.set_mode((ANCHO_PANTALLA, ALTO_PANTALLA))
@@ -150,9 +150,10 @@ def ejecutar_mapa4(pantalla):
             clock.tick(60)
  
 
-    if not animacion_puerta_abierta_hecha:
+    if animacion_puerta_abierta_hecha:
     #hace a animacion
         animacion_puerta_abierta(pantalla)
+        
     # Acá comienza el juego normal
     running = True
     while running:
@@ -206,10 +207,11 @@ def ejecutar_mapa4(pantalla):
         #Dibujar puertas (opcional para depuración)
         #pygame.draw.rect(pantalla, (0, 0, 255), puerta_3_entrada, 2)
         pygame.draw.rect(pantalla, (0, 255, 255), puerta_3_salida, 2)
-        pygame.draw.rect(pantalla, (0, 255, 255), puerta_3_engranaje, 2)
+        #pygame.draw.rect(pantalla, (0, 255, 255), puerta_3_engranaje, 2)
         #pygame.draw.rect(pantalla, (255, 0, 255), puerta_3_cuatro_en_raya, 2)
         if not imagen_estand_de_armadura_actual == imagen_estand_de_armadura_vacio_escalado:
-            pygame.draw.rect(pantalla, (255, 255, 0), estandarte_de_armaduras, 2)
+            #pygame.draw.rect(pantalla, (255, 255, 0), estandarte_de_armaduras, 2)
+            continue
         if nivel_jugador >=2:
             JugadorLvl2.manejar_teclas(jugador)
         else:
@@ -225,9 +227,7 @@ def ejecutar_mapa4(pantalla):
             print("Transición al siguiente mapa")
             from juego.mapa_5 import ejecutar_mapa5
             return ejecutar_mapa5(pantalla)
-            
-            
-            
+                    
         if jugador.rect.colliderect(puerta_3_entrada):
             print("regresa a mapa 2")
             return 
