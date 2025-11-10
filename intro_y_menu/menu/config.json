@@ -2,6 +2,6 @@
     "volumes": {
         "MUSIC": 100,
         "SFX": 100,
-        "MASTER": 70
+        "MASTER": 100
     }
 }

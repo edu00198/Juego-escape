@@ -214,7 +214,7 @@ def settings_menu(window):
                                 res_index = res_cursor
                                 res_index_original = res_index  # Actualizar valor original
                                 has_resolution_changes = False  # Reiniciar bandera de cambios
-                                print("✅ Resolución guardada:", nueva_res)
+                                print("Resolución guardada:", nueva_res)
                             else:
                                 if not pending_fullscreen:
                                     prev_size = window.get_size()

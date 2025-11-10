@@ -29,6 +29,15 @@ def aplicar_resolucion(window, nueva_res):
     return window, ancho, alto
 
 
+def detectar_fullscreen():
+    """Devuelve True si la ventana está en pantalla completa, False en caso contrario."""
+    surface = pygame.display.get_surface()
+    if surface:
+        flags = surface.get_flags()
+        return bool(flags & pygame.FULLSCREEN)
+    return False
+
+
 def loading_screen(window):
     from configuracion import ANCHO_PANTALLA, ALTO_PANTALLA
     ANCHO_PANTALLA, ALTO_PANTALLA = window.get_size()
@@ -44,6 +53,12 @@ def loading_screen(window):
     bar_y = ALTO_PANTALLA // 2
     progress = 0
     max_progress = 100
+
+    # Ejemplo de uso de la detección:
+    if detectar_fullscreen():
+        print("🔎 La ventana está en modo pantalla completa")
+    else:
+        print("🔎 La ventana NO está en pantalla completa")
 
     try:
         font = pygame.font.Font(None, 24)
