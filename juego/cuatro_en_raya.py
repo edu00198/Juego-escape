@@ -26,6 +26,24 @@ RED = (255, 0, 0)
 YELLOW = (255, 255, 0)
 GREEN = (0, 255, 0)
 
+# --- después de crear SCREEN y antes del loop ---
+USE_PIECE_IMAGES = True
+try:
+    TABLERO_IMG = pygame.image.load("intro_y_menu/menu/assets/tablero.png").convert_alpha()
+except Exception:
+    TABLERO_IMG = None
+    USE_PIECE_IMAGES = False
+
+try:
+    ficha_r = pygame.image.load("intro_y_menu/menu/assets/ficha_roja.png").convert_alpha()
+    ficha_a = pygame.image.load("intro_y_menu/menu/assets/ficha_amarillo.png").convert_alpha()
+except Exception:
+    ficha_r = None
+    ficha_a = None
+    USE_PIECE_IMAGES = False
+
+
+
 FPS = 60
 clock = pygame.time.Clock()
 
@@ -36,37 +54,87 @@ def create_board():
     return [[0 for _ in range(COLS)] for _ in range(ROWS)]
 
 def draw_static_board(board, board_x, board_y):
-    """Dibuja solo el tablero y las fichas ya colocadas, sin el cursor."""
+    board_width = COLS * SQUARE_SIZE
+    board_height = (ROWS + 1) * SQUARE_SIZE
+    # Si existe la imagen del tablero, escalar y blitear; si no, dibujar un fallback
+    if TABLERO_IMG is not None:
+        tablero_scaled = pygame.transform.smoothscale(TABLERO_IMG, (board_width, board_height))
+        SCREEN.blit(tablero_scaled, (board_x, board_y))
+    else:
+        pygame.draw.rect(SCREEN, BLUE, (board_x, board_y, board_width, board_height))
+        # Dibujar 'huecos' negros para las casillas
+        for c_h in range(COLS):
+            for r_h in range(ROWS):
+                cx = board_x + c_h * SQUARE_SIZE + SQUARE_SIZE // 2
+                cy = board_y + r_h * SQUARE_SIZE + SQUARE_SIZE // 2
+                pygame.draw.circle(SCREEN, BLACK, (cx, cy), RADIUS)
+
+    # Dibujar fichas ya colocadas: preferir imágenes PNG, si no están disponibles usar círculos
+    piece_size = SQUARE_SIZE - 10
+    use_images = USE_PIECE_IMAGES and ficha_r is not None and ficha_a is not None
+    if use_images:
+        ficha_r_scaled = pygame.transform.smoothscale(ficha_r, (piece_size, piece_size))
+        ficha_a_scaled = pygame.transform.smoothscale(ficha_a, (piece_size, piece_size))
+
     for c in range(COLS):
         for r in range(ROWS):
-            pygame.draw.rect(SCREEN, BLUE, (board_x + c*SQUARE_SIZE, board_y + r*SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
-            color = BLACK
             if board[r][c] == 1:
-                color = RED
+                draw_x = board_x + c * SQUARE_SIZE + (SQUARE_SIZE - piece_size) // 2
+                draw_y = board_y + r * SQUARE_SIZE + (SQUARE_SIZE - piece_size) // 2
+                if use_images:
+                    SCREEN.blit(ficha_r_scaled, (draw_x, draw_y))
+                else:
+                    pygame.draw.circle(SCREEN, RED, (draw_x + piece_size//2, draw_y + piece_size//2), RADIUS)
             elif board[r][c] == 2:
-                color = YELLOW
-            pygame.draw.circle(SCREEN, color, 
-                              (board_x + c*SQUARE_SIZE + SQUARE_SIZE//2, 
-                               board_y + r*SQUARE_SIZE + SQUARE_SIZE//2), RADIUS)
+                draw_x = board_x + c * SQUARE_SIZE + (SQUARE_SIZE - piece_size) // 2
+                draw_y = board_y + r * SQUARE_SIZE + (SQUARE_SIZE - piece_size) // 2
+                if use_images:
+                    SCREEN.blit(ficha_a_scaled, (draw_x, draw_y))
+                else:
+                    pygame.draw.circle(SCREEN, YELLOW, (draw_x + piece_size//2, draw_y + piece_size//2), RADIUS)
 
 def draw_board(board, cursor_col):
-    """Dibuja toda la escena: tablero, fichas y el cursor del jugador."""
     # Calcular la posición del tablero para centrarlo
     board_width = COLS * SQUARE_SIZE
     board_height = (ROWS + 1) * SQUARE_SIZE
     board_x = (WIDTH - board_width) // 2
     board_y = (HEIGHT - board_height) // 2 + SQUARE_SIZE // 2
-    
-    # Dibujar el tablero estático
+
+    # Usar draw_static_board para pintar el tablero y las fichas
     draw_static_board(board, board_x, board_y)
-    
+
     # Dibujar cursor del jugador solo si es su turno
     if cursor_col != -1:
-        pygame.draw.circle(SCREEN, RED, 
-                          (board_x + cursor_col * SQUARE_SIZE + SQUARE_SIZE//2, 
-                           board_y - SQUARE_SIZE//2), RADIUS)
-    
+        # Dibujar el cursor: usar PNG si está disponible, si no usar un círculo rojo
+        piece_size = SQUARE_SIZE - 10
+        center_x = board_x + cursor_col * SQUARE_SIZE + SQUARE_SIZE // 2
+        center_y = board_y - SQUARE_SIZE // 2
+        draw_x = center_x - piece_size // 2
+        draw_y = center_y - piece_size // 2
+        if USE_PIECE_IMAGES and ficha_r is not None:
+            ficha_r_scaled = pygame.transform.smoothscale(ficha_r, (piece_size, piece_size))
+            SCREEN.blit(ficha_r_scaled, (draw_x, draw_y))
+        else:
+            pygame.draw.circle(SCREEN, RED, (center_x, center_y), RADIUS)
+
     return board_x, board_y
+
+    # Dibujar cursor del jugador solo si es su turno
+    if cursor_col != -1:
+        # Dibujar el cursor: usar PNG si está disponible, si no usar un círculo rojo
+        piece_size = SQUARE_SIZE - 10
+        center_x = board_x + cursor_col * SQUARE_SIZE + SQUARE_SIZE // 2
+        center_y = board_y - SQUARE_SIZE // 2
+        draw_x = center_x - piece_size // 2
+        draw_y = center_y - piece_size // 2
+        if USE_PIECE_IMAGES and ficha_r is not None:
+            ficha_r_scaled = pygame.transform.smoothscale(ficha_r, (piece_size, piece_size))
+            SCREEN.blit(ficha_r_scaled, (draw_x, draw_y))
+        else:
+            pygame.draw.circle(SCREEN, RED, (center_x, center_y), RADIUS)
+
+    return board_x, board_y
+
 
 def is_valid_location(board, col):
     return board[0][col] == 0
@@ -84,13 +152,29 @@ def drop_piece_animated(board, col, piece, board_x, board_y):
     y = board_y - SQUARE_SIZE // 2 # Posición inicial de la animación
     color = RED if piece == 1 else YELLOW
     
+    # Si columna llena, salir (seguridad)
+    if target_row == -1:
+        return
+
     # Bucle de animación
     while y < board_y + target_row*SQUARE_SIZE + SQUARE_SIZE//2:
         SCREEN.fill(BLACK)
         # Dibujar solo el tablero estático, SIN el cursor
         draw_static_board(board, board_x, board_y)
-        # Dibujar la ficha que está cayendo
-        pygame.draw.circle(SCREEN, color, (x, int(y)), RADIUS)
+        # Dibujar la ficha que está cayendo usando la imagen PNG correspondiente o fallback
+        piece_size = SQUARE_SIZE - 10
+        use_images = USE_PIECE_IMAGES and ((piece == 1 and ficha_r is not None) or (piece == 2 and ficha_a is not None))
+        if use_images:
+            if piece == 1:
+                ficha_scaled = pygame.transform.smoothscale(ficha_r, (piece_size, piece_size))
+            else:
+                ficha_scaled = pygame.transform.smoothscale(ficha_a, (piece_size, piece_size))
+            draw_x = int(x) - piece_size // 2
+            draw_y = int(y) - piece_size // 2
+            SCREEN.blit(ficha_scaled, (draw_x, draw_y))
+        else:
+            pygame.draw.circle(SCREEN, RED if piece == 1 else YELLOW, (int(x), int(y)), RADIUS)
+
         pygame.display.update()
         y += 15  # Velocidad de caída
         clock.tick(FPS)
