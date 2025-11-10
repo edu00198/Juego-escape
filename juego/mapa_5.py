@@ -22,12 +22,48 @@ from assets.mapas.mapa5_data import (
     puerta_4_salida,
     colisiones_escaladas
 )
+from assets.mapas.fondo import vida_jugador
 
 pantalla = pygame.display.set_mode((ANCHO_PANTALLA, ALTO_PANTALLA))
 
 def ejecutar_mapa5(respect_saved: bool = True):
     clock = pygame.time.Clock()
     running = True
+
+    # Cargar la imagen de vida una sola vez al inicio
+    imagen_vida = None
+    try:
+        # vida_jugador puede ser una ruta (str) o una Surface ya cargada
+        if isinstance(vida_jugador, str):
+            cargado = pygame.image.load(vida_jugador)
+        elif isinstance(vida_jugador, pygame.Surface):
+            cargado = vida_jugador
+        else:
+            raise TypeError(f"vida_jugador tiene un tipo inesperado: {type(vida_jugador)!r}")
+
+        try:
+            # Intentar usar convert_alpha si está disponible
+            imagen_vida = cargado.convert_alpha()
+        except AttributeError as ae:
+            # Mensaje detallado y sugestivo si el objeto no soporta convert_alpha
+            msg = (
+                "GRAN ERROR cargando imagen de vida: el objeto cargado no tiene 'convert_alpha'. "
+                f"Tipo del objeto: {type(cargado).__name__}. Detalle del error: {ae}.\n"
+                "Asegúrate de que 'vida_jugador' sea la ruta a un fichero de imagen (str) o una "
+                "instancia de pygame.Surface válida. Se usará un fallback visual.")
+            print(msg)
+            # Crear un fallback visual (superficie semitransparente roja)
+            imagen_vida = pygame.Surface((250, 90), pygame.SRCALPHA)
+            imagen_vida.fill((255, 0, 0, 180))
+
+        # Escalar la imagen/fallback a la dimensión deseada
+        imagen_vida = pygame.transform.scale(imagen_vida, (250, 90))  # Ajusta el tamaño según necesites
+
+    except Exception as e:
+        # Mensaje amplio de fallo y creación de fallback gris
+        print("GRAN ERROR cargando imagen de vida:", e)
+        imagen_vida = pygame.Surface((250, 90))
+        imagen_vida.fill((128, 128, 128))
 
     ancho_jugador = 23
     alto_jugador = 15
@@ -186,6 +222,24 @@ def ejecutar_mapa5(respect_saved: bool = True):
         # Actualizar jugador y sistema de combate
         combat_player.update(current_time)
         jugador.dibujar(pantalla, offset_x, offset_y)
+        
+        # Dibujar la imagen de vida del jugador centrada justo encima de la barra de vida
+        if imagen_vida:
+            try:
+                iw, ih = imagen_vida.get_size()
+                bx = getattr(combat_player, 'bar_x', 10)
+                by = getattr(combat_player, 'bar_y', 10)
+                bw = getattr(combat_player, 'bar_width', iw)
+                # Centrar horizontalmente sobre la barra.
+                pos_x = bx + (bw - iw) // 2
+                # Baja la imagen en Y respecto a la posición original para acercarla a la barra.
+                # Ajusta este valor (imagen_vida_dy) para subir/bajar la imagen.
+                imagen_vida_dy = 20
+                pos_y = by - ih + imagen_vida_dy
+                pantalla.blit(imagen_vida, (pos_x, pos_y))
+            except Exception as e:
+                # Fallback: dibujar en la esquina si algo falla
+                pantalla.blit(imagen_vida, (10, 10))
         
         # Solo mostrar la barra de vida y enemigos si el combate está activo
         if combate_activo:

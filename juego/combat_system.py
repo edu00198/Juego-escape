@@ -426,6 +426,11 @@ class CombatPlayer:
         self.combo_window = 1000  # Ventana de 1 segundo para combos
         self.combo_hits = 0
         self.last_successful_hit = 0
+        # Parámetros de la barra de vida (expuestos para que otras partes del juego puedan posicionar elementos relativos)
+        self.bar_width = 150
+        self.bar_height = 10
+        self.bar_x = 30
+        self.bar_y = 30
         
     def can_attack(self, current_time):
         return current_time - self.last_attack >= self.attack_cooldown
@@ -526,18 +531,13 @@ class CombatPlayer:
             self.invulnerable = False
             
     def draw_health(self, screen):
-        # Dibujar barra de vida del jugador
-        bar_width = 200
-        bar_height = 20
-        x = 10
-        y = 10
-        
-        # Fondo de la barra (rojo)
-        pygame.draw.rect(screen, (255, 0, 0), (x, y, bar_width, bar_height))
-        
-        # Vida actual (verde)
-        health_width = (self.health / self.max_health) * bar_width
-        pygame.draw.rect(screen, (0, 255, 0), (x, y, health_width, bar_height))
-        
-        # Borde de la barra
-        pygame.draw.rect(screen, (255, 255, 255), (x, y, bar_width, bar_height), 2)
+        # Dibujar barra de vida del jugador usando los atributos expuestos
+        bar_width = self.bar_width
+        bar_height = self.bar_height
+        x = self.bar_x
+        y = self.bar_y
+
+        # Dibujar sólo la porción verde que representa la vida (sin fondo ni contorno)
+        health_width = int((self.health / self.max_health) * bar_width)
+        if health_width > 0:
+            pygame.draw.rect(screen, (0, 255, 0), (x, y, health_width, bar_height))

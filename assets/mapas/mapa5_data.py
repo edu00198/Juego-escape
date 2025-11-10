@@ -138,18 +138,29 @@ def cargar_tileset(path_relativo, tile_size):
     carpeta_actual = os.path.dirname(__file__)
     ruta_completa = os.path.join(carpeta_actual, path_relativo)
     if not os.path.exists(ruta_completa):
-        raise FileNotFoundError(f"No se encontró la imagen: {ruta_completa}")
-    imagen = pygame.image.load(ruta_completa).convert_alpha()
-    ancho, alto = imagen.get_size()
-    tiles = []
-    num_tiles_x = ancho // tile_size
-    num_tiles_y = alto // tile_size
-    for y in range(num_tiles_y):
-        for x in range(num_tiles_x):
-            rect = pygame.Rect(x * tile_size, y * tile_size, tile_size, tile_size)
-            tile = imagen.subsurface(rect)
-            tiles.append(tile)
-    return tiles
+        print(f"Advertencia: No se encontró la imagen: {ruta_completa}")
+        # Crear una superficie vacía como fallback
+        superficie = pygame.Surface((tile_size, tile_size))
+        superficie.fill((128, 128, 128))  # Gris como indicador visual de error
+        return [superficie]
+    try:
+        imagen = pygame.image.load(ruta_completa).convert_alpha()
+        ancho, alto = imagen.get_size()
+        tiles = []
+        num_tiles_x = ancho // tile_size
+        num_tiles_y = alto // tile_size
+        for y in range(num_tiles_y):
+            for x in range(num_tiles_x):
+                rect = pygame.Rect(x * tile_size, y * tile_size, tile_size, tile_size)
+                tile = imagen.subsurface(rect)
+                tiles.append(tile)
+        return tiles
+    except Exception as e:
+        print(f"Error cargando tileset {path_relativo}: {e}")
+        # Crear una superficie vacía como fallback
+        superficie = pygame.Surface((tile_size, tile_size))
+        superficie.fill((128, 128, 128))  # Gris como indicador visual de error
+        return [superficie]
 
 # ...existing code...
 

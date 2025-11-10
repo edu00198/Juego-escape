@@ -1,5 +1,6 @@
 import pygame
 import sys
+from configuracion import ANCHO_PANTALLA, ALTO_PANTALLA
 
 if __name__ == '__main__':
     try:
@@ -13,7 +14,7 @@ if __name__ == '__main__':
         # lo que requiere que exista un modo de video. Crear una ventana
         # temporal antes de importar evita el error "No video mode has been set".
         try:
-            pygame.display.set_mode((800, 600))
+            pygame.display.set_mode((ANCHO_PANTALLA, ALTO_PANTALLA))
         except Exception:
             # Si por alguna razón no se puede crear la ventana, seguir e intentar importar
             pass
@@ -25,4 +26,4 @@ if __name__ == '__main__':
         print(f"Error ejecutando mapa_5: {e}")
         import traceback
         traceback.print_exc()
-        sys.exit(1)
+        sys.exit()
