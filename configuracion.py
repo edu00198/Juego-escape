@@ -4,7 +4,7 @@ incluyendo las dimensiones de la ventana del juego, los colores y la velocidad d
 """
 
 
-from assets.mapas.fondo import mapa1_abierta,mapa1_cerrada,m1_opciones,mapa2,m2_opciones, m3_opciones
+from assets.mapas.fondo import mapa1_abierta,mapa1_cerrada,m1_opciones,mapa2,m2_opciones, m3_opciones,m4_opciones
 
 m1_abierta=mapa1_abierta
 m1_cerrado=mapa1_cerrada
@@ -12,6 +12,7 @@ mapa2 = mapa2
 m1_opciones=m1_opciones
 m2_opciones=m2_opciones
 m3_opciones=m3_opciones
+m4_opciones=m4_opciones
 
 # game_state.py
 class GameState:

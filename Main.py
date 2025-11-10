@@ -43,7 +43,7 @@ def main():
         #main_intro()
         # time.sleep(1)
         #press_any_key_screen()
-        menus()
+        #menus()
 
         print("Llamando a ejecutar_mapa1()...")
 
