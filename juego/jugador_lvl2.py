@@ -8,31 +8,16 @@ from configuracion import VELOCIDAD_JUGADOR, ANCHO_PANTALLA, ALTO_PANTALLA, VELO
 class JugadorLvl2(Jugador):
     def __init__(self, x, y, ancho, alto, escala=1.0, colisiones=None):
         super().__init__(x, y, ancho, alto, escala, colisiones)
-        
-        
-        self.colisiones = colisiones 
-        self.velocidad = VELOCIDAD_JUGADOR
-        self.escala = escala
 
-        # Posición visual del sprite (sin desplazamiento manual)
-        self.sprite_pos = pygame.Vector2(x, y)
 
-        # Offset consistente entre sprite_pos y rect (ajustalo si tu sprite lo requiere)
-        self.hitbox_offset = pygame.Vector2(0, 0)  # usar el mismo que el mapa usa para sincronizar
-
-        # Tamaño base del rectángulo (hitbox) escalado
-        hitbox_ancho = max(1, int(ancho * escala))
-        hitbox_alto  = max(1, int(alto * escala))
-
-        # Crear la hitbox alineada con sprite_pos + hitbox_offset
+        # Crear la hitbox desplazada y ajustada
         self.rect = pygame.Rect(
-            int(self.sprite_pos.x + self.hitbox_offset.x),
-            int(self.sprite_pos.y + self.hitbox_offset.y),
-            hitbox_ancho,
-            hitbox_alto
+            x, #posision en y
+            y, #posision en x
+            69,  # ancho fijo de la hitbox
+            37 # alto fijo de la hitbox
         )
-        # Ajuste fino de la hitbox (si lo necesitas)
-        self.rect.inflate_ip(0, -0)
+        self.rect.inflate_ip(-25, -10)  # achica la hitbox horizontal y verticalmente
 
         self.atacando = False
         self.tiempo_ataque = 0
@@ -85,14 +70,14 @@ class JugadorLvl2(Jugador):
         # Parámetros de ataque
         self.atacando = False
         self.tiempo_ataque = 0
-        self.duracion_ataque = 300  
+        self.duracion_ataque = 1000  # Duración del ataque en milisegundos
 
     def cargar_sprites(self, carpeta_principal, subcarpeta):
         ruta_base = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets", "sprites_jugador lvl 2", carpeta_principal, subcarpeta)
         imagenes = []
-
+        
         if not os.path.exists(ruta_base):
-            print(f"[ADVERTENCIA] Carpeta no encontrada: {ruta_base}")
+            #print(f"[ADVERTENCIA] Carpeta no encontrada: {ruta_base}")
             return imagenes
 
         for archivo in sorted(os.listdir(ruta_base)):
@@ -111,7 +96,6 @@ class JugadorLvl2(Jugador):
                     print(f"[ERROR] No se pudo cargar {ruta}: {e}")
 
         return imagenes
-
 
     
     def manejar_teclas(self):
@@ -155,7 +139,7 @@ class JugadorLvl2(Jugador):
                 for colision in colisiones:
                     if self.rect.colliderect(colision):
                         self.rect.x = prev_x
-                        self.sprite_pos.x = self.rect.x - self.hitbox_offset.x
+                        self.sprite_pos.x = self.rect.x - 10
                         break
 
             elif derecha:
@@ -168,7 +152,7 @@ class JugadorLvl2(Jugador):
                 for colision in colisiones:
                     if self.rect.colliderect(colision):
                         self.rect.x = prev_x
-                        self.sprite_pos.x = self.rect.x - self.hitbox_offset.x
+                        self.sprite_pos.x = self.rect.x - 10
                         break
 
             if not izquierda and not derecha:
@@ -182,7 +166,7 @@ class JugadorLvl2(Jugador):
                     for colision in colisiones:
                         if self.rect.colliderect(colision):
                             self.rect.y = prev_y
-                            self.sprite_pos.y = self.rect.y - self.hitbox_offset.y
+                            self.sprite_pos.y = self.rect.y - 0
                             break
 
                 elif abajo:
@@ -195,7 +179,7 @@ class JugadorLvl2(Jugador):
                     for colision in colisiones:
                         if self.rect.colliderect(colision):
                             self.rect.y = prev_y
-                            self.sprite_pos.y = self.rect.y - self.hitbox_offset.y
+                            self.sprite_pos.y = self.rect.y - 0
                             break
             else:
                 if arriba:
@@ -207,7 +191,7 @@ class JugadorLvl2(Jugador):
                     for colision in colisiones:
                         if self.rect.colliderect(colision):
                             self.rect.y = prev_y
-                            self.sprite_pos.y = self.rect.y - self.hitbox_offset.y
+                            self.sprite_pos.y = self.rect.y - 0
                             break
 
                 elif abajo:
@@ -219,7 +203,7 @@ class JugadorLvl2(Jugador):
                     for colision in colisiones:
                         if self.rect.colliderect(colision):
                             self.rect.y = prev_y
-                            self.sprite_pos.y = self.rect.y - self.hitbox_offset.y
+                            self.sprite_pos.y = self.rect.y - 0
                             break
 
             # Animación según movimiento
@@ -238,8 +222,8 @@ class JugadorLvl2(Jugador):
         self.rect.bottom = min(self.rect.bottom, ALTO_PANTALLA)
 
         # Sincronizar sprite_pos con rect usando el mismo hitbox_offset
-        self.sprite_pos.x = self.rect.x - self.hitbox_offset.x
-        self.sprite_pos.y = self.rect.y - self.hitbox_offset.y
+        self.sprite_pos.x = self.rect.x - 10
+        self.sprite_pos.y = self.rect.y - 0
 
 
     def dibujar(self, pantalla, offset_x=0, offset_y=0):
@@ -266,10 +250,10 @@ class JugadorLvl2(Jugador):
             imagen = self.animacion_actual[self.frame_actual]
 
             # Dibujar el sprite con desplazamiento
-            pantalla.blit(imagen, (self.sprite_pos.x + offset_x, self.sprite_pos.y + offset_y))
+            #pantalla.blit(imagen, (self.sprite_pos.x + offset_x, self.sprite_pos.y + offset_y))
+            pantalla.blit(imagen, (self.sprite_pos.x - 32 -28 , self.sprite_pos.y -64 - 45))
             
             # Dibujar la hitbox (verde) con desplazamiento
-            hitbox_offset = self.rect.move(offset_x, offset_y)
-            pygame.draw.rect(pantalla, (0, 255, 0), hitbox_offset, 2)
+            #pygame.draw.rect(pantalla, (0, 255, 0), self.rect, 2)
             if self.estado == "attack" and self.frame_actual == len(self.animacion_actual) - 1:
                 self.estado = "idle"

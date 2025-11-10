@@ -182,8 +182,8 @@ def ejecutar_mapa2_con_estado(state=None):
                 'pos_jugador': (jugador.sprite_pos.x, jugador.sprite_pos.y)
             }
             save_game(state)
-            running = False
-            return ejecutar_mapa3()
+            ejecutar_mapa3()
+            continue
 
     pygame.quit()
     sys.exit()

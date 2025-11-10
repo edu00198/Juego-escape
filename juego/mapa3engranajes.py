@@ -29,7 +29,7 @@ AREA_MINIJUEGO = pygame.Rect(
     SCALED_HEIGHT // 3   # Un tercio del alto
 )
 
-def ejecutar_mapa3engranajes():
+def ejecutar_mapa3engranajes(pantalla):
     clock = pygame.time.Clock()
     running = True
 

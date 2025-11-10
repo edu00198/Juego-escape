@@ -186,7 +186,7 @@ def ejecutar_mapa4(pantalla):
         print("Suma:", jugador.sprite_pos.y + jugador.rect.height)"""
 
         # Dibujo condicional según posición del jugador
-        if float(jugador.sprite_pos.y + jugador.rect.height) < 310.0: 
+        if float(jugador.sprite_pos.y) + float(jugador.rect.height) < 325: 
             
             jugador.dibujar(pantalla, offset_x, offset_y)
             pantalla.blit(imagen_escalada, (0, 0))
@@ -198,19 +198,22 @@ def ejecutar_mapa4(pantalla):
            
             jugador.dibujar(pantalla, offset_x, offset_y)
 
-
+        """
         # Dibujar colisiones
         for colision in colisiones_escaladas:
-            pygame.draw.rect(pantalla, (255, 0, 0), colision, 2)
+            pygame.draw.rect(pantalla, (255, 0, 0), colision, 2)"""
 
         #Dibujar puertas (opcional para depuración)
         #pygame.draw.rect(pantalla, (0, 0, 255), puerta_3_entrada, 2)
-        #pygame.draw.rect(pantalla, (0, 255, 255), puerta_3_salida, 2)
+        pygame.draw.rect(pantalla, (0, 255, 255), puerta_3_salida, 2)
         pygame.draw.rect(pantalla, (0, 255, 255), puerta_3_engranaje, 2)
         #pygame.draw.rect(pantalla, (255, 0, 255), puerta_3_cuatro_en_raya, 2)
-        pygame.draw.rect(pantalla, (255, 255, 0), estandarte_de_armaduras, 2)
-
-        jugador.manejar_teclas()
+        if not imagen_estand_de_armadura_actual == imagen_estand_de_armadura_vacio_escalado:
+            pygame.draw.rect(pantalla, (255, 255, 0), estandarte_de_armaduras, 2)
+        if nivel_jugador >=2:
+            JugadorLvl2.manejar_teclas(jugador)
+        else:
+            jugador.manejar_teclas()
 
         pygame.display.flip()
         clock.tick(60)
@@ -220,21 +223,23 @@ def ejecutar_mapa4(pantalla):
         # Transición al siguiente mapa
         if jugador.rect.colliderect(puerta_3_salida):
             print("Transición al siguiente mapa")
-            running = False
-            return
+            from juego.mapa_5 import ejecutar_mapa5
+            return ejecutar_mapa5(pantalla)
+            
+            
             
         if jugador.rect.colliderect(puerta_3_entrada):
             print("regresa a mapa 2")
-            #running = False  # Aquí puedes llamar al siguiente mapa si lo tienes
-            #return 2
-    
+            return 
+        
         if jugador.rect.colliderect(puerta_3_cuatro_en_raya):
             print("Transición al minijuego de 4 en raya")
-            running = False
-            return
+
             
         if jugador.rect.colliderect(puerta_3_engranaje):
-            continue
+            print("Transición al minijuego de engranajes")
+            from juego.mapa3engranajes import ejecutar_mapa3engranajes
+            ejecutar_mapa3engranajes(pantalla)
             
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -251,21 +256,26 @@ def ejecutar_mapa4(pantalla):
                     pos_x = jugador.rect.x
                     pos_y = jugador.rect.y
                     
+                    print("Posición X antes de cambiar de nivel:", pos_x)
+                    print("Posición Y antes de cambiar de nivel:", pos_y)
+
                     nivel_jugador = 2  # Actualizar el nivel del jugador
 
                     # Crear nuevo jugador de nivel 2 en la misma posición
                     jugador = JugadorLvl2(
-                        x=pos_x-88,
-                        y=pos_y-105,
+                        x=pos_x,
+                        y=pos_y,
                         ancho=jugador.rect.width,
                         alto=jugador.rect.height,
                         escala=jugador.escala,
-                        colisiones=colisiones_escaladas
+                        colisiones=colisiones_escaladas,
+                        
+                    
                     )
 
                     # Sincronizar sprite_pos con rect (por si el constructor no lo hace)
-                    offset_x = 70  # o el valor que uses en tu clase base
-                    offset_y = 101
+                    offset_x = 0  # o el valor que uses en tu clase base
+                    offset_y = 0
                     jugador.sprite_pos.x = jugador.rect.x - offset_x
                     jugador.sprite_pos.y = jugador.rect.y - offset_y
 
