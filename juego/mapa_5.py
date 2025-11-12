@@ -152,7 +152,7 @@ def ejecutar_mapa5(respect_saved: bool = True):
         pantalla.fill((0, 0, 0))  # Limpiar pantalla
 
         pantalla.blit(fondo_escalado, (OFFSET_X, OFFSET_Y))  # Fondo del mapa
-
+        
         #Dibujar colisiones (opcional para depuración)
         for colision in colisiones_escaladas:
             pygame.draw.rect(pantalla, (255, 0, 0), colision, 2)
@@ -187,7 +187,12 @@ def ejecutar_mapa5(respect_saved: bool = True):
         # Manejo del ataque del jugador (integrado desde test_combat.py)
         keys = pygame.key.get_pressed()
         if keys[pygame.K_SPACE] and combat_player.can_attack(current_time) and not jugador.atacando:
-            # activar animación de ataque en el jugador (igual comportamiento que en test_combat)
+            # ACTUALIZAR RECT DE ENEMIGOS ANTES DE DETECTAR COLISIÓN
+            for enemy_instance in combat_system.enemies[:]:
+                if not enemy_instance.is_dead:
+                    enemy_instance.update_rect()
+            
+            # activar animación de ataque en el jugador (igual comportamiento que en test_combat.py)
             jugador.estado = "attack"
             jugador.atacando = True
             jugador.frame_actual = 0
