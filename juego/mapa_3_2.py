@@ -201,8 +201,8 @@ def ejecutar_mapa4(pantalla):
 
         #Dibujar puertas (opcional para depuración)
         #pygame.draw.rect(pantalla, (0, 0, 255), puerta_3_entrada, 2)
-        pygame.draw.rect(pantalla, (0, 255, 255), puerta_3_salida, 2)
-        pygame.draw.rect(pantalla, (0, 255, 255), puerta_3_engranaje, 2)
+        #pygame.draw.rect(pantalla, (0, 255, 255), puerta_3_salida, 2)
+        #pygame.draw.rect(pantalla, (0, 255, 255), puerta_3_engranaje, 2)
         #pygame.draw.rect(pantalla, (255, 0, 255), puerta_3_cuatro_en_raya, 2)
             
         if nivel_jugador >=2:
@@ -213,13 +213,6 @@ def ejecutar_mapa4(pantalla):
         pygame.display.flip()
         clock.tick(60)
 
-
-
-        # Transición al siguiente mapa
-        if jugador.rect.colliderect(puerta_3_salida):
-            print("Transición al siguiente mapa")
-            from juego.mapa_5 import ejecutar_mapa5
-            return ejecutar_mapa5(pantalla)
         
         """
         if jugador.rect.colliderect(puerta_3_entrada):
@@ -234,8 +227,8 @@ def ejecutar_mapa4(pantalla):
             
         if jugador.rect.colliderect(puerta_3_engranaje):
             print("Transición al minijuego de engranajes")
-            from juego.mapa3engranajes import ejecutar_mapa3engranajes
-            ejecutar_mapa3engranajes(pantalla)
+            from juego.mapa_5 import ejecutar_mapa5
+            return ejecutar_mapa5(pantalla)
             
         for event in pygame.event.get():
             if event.type == pygame.QUIT:

@@ -153,9 +153,6 @@ def ejecutar_mapa5(respect_saved: bool = True):
 
         pantalla.blit(fondo_escalado, (OFFSET_X, OFFSET_Y))  # Fondo del mapa
         
-        #Dibujar colisiones (opcional para depuración)
-        for colision in colisiones_escaladas:
-            pygame.draw.rect(pantalla, (255, 0, 0), colision, 2)
 
         #Dibujar puertas (opcional para depuración)
         pygame.draw.rect(pantalla, (0, 0, 255), puerta_4_entrada, 2)

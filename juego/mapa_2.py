@@ -179,8 +179,7 @@ def ejecutar_mapa2_con_estado(state=None,x = 0, y= 0):
             pantalla.blit(imagen_escalada, (0, 0))
             jugador.dibujar(pantalla, offset_x, offset_y)
                 
-        for colision in colisiones_escaladas:
-            pygame.draw.rect(pantalla, (255, 0, 0), colision, 2)
+        
             
         dialog_system.draw()
 

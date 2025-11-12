@@ -42,9 +42,8 @@ def main():
 
 
         # Ejecutar intro y menu
-        #main_intro()
-        # time.sleep(1)
-        #press_any_key_screen()
+        main_intro()
+        press_any_key_screen()
         menus()
 
         print("Llamando a ejecutar_mapa1()...")
