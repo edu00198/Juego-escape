@@ -11,9 +11,8 @@ pygame.init()
 # -------------------
 ROWS, COLS = 6, 7
 SQUARE_SIZE = 100
-# Tamaño único para las fichas (usar en dibujo y animación)
-PIECE_SIZE = int(SQUARE_SIZE * 0.8)  # 80% del cuadrado
-RADIUS = PIECE_SIZE // 2
+PIECE_SIZE = int(SQUARE_SIZE * 0.8)  # Tamaño consistente para todas las fichas
+RADIUS = SQUARE_SIZE // 2 - 5
 
 # Resolución de 1280x720
 WIDTH= ANCHO_PANTALLA
@@ -96,22 +95,14 @@ def draw_static_board(board, board_x, board_y):
                 pygame.draw.circle(SCREEN, BLACK, (cx, cy), RADIUS)
 
     # Dibujar fichas ya colocadas: preferir imágenes PNG, si no están disponibles usar círculos
-    piece_size = PIECE_SIZE  # Usar tamaño consistente
+    piece_size = PIECE_SIZE
     use_images = USE_PIECE_IMAGES and ficha_r is not None and ficha_a is not None
-    
-    # Debug info
-    print(f"USE_PIECE_IMAGES: {USE_PIECE_IMAGES}")
-    print(f"ficha_r is None: {ficha_r is None}")
-    print(f"ficha_a is None: {ficha_a is None}")
-    print(f"use_images final: {use_images}")
 
     if use_images:
         try:
             ficha_r_scaled = pygame.transform.smoothscale(ficha_r, (piece_size, piece_size))
             ficha_a_scaled = pygame.transform.smoothscale(ficha_a, (piece_size, piece_size))
-            print("Fichas escaladas correctamente")
         except Exception as e:
-            print(f"Error al escalar fichas: {e}")
             use_images = False
 
     for c in range(COLS):
@@ -119,7 +110,7 @@ def draw_static_board(board, board_x, board_y):
             if board[r][c] == 1 or board[r][c] == 2:
                 draw_x = board_x + c * SQUARE_SIZE + (SQUARE_SIZE - piece_size) // 2
                 draw_y = board_y + r * SQUARE_SIZE + (SQUARE_SIZE - piece_size) // 2
-
+                
                 if use_images:
                     try:
                         if board[r][c] == 1:
@@ -129,17 +120,16 @@ def draw_static_board(board, board_x, board_y):
                     except Exception as e:
                         # Fallback a círculos si hay error
                         color = RED if board[r][c] == 1 else YELLOW
-                        pygame.draw.circle(SCREEN, color,
-                                           (draw_x + piece_size // 2, draw_y + piece_size // 2),
-                                           int(piece_size * 0.4))
+                        pygame.draw.circle(SCREEN, color, 
+                                        (draw_x + piece_size//2, draw_y + piece_size//2), 
+                                        int(piece_size * 0.4))
                 else:
                     color = RED if board[r][c] == 1 else YELLOW
-                    pygame.draw.circle(SCREEN, color,
-                                       (draw_x + piece_size // 2, draw_y + piece_size // 2),
-                                       int(piece_size * 0.4))
-        # Devolver las coordenadas ajustadas para que las demás funciones (preview/animación)
-        # puedan alinear correctamente las fichas con la imagen del tablero escalada.
-        return board_x, board_y
+                    pygame.draw.circle(SCREEN, color, 
+                                    (draw_x + piece_size//2, draw_y + piece_size//2), 
+                                    int(piece_size * 0.4))
+    
+    return board_x, board_y
 
 def draw_board(board, cursor_col):
     # Calcular la posición del tablero para centrarlo
@@ -156,29 +146,26 @@ def draw_board(board, cursor_col):
         next_row = get_next_open_row(board, cursor_col)
         # Si la columna está llena, mostrar el cursor arriba; si no, mostrar dentro del tablero en la fila objetivo
         if next_row == -1:
-            center_x = board_x + cursor_col * SQUARE_SIZE + SQUARE_SIZE // 2
-            center_y = board_y - SQUARE_SIZE // 2
+            draw_y = board_y - SQUARE_SIZE // 2 - PIECE_SIZE // 2
         else:
-            center_x = board_x + cursor_col * SQUARE_SIZE + SQUARE_SIZE // 2
-            center_y = board_y + next_row * SQUARE_SIZE + SQUARE_SIZE // 2
-
-        piece_size = PIECE_SIZE
-        draw_x = center_x - piece_size // 2
-        draw_y = center_y - piece_size // 2
+            draw_y = board_y + next_row * SQUARE_SIZE + (SQUARE_SIZE - PIECE_SIZE) // 2
+        
+        # Usar la MISMA fórmula de centrado que draw_static_board
+        draw_x = board_x + cursor_col * SQUARE_SIZE + (SQUARE_SIZE - PIECE_SIZE) // 2
 
         # Dibujar la imagen con transparencia si existe, si no dibujar un círculo semitransparente
         if USE_PIECE_IMAGES and ficha_r is not None:
             try:
-                ghost = pygame.transform.smoothscale(ficha_r, (piece_size, piece_size)).copy()
+                ghost = pygame.transform.smoothscale(ficha_r, (PIECE_SIZE, PIECE_SIZE)).copy()
                 ghost.set_alpha(140)
                 SCREEN.blit(ghost, (draw_x, draw_y))
             except Exception:
-                s = pygame.Surface((piece_size, piece_size), pygame.SRCALPHA)
-                pygame.draw.circle(s, (255, 0, 0, 140), (piece_size//2, piece_size//2), int(piece_size*0.4))
+                s = pygame.Surface((PIECE_SIZE, PIECE_SIZE), pygame.SRCALPHA)
+                pygame.draw.circle(s, (255, 0, 0, 140), (PIECE_SIZE//2, PIECE_SIZE//2), int(PIECE_SIZE*0.4))
                 SCREEN.blit(s, (draw_x, draw_y))
         else:
-            s = pygame.Surface((piece_size, piece_size), pygame.SRCALPHA)
-            pygame.draw.circle(s, (255, 0, 0, 140), (piece_size//2, piece_size//2), int(piece_size*0.4))
+            s = pygame.Surface((PIECE_SIZE, PIECE_SIZE), pygame.SRCALPHA)
+            pygame.draw.circle(s, (255, 0, 0, 140), (PIECE_SIZE//2, PIECE_SIZE//2), int(PIECE_SIZE*0.4))
             SCREEN.blit(s, (draw_x, draw_y))
 
     return board_x, board_y
@@ -196,22 +183,31 @@ def get_next_open_row(board, col):
 def drop_piece_animated(board, col, piece, board_x, board_y):
     """Hace que la ficha caiga animada hasta su posición final."""
     target_row = get_next_open_row(board, col)
-    x = board_x + col * SQUARE_SIZE + SQUARE_SIZE//2
-    y = board_y - SQUARE_SIZE // 2 # Posición inicial de la animación
-    color = RED if piece == 1 else YELLOW
     
     # Si columna llena, salir (seguridad)
     if target_row == -1:
         return
-
+    
     # Bucle de animación
-    while y < board_y + target_row*SQUARE_SIZE + SQUARE_SIZE//2:
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+        
         SCREEN.fill(BLACK)
-        # Dibujar solo el tablero estático, SIN el cursor
-        # Capturar posibles ajustes que draw_static_board aplique (imagen escalada)
-        board_x, board_y = draw_static_board(board, board_x, board_y)
-
-        # Dibujar la ficha que está cayendo usando la imagen PNG correspondiente o fallback
+        # Dibujar solo el tablero estático, SIN el cursor, y obtener coordenadas ajustadas
+        adj_board_x, adj_board_y = draw_static_board(board, board_x, board_y)
+        
+        # Calcular posición actual de la ficha
+        x = adj_board_x + col * SQUARE_SIZE + SQUARE_SIZE//2
+        y_current = adj_board_y + target_row * SQUARE_SIZE + SQUARE_SIZE//2
+        
+        # Posición inicial (arriba del tablero)
+        if not hasattr(drop_piece_animated, 'y_anim'):
+            drop_piece_animated.y_anim = adj_board_y - SQUARE_SIZE // 2
+        
+        # Dibujar la ficha que está cayendo
         piece_size = PIECE_SIZE
         use_images = USE_PIECE_IMAGES and ((piece == 1 and ficha_r is not None) or (piece == 2 and ficha_a is not None))
         if use_images:
@@ -220,15 +216,24 @@ def drop_piece_animated(board, col, piece, board_x, board_y):
             else:
                 ficha_scaled = pygame.transform.smoothscale(ficha_a, (piece_size, piece_size))
             draw_x = int(x) - piece_size // 2
-            draw_y = int(y) - piece_size // 2
+            draw_y = int(drop_piece_animated.y_anim) - piece_size // 2
             SCREEN.blit(ficha_scaled, (draw_x, draw_y))
         else:
-            pygame.draw.circle(SCREEN, RED if piece == 1 else YELLOW, (int(x), int(y)), int(piece_size * 0.4))
+            pygame.draw.circle(SCREEN, RED if piece == 1 else YELLOW, (int(x), int(drop_piece_animated.y_anim)), RADIUS)
 
         pygame.display.update()
-        y += 15  # Velocidad de caída
-        clock.tick(FPS)
         
+        # Si llegó a la posición final, salir del bucle
+        if drop_piece_animated.y_anim >= y_current:
+            break
+        
+        drop_piece_animated.y_anim += 15  # Velocidad de caída
+        clock.tick(FPS)
+    
+    # Limpiar el atributo temporal
+    if hasattr(drop_piece_animated, 'y_anim'):
+        delattr(drop_piece_animated, 'y_anim')
+    
     # Una vez que termina la animación, actualizar el tablero
     board[target_row][col] = piece
 
@@ -266,31 +271,6 @@ def draw_winning_line(board_x, board_y, positions):
               board_y + positions[-1][0] * SQUARE_SIZE + SQUARE_SIZE//2)
     
     pygame.draw.line(SCREEN, GREEN, start_pos, end_pos, 10)
-
-
-def show_end_screen(player_won: bool):
-    """Muestra una pantalla completa indicando si el jugador ganó o perdió. Espera una tecla o clic."""
-    font_big = pygame.font.SysFont(None, 96)
-    font_small = pygame.font.SysFont(None, 36)
-    msg = "Has ganado!" if player_won else "Has perdido"
-    color = RED if player_won else YELLOW
-
-    waiting = True
-    while waiting:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            if event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
-                waiting = False
-
-        SCREEN.fill(BLACK)
-        txt = font_big.render(msg, True, color)
-        instr = font_small.render("Pulsa una tecla o clic para continuar", True, (200, 200, 200))
-        SCREEN.blit(txt, (WIDTH//2 - txt.get_width()//2, HEIGHT//2 - txt.get_height()))
-        SCREEN.blit(instr, (WIDTH//2 - instr.get_width()//2, HEIGHT//2 + 40))
-        pygame.display.flip()
-        clock.tick(FPS)
 
 def cpu_move(board):
     """Implementa una estrategia de CPU más difícil."""
@@ -385,10 +365,13 @@ def inicio_juego():
         
         # Fin de partida
         if game_over:
-            # Dibujar tablero final sin cursor
-            draw_board(board, -1)
-            # Mostrar pantalla final (espera interacción)
-            show_end_screen(winner == "Jugador")
+            SCREEN.fill(BLACK)
+            draw_static_board(board, board_x, board_y)
+            msg_txt = font.render(f"{winner} gana!", True, RED if winner=="Jugador" else YELLOW)
+            SCREEN.blit(msg_txt, (WIDTH//2 - msg_txt.get_width()//2, 50))
+            pygame.display.flip()
+            pygame.time.wait(2000)
+            # Return True if player won, False if CPU won
             return winner == "Jugador"
         
         pygame.display.update()
