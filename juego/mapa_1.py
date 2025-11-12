@@ -177,12 +177,10 @@ def ejecutar_mapa1():
             # Recompute sprite_pos from rect using the known offsets
             jugador.sprite_pos.x = jugador.rect.x - offset_x
             jugador.sprite_pos.y = jugador.rect.y - offset_y
-            print(f"[LOAD DEBUG] Saved pos looked like rect coords. Set rect={jugador.rect.topleft}, sprite_pos=({jugador.sprite_pos.x}, {jugador.sprite_pos.y})")
         except Exception:
             # Fallback to clamping sprite_pos inside map
             jugador.sprite_pos.x = max(map_left, min(jugador.sprite_pos.x, map_right))
             jugador.sprite_pos.y = max(map_top, min(jugador.sprite_pos.y, map_bottom))
-            print(f"[LOAD DEBUG] Failed interpreting saved rect; clamped sprite_pos to ({jugador.sprite_pos.x}, {jugador.sprite_pos.y})")
 
     # Clamp rect within visible map bounds and sync sprite_pos to avoid breaking collisions/drawing
     old_rect_topleft = jugador.rect.topleft
@@ -191,11 +189,7 @@ def ejecutar_mapa1():
     jugador.sprite_pos.x = jugador.rect.x - offset_x
     jugador.sprite_pos.y = jugador.rect.y - offset_y
 
-    if jugador.rect.topleft != old_rect_topleft:
-        print(f"[LOAD DEBUG] Clamped rect from {old_rect_topleft} to {jugador.rect.topleft}; sprite_pos now=({jugador.sprite_pos.x}, {jugador.sprite_pos.y})")
-    else:
-        print(f"[LOAD DEBUG] Player position OK: rect={jugador.rect.topleft}, sprite_pos=({jugador.sprite_pos.x}, {jugador.sprite_pos.y})")
-
+    
     fondo_escalado = pygame.transform.scale(fondo_mapa, (SCALED_WIDTH, SCALED_HEIGHT))
     codigo_secreto = str(random.randint(1000, 9999))
     sistema_cofres = SistemaLlavesCofres(codigo_secreto=codigo_secreto)
@@ -244,12 +238,9 @@ def ejecutar_mapa1():
                         hay_cofre_abierto = any(c.abierto for c in sistema_cofres.cofres)
                         panel_visible = sistema_cofres.panel_codigo and sistema_cofres.panel_codigo.visible
                         # DEBUG: mostrar estado para diagnosticar transiciones
-                        print(f"DEBUG SPACE: cerca_puerta={cerca_puerta}, hay_cofre_abierto={hay_cofre_abierto}, panel_visible={panel_visible}, codigo_correcto={sistema_cofres.codigo_correcto}")
+                        #print(f"DEBUG SPACE: cerca_puerta={cerca_puerta}, hay_cofre_abierto={hay_cofre_abierto}, panel_visible={panel_visible}, codigo_correcto={sistema_cofres.codigo_correcto}")
                         # Más info: rects (jugador vs puerta)
-                        try:
-                            print(f"jugador.rect={jugador.rect}, puerta_1_scaled={puerta_1_scaled}")
-                        except Exception as e:
-                            print(f"DEBUG RECT ERROR: {e}")
+                        
                         # Allow leaving to mapa2 if either a cofre is open (fresh session)
                         # or if the code was already entered in a previous session.
                         if cerca_puerta and (hay_cofre_abierto or sistema_cofres.codigo_correcto):

@@ -168,7 +168,6 @@ def ejecutar_mapa2_con_estado(state=None,x = 0, y= 0):
             dialog_system.handle_input(event)
 
         jugador.manejar_teclas()
-        print(float(jugador.sprite_pos.y) + float(jugador.rect.height))
         
         pantalla.fill((0, 0, 0)) # elfondo
         pantalla.blit(fondo_escalado, (OFFSET_X, OFFSET_Y))
@@ -189,7 +188,6 @@ def ejecutar_mapa2_con_estado(state=None,x = 0, y= 0):
         clock.tick(60)
 
         if jugador.rect.colliderect(puerta_2_salida):
-            print("Transición al mapa 3")
             # Guardar estado antes de cambiar de mapa
             state = {
                 'mapa': 'mapa2',
