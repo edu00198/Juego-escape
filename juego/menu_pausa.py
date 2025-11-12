@@ -22,25 +22,24 @@ def pause_menu(pantalla, mapa_actual=1, state=None):
     """
 
 	# --- FONDO SEGÚN EL MAPA ---
-	try:
-		if mapa_actual == 1:
-			fondo = pygame.image.load(m1_opciones).convert()
-		elif mapa_actual == 2:
-			fondo = pygame.image.load(m2_opciones).convert()
-		elif mapa_actual == 3:
-			fondo = pygame.image.load(m3_opciones).convert()
-		elif mapa_actual == 4:
-			fondo = pygame.image.load(m4_opciones).convert()
-		elif mapa_actual == 5:
-			fondo = pygame.image.load(m4_opciones).convert()
-		else:
-			raise ValueError("Mapa no válido")
-		fondo = pygame.transform.scale(fondo, (ANCHO_PANTALLA, ALTO_PANTALLA))
-	except Exception as e:
-		print(f"No se pudo cargar el fondo: {e}")
-		fondo = pygame.Surface((ANCHO_PANTALLA, ALTO_PANTALLA))
-		fondo.fill(BLANCO)
-
+    try:
+        if mapa_actual == 1:
+            fondo = pygame.image.load(m1_opciones).convert()
+        elif mapa_actual == 2:
+            fondo = pygame.image.load(m2_opciones).convert()
+        elif mapa_actual == 3:
+               fondo = pygame.image.load(m3_opciones).convert()
+        elif mapa_actual == 4:
+            fondo = pygame.image.load(m4_opciones).convert()
+        elif mapa_actual == 5:
+            fondo = pygame.image.load(m4_opciones).convert()
+        else:
+            raise ValueError("Mapa no válido")
+        fondo = pygame.transform.scale(fondo, (ANCHO_PANTALLA, ALTO_PANTALLA))
+    except Exception as e:
+        print(f"No se pudo cargar el fondo: {e}")
+        fondo = pygame.Surface((ANCHO_PANTALLA, ALTO_PANTALLA))
+        fondo.fill(BLANCO)  
 	# --- CONTENEDOR CENTRAL (menu_pause) ---
     try:
         menu_fondo = pygame.image.load(menu_pause).convert_alpha()
