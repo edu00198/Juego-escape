@@ -50,6 +50,8 @@ def ejecutar_mapa4_en_raya():
     imagen_escalada = pygame.transform.scale(imagen_tablero, (427, 240))
     pos_tablero = ((ANCHO_PANTALLA - imagen_escalada.get_width()) // 2, 150)
 
+    cuatro_en_raya_ya_jugador = False
+
     # --- NPC ANIMADO (cargado uno por uno) ---
     ruta_npc_dir = os.path.join(BASE_DIR, "assets", "sprites_vampiro1", "Vampires1_Idle", "idle_abajo")
 
@@ -95,18 +97,20 @@ def ejecutar_mapa4_en_raya():
                     except Exception:
                         state = None
                     pause_menu(pantalla, mapa_actual=4, state=state)
-
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-                if jugador.rect.colliderect(npc_rect):
-                    if not mostrar_dialogo:
-                        mostrar_dialogo = True
-                    else:
-                        # Jugar y actualizar acertijo_en_raya según el resultado
-                        acertijo_en_raya = inicio_juego()
-                        if acertijo_en_raya:
-                            dialogo_texto = "¡Felicidades! Has ganado. Puedes continuar."
+            if cuatro_en_raya_ya_jugador == False:
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                    if jugador.rect.colliderect(npc_rect):
+                        if not mostrar_dialogo:
+                            mostrar_dialogo = True
                         else:
-                            dialogo_texto = "Has perdido. ¿Quieres intentarlo de nuevo?"
+                            # Jugar y actualizar acertijo_en_raya según el resultado
+                            acertijo_en_raya = inicio_juego()
+                            if acertijo_en_raya:
+                                dialogo_texto = "¡Felicidades! Has ganado. Puedes continuar."
+                                cuatro_en_raya_ya_jugador = True
+                            else:
+                                dialogo_texto = "Has perdido. ¿Quieres intentarlo de nuevo?"
+                                cuatro_en_raya_ya_jugador = False
 
         # Animación NPC
         npc_anim_timer += npc_anim_speed

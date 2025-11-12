@@ -106,12 +106,16 @@ def ejecutar_mapa4(pantalla):
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
-                elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                    try:
-                        state = {'mapa': 'mapa4'}
-                    except Exception:
-                        state = None
-                    pause_menu(pantalla, mapa_actual=3, state=state)
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        try:
+                            state = {
+                                'mapa': 'mapa3',
+                                'pos_jugador': (jugador.sprite_pos.x, jugador.sprite_pos.y)
+                            }
+                        except Exception:
+                            state = None
+                        pause_menu(pantalla, mapa_actual=3, state=state)
             
             # Dibujar fondo y jugador
             pantalla.fill((0, 0, 0))
@@ -244,16 +248,16 @@ def ejecutar_mapa4(pantalla):
                     imagen_estand_de_armadura_actual = imagen_estand_de_armadura_vacio_escalado
 
                     # Guardar posición real del jugador (rect)
-                    pos_x = jugador.rect.x
-                    pos_y = jugador.rect.y
+                    pos_x = jugador.rect.x -8
+                    pos_y = jugador.rect.y +10
                     
 
                     nivel_jugador = 2  # Actualizar el nivel del jugador
 
                     # Crear nuevo jugador de nivel 2 en la misma posición
                     jugador = JugadorLvl2(
-                        x=pos_x,
-                        y=pos_y,
+                        x=pos_x-10,
+                        y=pos_y+10,
                         ancho=jugador.rect.width,
                         alto=jugador.rect.height,
                         escala=jugador.escala,

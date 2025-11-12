@@ -331,13 +331,13 @@ def inicio_juego():
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     # Abrir menú de pausa; minijuego no guarda estado por defecto
-                    pause_menu(SCREEN, mapa_actual=0, state=None)
+                    pause_menu(SCREEN, mapa_actual=4, state=None)
                 elif not game_over and turn == 0:
                     if event.key == pygame.K_LEFT:
                         cursor_col = max(0, cursor_col - 1)
                     elif event.key == pygame.K_RIGHT:
                         cursor_col = min(COLS - 1, cursor_col + 1)
-                    elif event.key == pygame.K_RETURN:
+                    elif event.key == pygame.K_RETURN or event.key == pygame.K_SPACE:
                         if is_valid_location(board, cursor_col):
                             drop_piece_animated(board, cursor_col, 1, board_x, board_y)
                             win_positions = winning_move(board, 1)
