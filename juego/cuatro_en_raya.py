@@ -131,13 +131,7 @@ def draw_static_board(board, board_x, board_y):
     
     return board_x, board_y
 
-def draw_board(board, cursor_col):
-    # Calcular la posición del tablero para centrarlo
-    board_width = COLS * SQUARE_SIZE
-    board_height = (ROWS + 1) * SQUARE_SIZE
-    board_x = (WIDTH - board_width) // 2
-    board_y = (HEIGHT - board_height) // 4  # Cambiado de //2 a //4 para subir el tablero
-
+def draw_board(board, cursor_col, board_x, board_y):
     # Usar draw_static_board para pintar el tablero y las fichas
     board_x, board_y = draw_static_board(board, board_x, board_y)
 
@@ -310,6 +304,12 @@ def inicio_juego():
     cursor_col = COLS // 2  # Posición inicial del cursor
     font = pygame.font.SysFont(None, 50)
     
+    # Calcular las coordenadas del tablero UNA SOLA VEZ y mantenerlas constantes
+    board_width = COLS * SQUARE_SIZE
+    board_height = (ROWS + 1) * SQUARE_SIZE
+    board_x = (WIDTH - board_width) // 2
+    board_y = (HEIGHT - board_height) // 4
+    
     # Cargar imagen de fondo (descomenta la siguiente línea cuando tengas la imagen)
     # fondo = pygame.image.load("fondo.png").convert()
     # fondo = pygame.transform.scale(fondo, (WIDTH, HEIGHT))
@@ -321,8 +321,8 @@ def inicio_juego():
         # Dibujar fondo si está disponible
         # SCREEN.blit(fondo, (0, 0))
         
-        # Dibujar el tablero y el cursor (si es el turno del jugador)
-        board_x, board_y = draw_board(board, cursor_col if turn == 0 else -1)
+        # Dibujar el tablero (devuelve coordenadas ajustadas que se ignoran)
+        _, _ = draw_board(board, cursor_col if turn == 0 else -1, board_x, board_y)
         
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
