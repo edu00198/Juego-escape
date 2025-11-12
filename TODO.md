@@ -1,9 +1,0 @@
-- [x] Corregir el código duplicado en juego/mapa3.py eliminando el segundo while running loop y agregando la lógica de transición al primer loop.
-- [x] Corregir la ruta de la imagen de pared en mapa3.py agregando "assets" al path.
-- [ ] Probar la transición de mapa2 a mapa3 para confirmar que no se rompe.
-- [x] Implementar sistema de autoguardado usando pickle para guardar estado del juego.
-- [x] Modificar menú principal para abrir interfaz de selección de partida (Nueva Partida / Cargar Partida).
-- [x] Integrar autoguardado en mapa1 al pasar a mapa2.
-- [x] Crear función ejecutar_mapa1_con_estado para cargar partida guardada.
-- [ ] Probar el sistema de guardado y carga de partida.
-- [ ] Integrar autoguardado en otros mapas si es necesario.
