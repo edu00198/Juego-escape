@@ -22,7 +22,7 @@ if __name__ == '__main__':
         from juego.mapa_3_2 import ejecutar_mapa4
         ejecutar_mapa4(pantalla)
     except Exception as e:
-        print(f"Error ejecutando mapa_5: {e}")
+        print(f"Error ejecutando mapa_4: {e}")
         import traceback
         traceback.print_exc()
-        sys.exit()
+        sys.exit()  

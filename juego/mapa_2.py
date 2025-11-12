@@ -95,10 +95,10 @@ class DialogSystem:
             (self.dialog_rect.right - indicator.get_width() - 20, self.dialog_rect.bottom - 30),
         )
 
-def ejecutar_mapa2():
+def ejecutar_mapa2(x = 0, y= 0):
     return ejecutar_mapa2_con_estado(None)
 
-def ejecutar_mapa2_con_estado(state=None):
+def ejecutar_mapa2_con_estado(state=None,x = 0, y= 0):
     clock = pygame.time.Clock()
     running = True
 
@@ -112,13 +112,18 @@ def ejecutar_mapa2_con_estado(state=None):
     offset_x = (ANCHO_PANTALLA - fondo_mapa.get_width() * escala) // 2
     offset_y = (ALTO_PANTALLA - fondo_mapa.get_height() * escala) // 2
 
-    if state and 'pos_jugador' in state:
-        pos_x, pos_y = state['pos_jugador']
+    if x == 0 and y == 0:
+        
+        if state and 'pos_jugador' in state:
+            pos_x, pos_y = state['pos_jugador']
+        else:
+            puerta2pos = puerta_2_entrada.topleft
+            pos_x = puerta2pos[0]
+            pos_y = puerta2pos[1] - alto_jugador * 10
     else:
-        puerta2pos = puerta_2_entrada.topleft
-        pos_x = puerta2pos[0]
-        pos_y = puerta2pos[1] - alto_jugador * 10
-    
+        pos_x = x
+        pos_y = y
+        
     jugador = Jugador(pos_x, pos_y, ancho_jugador, alto_jugador, escala=ESCALA_JUGADOR, colisiones=colisiones_escaladas)
 
     fondo_escalado = pygame.transform.scale(fondo_mapa, (SCALED_WIDTH, SCALED_HEIGHT))
@@ -184,6 +189,3 @@ def ejecutar_mapa2_con_estado(state=None):
             save_game(state)
             ejecutar_mapa3()
             continue
-
-    pygame.quit()
-    sys.exit()

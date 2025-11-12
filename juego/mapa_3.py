@@ -100,14 +100,7 @@ def ejecutar_mapa3_con_estado(state=None):
         # Transición al siguiente map
             
         if jugador.rect.colliderect(puerta_3_entrada):
-            print("regresa a mapa 2")
-            state = {
-                'mapa': 'mapa3',
-                'pos_jugador': (jugador.sprite_pos.x, jugador.sprite_pos.y)
-            }
-            save_game(state)
-            # running = False  # Aquí puedes llamar al mapa anterior si lo tienes
-            # return 2
+            break
     
         if jugador.rect.colliderect(puerta_3_cuatro_en_raya):
             print("Transición al minijuego de 4 en raya")
@@ -119,5 +112,3 @@ def ejecutar_mapa3_con_estado(state=None):
             running = False
             return ejecutar_mapa4_en_raya()
 
-    pygame.quit()
-    sys.exit()

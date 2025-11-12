@@ -37,8 +37,6 @@ def ejecutar_mapa4(pantalla):
     clock = pygame.time.Clock()
     running = True
     
-    os.system('cls')  
-    
     animacion_puerta_abierta_hecha = False
 
     nivel_jugador = 1  # Nivel inicial del jugador
@@ -70,7 +68,7 @@ def ejecutar_mapa4(pantalla):
     imagen_pared = pygame.image.load(ruta_pared).convert_alpha()
     imagen_escalada = pygame.transform.scale(imagen_pared, (1280, 720))
 
-     #estandarte lleno
+    #estandarte lleno
     BASE_DIR = os.path.dirname(os.path.dirname(__file__))
     ruta_estand_de_armadura_lleno = os.path.join(BASE_DIR, "assets", "mapas", "estand_de_armadura_lleno.png")
     imagen_estand_de_armadura_lleno = pygame.image.load(ruta_estand_de_armadura_lleno).convert_alpha()
@@ -82,7 +80,6 @@ def ejecutar_mapa4(pantalla):
     imagen_estand_de_armadura_vacio_escalado = pygame.transform.scale(imagen_estand_de_armadura_vacio, (1280, 720))
 
     imagen_estand_de_armadura_actual = imagen_estand_de_armadura_lleno_escalado
-
 
     def animacion_puerta_abierta(pantalla):
         # Cargar sprites de la animación de la puerta
@@ -148,17 +145,14 @@ def ejecutar_mapa4(pantalla):
             # Actualizar pantalla final
             pygame.display.flip()
             clock.tick(60)
- 
 
-    if animacion_puerta_abierta_hecha:
+    if not animacion_puerta_abierta_hecha:
     #hace a animacion
         animacion_puerta_abierta(pantalla)
-        
+    
     # Acá comienza el juego normal
     running = True
     while running:
-        current_time = pygame.time.get_ticks()
-        
         
 
         for event in pygame.event.get():
@@ -180,11 +174,8 @@ def ejecutar_mapa4(pantalla):
         pantalla.fill((0, 0, 0))
         pantalla.blit(fondo_escalado, (OFFSET_X, OFFSET_Y))
 
-        """
+        
         #depuracion de alturas
-        print("Posición Y del jugador:", jugador.sprite_pos.y)
-        print("Altura del jugador:", jugador.rect.height)
-        print("Suma:", jugador.sprite_pos.y + jugador.rect.height)"""
 
         # Dibujo condicional según posición del jugador
         if float(jugador.sprite_pos.y) + float(jugador.rect.height) < 325: 
@@ -196,7 +187,7 @@ def ejecutar_mapa4(pantalla):
         else:
             pantalla.blit(imagen_escalada, (0, 0))
             pantalla.blit(imagen_estand_de_armadura_actual, (0, 0))
-           
+
             jugador.dibujar(pantalla, offset_x, offset_y)
 
         """
@@ -207,11 +198,9 @@ def ejecutar_mapa4(pantalla):
         #Dibujar puertas (opcional para depuración)
         #pygame.draw.rect(pantalla, (0, 0, 255), puerta_3_entrada, 2)
         pygame.draw.rect(pantalla, (0, 255, 255), puerta_3_salida, 2)
-        #pygame.draw.rect(pantalla, (0, 255, 255), puerta_3_engranaje, 2)
+        pygame.draw.rect(pantalla, (0, 255, 255), puerta_3_engranaje, 2)
         #pygame.draw.rect(pantalla, (255, 0, 255), puerta_3_cuatro_en_raya, 2)
-        if not imagen_estand_de_armadura_actual == imagen_estand_de_armadura_vacio_escalado:
-            #pygame.draw.rect(pantalla, (255, 255, 0), estandarte_de_armaduras, 2)
-            continue
+            
         if nivel_jugador >=2:
             JugadorLvl2.manejar_teclas(jugador)
         else:
@@ -227,10 +216,13 @@ def ejecutar_mapa4(pantalla):
             print("Transición al siguiente mapa")
             from juego.mapa_5 import ejecutar_mapa5
             return ejecutar_mapa5(pantalla)
-                    
+        
+        """
         if jugador.rect.colliderect(puerta_3_entrada):
+
             print("regresa a mapa 2")
-            return 
+            from juego.mapa_2 import  ejecutar_mapa2_con_estado
+            ejecutar_mapa2_con_estado(None, pos_x, pos_y)"""
         
         if jugador.rect.colliderect(puerta_3_cuatro_en_raya):
             print("Transición al minijuego de 4 en raya")
@@ -247,7 +239,6 @@ def ejecutar_mapa4(pantalla):
 
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE and jugador.rect.colliderect(estandarte_de_armaduras):
-                    print("¡Interacción con el estandarte activada! Subiendo a nivel 2...")
 
                     # Cambiar imagen del estandarte
                     imagen_estand_de_armadura_actual = imagen_estand_de_armadura_vacio_escalado
@@ -256,8 +247,6 @@ def ejecutar_mapa4(pantalla):
                     pos_x = jugador.rect.x
                     pos_y = jugador.rect.y
                     
-                    print("Posición X antes de cambiar de nivel:", pos_x)
-                    print("Posición Y antes de cambiar de nivel:", pos_y)
 
                     nivel_jugador = 2  # Actualizar el nivel del jugador
 
@@ -270,7 +259,6 @@ def ejecutar_mapa4(pantalla):
                         escala=jugador.escala,
                         colisiones=colisiones_escaladas,
                         
-                    
                     )
 
                     # Sincronizar sprite_pos con rect (por si el constructor no lo hace)
@@ -279,10 +267,7 @@ def ejecutar_mapa4(pantalla):
                     jugador.sprite_pos.x = jugador.rect.x - offset_x
                     jugador.sprite_pos.y = jugador.rect.y - offset_y
 
-
-            
-    pygame.quit()
-    sys.exit()
+    
 
 if __name__ == "__main__":
     pygame.init()
