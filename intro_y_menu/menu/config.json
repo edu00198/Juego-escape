@@ -1,0 +1,7 @@
+{
+    "volumes": {
+        "MUSIC": 100,
+        "SFX": 100,
+        "MASTER": 75
+    }
+}

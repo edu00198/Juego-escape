@@ -111,7 +111,7 @@ def ejecutar_mapa4(pantalla):
                         state = {'mapa': 'mapa4'}
                     except Exception:
                         state = None
-                    pause_menu(pantalla, mapa_actual=4, state=state)
+                    pause_menu(pantalla, mapa_actual=3, state=state)
             
             # Dibujar fondo y jugador
             pantalla.fill((0, 0, 0))
