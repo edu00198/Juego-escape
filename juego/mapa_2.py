@@ -168,12 +168,21 @@ def ejecutar_mapa2_con_estado(state=None,x = 0, y= 0):
             dialog_system.handle_input(event)
 
         jugador.manejar_teclas()
-
-        pantalla.fill((0, 0, 0))
+        print(float(jugador.sprite_pos.y) + float(jugador.rect.height))
+        
+        pantalla.fill((0, 0, 0)) # elfondo
         pantalla.blit(fondo_escalado, (OFFSET_X, OFFSET_Y))
-        jugador.dibujar(pantalla, offset_x, offset_y)
-        pantalla.blit(imagen_escalada, (0, 0))
-
+        # Dibujo condicional según posición del jugador
+        if float(jugador.sprite_pos.y) + float(jugador.rect.height) < 300: 
+            jugador.dibujar(pantalla, offset_x, offset_y)
+            pantalla.blit(imagen_escalada, (0, 0))
+        else: 
+            pantalla.blit(imagen_escalada, (0, 0))
+            jugador.dibujar(pantalla, offset_x, offset_y)
+                
+        for colision in colisiones_escaladas:
+            pygame.draw.rect(pantalla, (255, 0, 0), colision, 2)
+            
         dialog_system.draw()
 
         pygame.display.flip()
