@@ -71,7 +71,7 @@ def settings_menu(window):
     font = pygame.font.SysFont("Consolas", 32, bold=True)
 
     # Tabs
-    tabs = ["VOLUME", "RESOLUTION", "CONTROLS"]
+    tabs = ["VOLUME", "RESOLUTION", "CONTROLS", "CREDITS"]
     tab_index = 0
     active_section = None
 
@@ -116,6 +116,39 @@ def settings_menu(window):
     total_controls = sum(len(section) for section in controls.values())
     control_selected = 0
     rebinding = False
+
+    # Credits: lista de (rol, nombre) que se mostrará en la pestaña CREDITS
+    # Cada elemento idealmente es una tupla (rol, nombre). También se admite una cadena simple.
+    credits = [
+        ("Creadores", "Torterolo, Rojic, De Turris"),
+        ("Gracias por jugar", "")
+    ]
+
+    # Intentar cargar logo_huergo desde rutas comunes; si no existe, logo_surface será None
+    logo_surface = None
+    posible_nombres = ["logo_huergo.png", "logo_huergo.jpg", "logo_huergo.jpeg", "logo_huergo.webp"]
+    posibles_rutas = []
+    # ruta en assets del menú
+    posibles_rutas.append(os.path.join(BASE_DIR, "assets"))
+    # ruta assets raíz del proyecto (una carpeta arriba)
+    posibles_rutas.append(os.path.join(os.path.dirname(BASE_DIR), "assets"))
+    # buscar en cada ruta los posibles nombres
+    for base in posibles_rutas:
+        for nombre in posible_nombres:
+            ruta = os.path.join(base, nombre)
+            if os.path.exists(ruta):
+                try:
+                    img = pygame.image.load(ruta)
+                    try:
+                        logo_surface = img.convert_alpha()
+                    except Exception:
+                        logo_surface = img.convert()
+                    # si cargó, salir de las búsquedas
+                    break
+                except Exception:
+                    logo_surface = None
+        if logo_surface is not None:
+            break
 
     # Variables para el sistema de advertencias
     advertencia = False
@@ -497,6 +530,75 @@ def settings_menu(window):
                 info = small_font.render("Press new key...", True, (255, 200, 0))
                 info_rect = info.get_rect(center=(cx_center, start_y + len(controls) * line_h + 40))
                 base_surface.blit(info, info_rect)
+
+        elif tabs[tab_index] == "CREDITS":
+            # Mostrar créditos estáticos. Se centra la lista y se permite cerrar con ESC o volver atrás.
+            try:
+                ruta_fuente = os.path.join(BASE_DIR, "assets", "font.ttf")
+                title_font = pygame.font.Font(ruta_fuente, 48)
+                credit_font = pygame.font.Font(ruta_fuente, 28)
+            except Exception:
+                title_font = pygame.font.SysFont("Consolas", 48, bold=True)
+                credit_font = pygame.font.SysFont("Consolas", 28)
+
+            # Renderizar la lista de créditos
+            start_y = 220
+            line_h = credit_font.get_linesize() + 10
+            cx = BASE_RES[0] // 2
+
+            # Si hay logo, lo colocamos en el medio de la lista
+            mid = len(credits) // 2
+
+            y = start_y
+            for i, item in enumerate(credits):
+                # antes de dibujar el elemento medio, dibujar logo si existe
+                if i == mid and logo_surface is not None:
+                    # escalar logo a un ancho máximo manteniendo proporción
+                    max_logo_w = 360
+                    logo_w, logo_h = logo_surface.get_size()
+                    if logo_w > max_logo_w:
+                        scale = max_logo_w / float(logo_w)
+                        new_w = int(logo_w * scale)
+                        new_h = int(logo_h * scale)
+                        logo_draw = pygame.transform.smoothscale(logo_surface, (new_w, new_h))
+                    else:
+                        logo_draw = logo_surface
+
+                    logo_rect = logo_draw.get_rect(center=(cx, y + logo_draw.get_height() // 2))
+                    base_surface.blit(logo_draw, logo_rect)
+                    y += logo_draw.get_height() + 20
+
+                # normalizar item a tupla (role, name)
+                if isinstance(item, tuple):
+                    role, name = item
+                    text = f"{role}: {name}" if name else f"{role}"
+                else:
+                    text = str(item)
+
+                txt_surf = credit_font.render(text, True, (215, 215, 215))
+                txt_rect = txt_surf.get_rect(center=(cx, y))
+                base_surface.blit(txt_surf, txt_rect)
+                y += line_h
+
+            # Si el logo debe ir después de todos (caso len==0 o mid==len), cubrirlo
+            if logo_surface is not None and mid >= len(credits):
+                max_logo_w = 360
+                logo_w, logo_h = logo_surface.get_size()
+                if logo_w > max_logo_w:
+                    scale = max_logo_w / float(logo_w)
+                    new_w = int(logo_w * scale)
+                    new_h = int(logo_h * scale)
+                    logo_draw = pygame.transform.smoothscale(logo_surface, (new_w, new_h))
+                else:
+                    logo_draw = logo_surface
+                logo_rect = logo_draw.get_rect(center=(cx, y + logo_draw.get_height() // 2))
+                base_surface.blit(logo_draw, logo_rect)
+
+            # Nota para volver
+            note_font = pygame.font.SysFont("Consolas", 18)
+            note = note_font.render("Press ESC to go back", True, (150, 150, 150))
+            note_rect = note.get_rect(center=(BASE_RES[0] // 2, BASE_RES[1] - 60))
+            base_surface.blit(note, note_rect)
 
         # Mostrar mensajes de ayuda según la sección activa
         if active_section in ["VOLUME", "RESOLUTION"]:
