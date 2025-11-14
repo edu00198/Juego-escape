@@ -151,19 +151,16 @@ def ejecutar_mapa5(respect_saved: bool = True):
 
         pantalla.fill((0, 0, 0))  # Limpiar pantalla
 
-        pantalla.blit(fondo_escalado, (OFFSET_X, OFFSET_Y))  # Fondo del mapa
-        
-
-        #Dibujar puertas (opcional para depuración)
-        pygame.draw.rect(pantalla, (0, 0, 255), puerta_4_entrada, 2)
-        pygame.draw.rect(pantalla, (0, 255, 255), puerta_4_salida, 2)
+        # Fondo del mapa (usar offsets locales calculados)
+        pantalla.blit(fondo_escalado, (offset_x, offset_y))
+        # Imagen decorativa encima del fondo (paredes); dibujar antes del jugador
+        if imagen_escalada:
+            pantalla.blit(imagen_escalada, (0, 0))
 
         # Manejo del combate
         current_time = pygame.time.get_ticks()
         
-        # Debug: Mostrar posición del jugador y zona de combate
-        if jugador.rect.colliderect(zona_combate):
-            print(f"Jugador en zona de combate. Pos: {jugador.rect.topleft}")
+        # (Debug logging removed)
             
         # Actualizar y dibujar enemigos
         for enemy in combat_system.enemies[:]:  # Usar una copia de la lista para evitar problemas al eliminar
@@ -178,8 +175,7 @@ def ejecutar_mapa5(respect_saved: bool = True):
                         running = False
                     enemy.last_attack = current_time
 
-        # Debug: Dibujar zona de combate para visualización
-        pygame.draw.rect(pantalla, (255, 0, 0), zona_combate, 2)
+    # (Zona de combate no se dibuja en la versión final)
         
         # Manejo del ataque del jugador (integrado desde test_combat.py)
         keys = pygame.key.get_pressed()
@@ -245,13 +241,7 @@ def ejecutar_mapa5(respect_saved: bool = True):
         # Solo mostrar la barra de vida y enemigos si el combate está activo
         if combate_activo:
             combat_player.draw_health(pantalla)
-            # Debug: dibujar área de ataque cuando el jugador está atacando
-            if jugador.estado == "attack":
-                attack_rect = combat_player.get_attack_rect()
-                pygame.draw.rect(pantalla, (255, 255, 0), attack_rect.move(offset_x, offset_y), 2)
-            
-            # Debug: mostrar zona de combate
-            pygame.draw.rect(pantalla, (0, 0, 255), zona_combate, 2)
+            # (Debug visuals removed: no se dibuja área de ataque ni zona de combate)
 
             # Verificar si hay enemigos en el sistema de combate
             if len(combat_system.enemies) == 0:
@@ -294,13 +284,10 @@ def ejecutar_mapa5(respect_saved: bool = True):
                             running = False
                         enemy_instance.last_attack = current_time
 
-        if imagen_escalada:
-            pantalla.blit(imagen_escalada, (0, 0))  # Después la imagen → queda arriba del jugador
+        # imagen_escalada se dibuja arriba del fondo pero debajo del jugador (ya dibujada más arriba)
 
         # Debug: dibujar área de ataque cuando el jugador está atacando
-        if jugador.estado == "attack":
-            attack_rect = combat_player.get_attack_rect()
-            pygame.draw.rect(pantalla, (255, 255, 0), attack_rect.move(offset_x, offset_y), 2)
+            # (Debug attack rect removed)
 
         pygame.display.flip()
         clock.tick(60)
