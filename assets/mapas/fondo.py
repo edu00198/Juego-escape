@@ -10,6 +10,7 @@ m1_opciones = os.path.join(os.path.dirname(os.path.dirname(__file__)), "mapas", 
 m2_opciones = os.path.join(os.path.dirname(os.path.dirname(__file__)), "mapas", "m2_opciones.png")
 m3_opciones = os.path.join(os.path.dirname(os.path.dirname(__file__)), "mapas", "m3_opciones.png")
 m4_opciones=os.path.join(os.path.dirname(os.path.dirname(__file__)), "mapas", "m4_opciones.png")
+m4_2_opciones=os.path.join(os.path.dirname(os.path.dirname(__file__)), "mapas", "m4_2_opciones.png")
 key = os.path.join(os.path.dirname(os.path.dirname(__file__)), "mapas", "key.png")
 cofre_a= os.path.join(os.path.dirname(os.path.dirname(__file__)), "mapas", "cofre_a.png")
 cofre_c= os.path.join(os.path.dirname(os.path.dirname(__file__)), "mapas", "cofre_c.png")

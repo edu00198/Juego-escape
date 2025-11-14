@@ -2,7 +2,7 @@ import pygame
 import sys
 import os
 import fnmatch
-from configuracion import ANCHO_PANTALLA, ALTO_PANTALLA, BLANCO, m1_opciones, m2_opciones, m3_opciones, m4_opciones
+from configuracion import ANCHO_PANTALLA, ALTO_PANTALLA, BLANCO, m1_opciones, m2_opciones, m3_opciones, m4_opciones, m4_2_opciones
 from intro_y_menu.menu.button import Button
 from intro_y_menu.menu.settings import settings_menu
 # Removed top-level import of menus to avoid circular import.
@@ -33,6 +33,8 @@ def pause_menu(pantalla, mapa_actual=1, state=None):
             fondo = pygame.image.load(m4_opciones).convert()
         elif mapa_actual == 5:
             fondo = pygame.image.load(m4_opciones).convert()
+        elif mapa_actual == 6:
+            fondo = pygame.image.load(m4_2_opciones).convert()
         else:
             raise ValueError("Mapa no válido")
         fondo = pygame.transform.scale(fondo, (ANCHO_PANTALLA, ALTO_PANTALLA))

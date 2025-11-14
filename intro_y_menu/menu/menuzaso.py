@@ -25,7 +25,7 @@ def aplicar_resolucion(window, nueva_res):
         ancho, alto = map(int, nueva_res.split("x"))
         window = pygame.display.set_mode((ancho, alto), pygame.RESIZABLE)
 
-    print(f"✅ Resolución aplicada: {ancho}x{alto} | fullscreen={fullscreen}")
+    print(f"Resolución aplicada: {ancho}x{alto} | fullscreen={fullscreen}")
     return window, ancho, alto
 
 
@@ -56,9 +56,9 @@ def loading_screen(window):
 
     # Ejemplo de uso de la detección:
     if detectar_fullscreen():
-        print("🔎 La ventana está en modo pantalla completa")
+        print("pantalla completa")
     else:
-        print("🔎 La ventana NO está en pantalla completa")
+        print("NO pantalla completa")
 
     try:
         font = pygame.font.Font(None, 24)
@@ -110,7 +110,7 @@ def select_load_slot(window):
     BASE_DIR = os.path.dirname(__file__)
 
     # Fondo
-    ruta_fondo = os.path.join(BASE_DIR, "assets", "fondo_titulo.png")
+    ruta_fondo = os.path.join(BASE_DIR, "assets", "fondo_s.png")
     if os.path.exists(ruta_fondo):
         fondo = pygame.image.load(ruta_fondo).convert()
         fondo = pygame.transform.scale(fondo, (ANCHO_PANTALLA, ALTO_PANTALLA))
@@ -132,21 +132,94 @@ def select_load_slot(window):
         except Exception:
             exists[i-1] = False
 
-    # Mostrar instrucciones para eliminar
-    instructions_font = pygame.font.Font(None, 24)
-    instructions_surf = instructions_font.render("Presiona 'R' para eliminar el slot seleccionado", True, (255, 255, 255))
-    instructions_rect = instructions_surf.get_rect(center=(ANCHO_PANTALLA // 2, 150))
+    # Mostrar instrucciones para eliminar (colocadas en esquina inferior derecha, en pixel font)
+    try:
+        instructions_font = get_font(14)
+    except Exception:
+        instructions_font = pygame.font.SysFont("couriernew", 12)
+    instructions_surf = instructions_font.render("PRESIONA 'R' PARA ELIMINAR", True, (255, 255, 255))
+    instructions_pos = (ANCHO_PANTALLA - instructions_surf.get_width() - 20, ALTO_PANTALLA - 40)
 
-    # crear botones con texto dinámico
+    # crear botones con imágenes: empty_button.png o button_game{n}.png
     buttons = []
-    font = pygame.font.Font(None, 36)
-    for i in range(1, 6):
-        text = f"Slot {i}" + (" (Guardado)" if exists[i-1] else "")
-        text_surf = font.render(text, True, (255, 255, 255))
-        btn = Button(text_surf, (ANCHO_PANTALLA // 2, 300 + (i-1) * 80))
-        buttons.append(btn)
+    BASE_ASSETS = os.path.join(BASE_DIR, "assets")
+    back_button_img = os.path.join(BASE_ASSETS, "back_button.png")
+    # layout parameters for the slots (adjustable)
+    base_y = 160
+    slot_spacing = 92  # aumenté el espacio entre botones
+    # helper para crear botón de slot
+    def make_slot_button(i):
+        # i: 1..5
+        # possible asset name variants (some projects use different naming)
+        if exists[i-1]:
+            candidates = [f"button_game{i}.png", f"game{i}_button.png", f"game{i}.png", f"button_game_{i}.png"]
+        else:
+            candidates = ["empty_button.png", "emptybutton.png", "slot_empty.png"]
 
-    back_button = Button(None, (ANCHO_PANTALLA // 2, 300 + 5 * 80), scale=1.0, text="Volver")
+        img_path = None
+        for c in candidates:
+            p = os.path.join(BASE_ASSETS, c)
+            if os.path.exists(p):
+                img_path = p
+                break
+
+        # compute position; if slot is empty, raise it a bit to match visual preference
+        center_x = ANCHO_PANTALLA // 2
+        pos_y = base_y + (i - 1) * slot_spacing
+        if not exists[i-1]:
+            pos_y -= 16  # raise empty slots 16 pixels
+
+        pos = (center_x, pos_y)
+        if img_path:
+            return Button(img_path, pos, scale=1.0)
+        else:
+            # fallback: create a button-like surface so it still looks like an image
+            w, h = 420, 64
+            surf = pygame.Surface((w, h), pygame.SRCALPHA)
+            # choose color depending on whether slot is occupied
+            if exists[i-1]:
+                bg = (40, 100, 40)
+            else:
+                bg = (60, 60, 60)
+            surf.fill(bg)
+            pygame.draw.rect(surf, (200, 200, 200), surf.get_rect(), 3)
+            try:
+                fb = pygame.font.Font(None, 28)
+            except Exception:
+                fb = pygame.font.SysFont("Arial", 28)
+            label = f"Slot {i}"
+            if exists[i-1]:
+                sub = "GUARDADO"
+                label_s = fb.render(label, True, (255, 255, 255))
+                sub_s = fb.render(sub, True, (220, 220, 0))
+                surf.blit(label_s, (16, 12))
+                surf.blit(sub_s, (16, 12 + label_s.get_height() + 2))
+            else:
+                label_s = fb.render(label, True, (200, 200, 200))
+                surf.blit(label_s, (16, (h - label_s.get_height()) // 2))
+            return Button(surf, pos, scale=1.0)
+
+    for i in range(1, 6):
+        buttons.append(make_slot_button(i))
+
+    # back button (try image first, fallback to text)
+    back_pos = (160, base_y + 5 * slot_spacing + 20)
+    if os.path.exists(os.path.join(BASE_ASSETS, "back_button.png")):
+        back_button = Button(os.path.join(BASE_ASSETS, "back_button.png"), back_pos, scale=1.0)
+    else:
+        # create a boxed 'Volver' button using the pixel font so it looks consistent
+        try:
+            btn_font = get_font(28)
+        except Exception:
+            btn_font = pygame.font.SysFont("couriernew", 28)
+
+        bw, bh = 320, 64
+        btn_surf = pygame.Surface((bw, bh), pygame.SRCALPHA)
+        btn_surf.fill((40, 40, 40))
+        text_s = btn_font.render("VOLVER", True, (255, 255, 255))
+        txt_rect = text_s.get_rect(center=(bw // 2, bh // 2))
+        btn_surf.blit(text_s, txt_rect)
+        back_button = Button(btn_surf, back_pos, scale=1.0)
     buttons.append(back_button)
 
     # Default: select the first slot
@@ -165,15 +238,15 @@ def select_load_slot(window):
                 sys.exit()
 
             if event.type == pygame.KEYDOWN:
-                # Navegación: abajo/derecha = siguiente, arriba/izquierda = anterior
-                if event.key in [pygame.K_DOWN, pygame.K_RIGHT]:
+                # Navegación: abajo = siguiente, arriba = anterior (solo flechas ARRIBA/ABAJO)
+                if event.key == pygame.K_DOWN:
                     selected_index = (selected_index + 1) % len(buttons)
-                elif event.key in [pygame.K_UP, pygame.K_LEFT]:
+                elif event.key == pygame.K_UP:
                     selected_index = (selected_index - 1) % len(buttons)
                 elif event.key == pygame.K_RETURN:
                     if selected_index < 5:  # Slots 1-5
                         return selected_index + 1
-                    else:  # Back
+                    else:  # Back: return to game_selection_menu
                         return None
 
                 # --- ELIMINAR SLOT CON R ---
@@ -196,12 +269,9 @@ def select_load_slot(window):
                             for i in range(1, 6):
                                 exists[i-1] = i in raw_slots
 
-                            # actualizar textos de botones
+                            # recrear los botones de slots para usar imágenes actualizadas
                             for idx in range(5):
-                                txt = f"Slot {idx+1}" + (" (Guardado)" if exists[idx] else "")
-                                txt_surf = font.render(txt, True, (255, 255, 255))
-                                buttons[idx].image = txt_surf
-                                buttons[idx].rect = buttons[idx].image.get_rect(center=(ANCHO_PANTALLA // 2, 300 + idx * 80))
+                                buttons[idx] = make_slot_button(idx+1)
 
                             if deleted:
                                 message = f"Slot {target_slot} eliminado"
@@ -215,13 +285,17 @@ def select_load_slot(window):
 
         window.blit(fondo, (0, 0))
 
-        # Dibujar instrucciones
-        window.blit(instructions_surf, instructions_rect)
+        # Dibujar instrucciones (esquina inferior izquierda)
+        window.blit(instructions_surf, instructions_pos)
 
-        # Dibujar título
-        font_title = pygame.font.Font(None, 48)
-        title_surf = font_title.render("Seleccionar Slot de Carga", True, (255, 255, 255))
-        window.blit(title_surf, (ANCHO_PANTALLA // 2 - title_surf.get_width() // 2, 200))
+        # Dibujar título en pixel y en MAYÚSCULAS, sin recuadro
+        try:
+            title_font = get_font(36)
+        except Exception:
+            title_font = pygame.font.SysFont("couriernew", 36)
+        title_surf = title_font.render("SELECCIONAR SLOT DE CARGA", True, (255, 255, 255))
+        title_y = max(20, base_y - 100)
+        window.blit(title_surf, (ANCHO_PANTALLA // 2 - title_surf.get_width() // 2, title_y))
 
         for i, btn in enumerate(buttons):
             btn.selected = (i == selected_index)
@@ -249,7 +323,7 @@ def game_selection_menu(window):
     BASE_DIR = os.path.dirname(__file__)
 
     # Fondo
-    ruta_fondo = os.path.join(BASE_DIR, "assets", "fondo_titulo.png")
+    ruta_fondo = os.path.join(BASE_DIR, "assets", "fondo_s.png")
     if os.path.exists(ruta_fondo):
         fondo = pygame.image.load(ruta_fondo).convert()
         fondo = pygame.transform.scale(fondo, (ANCHO_PANTALLA, ALTO_PANTALLA))
@@ -257,15 +331,36 @@ def game_selection_menu(window):
         fondo = pygame.Surface((ANCHO_PANTALLA, ALTO_PANTALLA))
         fondo.fill((50, 50, 50))
 
-    # Botones
-    new_game_button = Button(None, (ANCHO_PANTALLA // 2, 400), scale=1.0, text="Nueva Partida")
-    load_game_button = Button(None, (ANCHO_PANTALLA // 2, 500), scale=1.0, text="Cargar Partida")
-    back_button = Button(None, (ANCHO_PANTALLA // 2, 600), scale=1.0, text="Volver")
+    # Labels for the menu
+    labels = ["Nueva Partida", "Cargar Partida", "Volver"]
 
-    buttons = [new_game_button, load_game_button, back_button]
-    # start with no selection so no button is highlighted by default
-    selected_index = -1
-    buttons[selected_index].selected = True
+    # Prepare font (pixel-like if available)
+    try:
+        font = get_font(36)
+    except Exception:
+        font = pygame.font.SysFont("couriernew", 36)
+
+    # Button sizing similar to menus(), but slightly smaller per request
+    spacing = 32  # reduced spacing
+    padding_w = 100
+    padding_h = 22
+    max_text_w = max(font.size(lbl)[0] for lbl in labels)
+    desired_w = max(360, max_text_w + padding_w)
+    max_w_allowed = ANCHO_PANTALLA - 260
+    # shrink a bit (82%) so buttons are visually smaller
+    btn_w = int(min(desired_w, max_w_allowed) * 0.82)
+    btn_h = int(max(64, btn_w * 0.24))
+
+    total_height = btn_h * len(labels) + spacing * (len(labels) - 1)
+    start_y = (ALTO_PANTALLA - total_height) // 2
+    center_x = ANCHO_PANTALLA // 2
+
+    buttons = []
+    for i, lbl in enumerate(labels):
+        rect = pygame.Rect(center_x - btn_w // 2, start_y + i * (btn_h + spacing), btn_w, btn_h)
+        buttons.append({"label": lbl, "rect": rect})
+
+    selected_index = 0
 
     while True:
         for event in pygame.event.get():
@@ -274,22 +369,21 @@ def game_selection_menu(window):
                 sys.exit()
 
             if event.type == pygame.KEYDOWN:
-                # Navegación: abajo/derecha = siguiente, arriba/izquierda = anterior
-                if event.key in [pygame.K_DOWN, pygame.K_RIGHT]:
+                # Navigate only with UP/DOWN as requested
+                if event.key == pygame.K_DOWN:
                     selected_index = (selected_index + 1) % len(buttons)
-                elif event.key in [pygame.K_UP, pygame.K_LEFT]:
+                elif event.key == pygame.K_UP:
                     selected_index = (selected_index - 1) % len(buttons)
                 elif event.key == pygame.K_RETURN:
-                    if buttons[selected_index] == new_game_button:
-                        print("Nueva partida")
+                    sel = buttons[selected_index]["label"]
+                    if sel == "Nueva Partida":
                         mapa_1.ejecutar_mapa1()
                         return
-                    elif buttons[selected_index] == load_game_button:
+                    elif sel == "Cargar Partida":
                         slot = select_load_slot(window)
                         if slot:
                             state = load_game(slot)
                             if state:
-                                # Cargar el mapa correspondiente basado en el estado
                                 mapa = state.get('mapa')
                                 if mapa == 'mapa1':
                                     mapa_1.ejecutar_mapa1_con_estado(state)
@@ -310,16 +404,59 @@ def game_selection_menu(window):
                             else:
                                 print("[ERROR] No se pudo cargar el estado del juego")
                         return
-                    elif buttons[selected_index] == back_button:
+                    elif sel == "Volver":
                         return
+
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                mx, my = event.pos
+                for idx, b in enumerate(buttons):
+                    if b["rect"].collidepoint(mx, my):
+                        selected_index = idx
+                        sel = b["label"]
+                        if sel == "Nueva Partida":
+                            mapa_1.ejecutar_mapa1()
+                            return
+                        elif sel == "Cargar Partida":
+                            slot = select_load_slot(window)
+                            if slot:
+                                state = load_game(slot)
+                                if state:
+                                    mapa = state.get('mapa')
+                                    if mapa == 'mapa1':
+                                        mapa_1.ejecutar_mapa1_con_estado(state)
+                                    elif mapa == 'mapa2':
+                                        from juego import mapa_2
+                                        mapa_2.ejecutar_mapa2_con_estado(state)
+                                    elif mapa == 'mapa3':
+                                        from juego import mapa_3
+                                        mapa_3.ejecutar_mapa3_con_estado(state)
+                                    elif mapa == 'mapa4':
+                                        from juego import mapa_3_2
+                                        mapa_3_2.ejecutar_mapa3_2_con_estado(state)
+                                    elif mapa == 'mapa5':
+                                        from juego import mapa_5
+                                        mapa_5.ejecutar_mapa5_con_estado(state)
+                                    else:
+                                        print(f"[ERROR] Mapa no reconocido: {mapa}")
+                                else:
+                                    print("[ERROR] No se pudo cargar el estado del juego")
+                            return
 
         window.blit(fondo, (0, 0))
 
-        # Actualizar y dibujar botones
-        for i, btn in enumerate(buttons):
-            btn.selected = (i == selected_index)
-            btn.update()
-            btn.draw(window)
+        # Draw buttons (semi-transparent background like menus())
+        for idx, b in enumerate(buttons):
+            rect = b["rect"]
+            is_hover = (idx == selected_index)
+            surf = pygame.Surface((rect.w, rect.h), pygame.SRCALPHA)
+            bg_color = (100, 100, 100, 230) if is_hover else (60, 60, 60, 200)
+            surf.fill(bg_color)
+            window.blit(surf, rect.topleft)
+
+            # render label centered with pixel font
+            txt_surf = font.render(b["label"].upper(), True, (255, 255, 255))
+            txt_rect = txt_surf.get_rect(center=rect.center)
+            window.blit(txt_surf, txt_rect)
 
         pygame.display.flip()
         clock.tick(60)

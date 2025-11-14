@@ -2,9 +2,20 @@ import pygame
 import sys
 import random
 import math
+import os
 from configuracion import ANCHO_PANTALLA, ALTO_PANTALLA
 from juego.menu_pausa import pause_menu
 pygame.init()
+
+# Cargar fondo m4_opciones
+try:
+    fondo_path = os.path.join(os.path.dirname(__file__), "..", "assets", "mapas", "f_cuatrolineas.png")
+    fondo = pygame.image.load(fondo_path).convert()
+    fondo = pygame.transform.scale(fondo, (ANCHO_PANTALLA, ALTO_PANTALLA))
+    print("✓ m4_opciones cargado correctamente")
+except Exception as e:
+    print(f"✗ Error al cargar m4_opciones: {e}")
+    fondo = None
 
 # -------------------
 # Configuración
@@ -189,7 +200,12 @@ def drop_piece_animated(board, col, piece, board_x, board_y):
                 pygame.quit()
                 sys.exit()
         
-        SCREEN.fill(BLACK)
+        # Dibujar el fondo si está disponible durante la animación (no dejar pantalla en negro)
+        if 'fondo' in globals() and fondo:
+            SCREEN.blit(fondo, (0, 0))
+        else:
+            SCREEN.fill(BLACK)
+
         # Dibujar solo el tablero estático, SIN el cursor, y obtener coordenadas ajustadas
         adj_board_x, adj_board_y = draw_static_board(board, board_x, board_y)
         
@@ -316,10 +332,10 @@ def inicio_juego():
     
     while True:
         clock.tick(FPS)
-        SCREEN.fill(BLACK)
-        
-        # Dibujar fondo si está disponible
-        # SCREEN.blit(fondo, (0, 0))
+        if 'fondo' in globals() and fondo:
+            SCREEN.blit(fondo, (0, 0))
+        else:
+            SCREEN.fill(BLACK)
         
         # Dibujar el tablero (devuelve coordenadas ajustadas que se ignoran)
         _, _ = draw_board(board, cursor_col if turn == 0 else -1, board_x, board_y)
@@ -331,7 +347,7 @@ def inicio_juego():
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     # Abrir menú de pausa; minijuego no guarda estado por defecto
-                    pause_menu(SCREEN, mapa_actual=4, state=None)
+                    pause_menu(SCREEN, mapa_actual=6, state=None)
                 elif not game_over and turn == 0:
                     if event.key == pygame.K_LEFT:
                         cursor_col = max(0, cursor_col - 1)
@@ -343,7 +359,7 @@ def inicio_juego():
                             win_positions = winning_move(board, 1)
                             if win_positions:
                                 game_over = True
-                                winner = "Jugador"
+                                winner = "JUGADOR"
                                 winning_line = win_positions
                             else:
                                 turn = 1
@@ -357,7 +373,7 @@ def inicio_juego():
                 win_positions = winning_move(board, 2)
                 if win_positions:
                     game_over = True
-                    winner = "CPU"
+                    winner = "VAMPIRO"
                     winning_line = win_positions
                 else:
                     turn = 0
@@ -365,13 +381,18 @@ def inicio_juego():
         
         # Fin de partida
         if game_over:
-            SCREEN.fill(BLACK)
+            if 'fondo' in globals() and fondo:
+                SCREEN.blit(fondo, (0, 0))
+            else:
+                SCREEN.fill(BLACK)
             draw_static_board(board, board_x, board_y)
-            msg_txt = font.render(f"{winner} gana!", True, RED if winner=="Jugador" else YELLOW)
+            # Show winner message
+            color = RED if str(winner).lower().startswith("jug") else YELLOW
+            msg_txt = font.render(f"{winner} GANA!", True, color)
             SCREEN.blit(msg_txt, (WIDTH//2 - msg_txt.get_width()//2, 50))
             pygame.display.flip()
             pygame.time.wait(2000)
-            # Return True if player won, False if CPU won
-            return winner == "Jugador"
+            # Return True if player won, False otherwise
+            return str(winner).lower().startswith("jug")
         
         pygame.display.update()
