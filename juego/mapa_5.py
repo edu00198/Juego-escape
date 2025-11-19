@@ -114,12 +114,77 @@ def ejecutar_mapa5(respect_saved: bool = True):
     fondo_escalado = pygame.transform.scale(fondo_mapa, (SCALED_WIDTH, SCALED_HEIGHT))
 
     BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-    ruta_pared = os.path.join(BASE_DIR, "assets", "mapas", "pared_mapa_4.png")
+    ruta_pared = os.path.join(BASE_DIR, "assets", "mapas", "pared_mapa_5.png")
     if os.path.exists(ruta_pared):
         imagen_pared = pygame.image.load(ruta_pared).convert_alpha()
         imagen_escalada = pygame.transform.scale(imagen_pared, (ANCHO_PANTALLA, ALTO_PANTALLA))
     else:
         imagen_escalada = None
+
+    def animacion_puerta_abierta(pantalla):
+        # Cargar sprites de la animación de la puerta
+        sprites_animacion_puerta = [
+            pygame.image.load("assets/animaciones/puerta_reja_abriendose_animacion/puerta_reja_abrien_escalada(1).png"),
+            pygame.image.load("assets/animaciones/puerta_reja_abriendose_animacion/puerta_reja_abrien_escalada(2).png"),
+            pygame.image.load("assets/animaciones/puerta_reja_abriendose_animacion/puerta_reja_abrien_escalada(3).png"),
+            pygame.image.load("assets/animaciones/puerta_reja_abriendose_animacion/puerta_reja_abrien_escalada(4).png"),
+        ]
+
+        # Variables de animación
+        sprite_index = 0
+        animation_timer = pygame.time.get_ticks()
+        animation_speed = 300  # milisegundos entre frames
+        animacion_terminada = False
+
+        # Bucle de animación
+        while not animacion_terminada:
+            current_time = pygame.time.get_ticks()
+
+            # Manejo de eventos
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        try:
+                            state = {
+                                'mapa': 'mapa3',
+                                'pos_jugador': (jugador.sprite_pos.x, jugador.sprite_pos.y)
+                            }
+                        except Exception:
+                            state = None
+                        pause_menu(pantalla, mapa_actual=3, state=state)
+            
+            # Dibujar fondo y jugador
+            pantalla.fill((0, 0, 0))
+            
+            pantalla.blit(fondo_escalado, (OFFSET_X, OFFSET_Y))
+            pantalla.blit(imagen_escalada, (0, 0))
+            
+            JugadorLvl2.dibujar(jugador, pantalla, offset_x, offset_y)    # Jugador lvl2
+           
+            
+            
+            # Dibujar sprite actual de la puerta
+            if sprite_index < len(sprites_animacion_puerta):
+                imagen_puerta = sprites_animacion_puerta[sprite_index]
+                imagen_puerta_escalado= pygame.transform.scale(imagen_puerta, (ANCHO_PANTALLA, ALTO_PANTALLA))
+                pantalla.blit(imagen_puerta_escalado, (0, 0))               # Posición de la puerta
+
+            pygame.display.update()
+
+            # Avanzar al siguiente frame si pasó el tiempo
+            if current_time - animation_timer > animation_speed:
+                sprite_index += 1
+                animation_timer = current_time
+                if sprite_index >= len(sprites_animacion_puerta):
+                    animacion_terminada = True
+            # Actualizar pantalla final
+            pygame.display.flip()
+            clock.tick(60)
+
+    animacion_puerta_abierta(pantalla)
 
     while running:
         for event in pygame.event.get():
@@ -152,11 +217,12 @@ def ejecutar_mapa5(respect_saved: bool = True):
         pantalla.fill((0, 0, 0))  # Limpiar pantalla
 
         pantalla.blit(fondo_escalado, (OFFSET_X, OFFSET_Y))  # Fondo del mapa
-        
+        '''
         #Dibujar colisiones (opcional para depuración)
         for colision in colisiones_escaladas:
-            pygame.draw.rect(pantalla, (255, 0, 0), colision, 2)
+            pygame.draw.rect(pantalla, (255, 0, 0), colision, 2)'''
 
+        
         #Dibujar puertas (opcional para depuración)
         pygame.draw.rect(pantalla, (0, 0, 255), puerta_4_entrada, 2)
         pygame.draw.rect(pantalla, (0, 255, 255), puerta_4_salida, 2)
@@ -182,7 +248,7 @@ def ejecutar_mapa5(respect_saved: bool = True):
                     enemy.last_attack = current_time
 
         # Debug: Dibujar zona de combate para visualización
-        pygame.draw.rect(pantalla, (255, 0, 0), zona_combate, 2)
+        #pygame.draw.rect(pantalla, (255, 0, 0), zona_combate, 2)
         
         # Manejo del ataque del jugador (integrado desde test_combat.py)
         keys = pygame.key.get_pressed()
@@ -254,7 +320,7 @@ def ejecutar_mapa5(respect_saved: bool = True):
                 pygame.draw.rect(pantalla, (255, 255, 0), attack_rect.move(offset_x, offset_y), 2)
             
             # Debug: mostrar zona de combate
-            pygame.draw.rect(pantalla, (0, 0, 255), zona_combate, 2)
+            #pygame.draw.rect(pantalla, (0, 0, 255), zona_combate, 2)
 
             # Verificar si hay enemigos en el sistema de combate
             if len(combat_system.enemies) == 0:
@@ -297,8 +363,8 @@ def ejecutar_mapa5(respect_saved: bool = True):
                             running = False
                         enemy_instance.last_attack = current_time
 
-        if imagen_escalada:
-            pantalla.blit(imagen_escalada, (0, 0))  # Después la imagen → queda arriba del jugador
+        #if imagen_escalada:
+            #pantalla.blit(imagen_escalada, (0, 0))  # Después la imagen → queda arriba del jugador
 
         # Debug: dibujar área de ataque cuando el jugador está atacando
         if jugador.estado == "attack":

@@ -185,8 +185,7 @@ tilesets = {
     "l_paredes_exteriores": cargar_tileset(IMAGENES_PATH + "paredes.png", TILE_SIZE),
     "l_New_Layer_7": cargar_tileset(IMAGENES_PATH + "paredes.png", TILE_SIZE),
     "l_uerta": cargar_tileset(IMAGENES_PATH + "paredes.png", TILE_SIZE),
-    "collisions": cargar_tileset(IMAGENES_PATH + "45c9c5be-c636-42b7-62d6-b8a104bf6200.png", TILE_SIZE),
-    "l_hitbox_js": cargar_tileset(IMAGENES_PATH + "45c9c5be-c636-42b7-62d6-b8a104bf6200.png", TILE_SIZE),
+    "l_hitbox_js": cargar_tileset(IMAGENES_PATH + "tablero.png", TILE_SIZE),
 }
 
 
