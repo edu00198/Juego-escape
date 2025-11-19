@@ -104,12 +104,21 @@ def ejecutar_mapa5(respect_saved: bool = True):
     enemy = None  # Inicializar enemy como None
     
     # Definir zona de combate más grande para facilitar el trigger
+    # Usar la escala local calculada (escala) y los offsets locales para
+    # que las coordenadas de la zona estén en el mismo espacio de pantalla
+    # que la hitbox del jugador.
+    # Definir zona de combate en las mismas coordenadas que el fondo/puertas
+    # para evitar desalineamientos: usar las constantes importadas OFFSET_X/Y
+    # y SCALE_FACTOR (coordenadas de mapa ya escaladas a la pantalla).
     zona_combate = pygame.Rect(
-        offset_x + 10 * TILE_SIZE * SCALE_FACTOR,  # x: desde columna 10
-        offset_y + 3 * TILE_SIZE * SCALE_FACTOR,   # y: desde fila 3
-        10 * TILE_SIZE * SCALE_FACTOR,             # ancho: 10 tiles
-        4 * TILE_SIZE * SCALE_FACTOR               # alto: 4 tiles
+        int(OFFSET_X + 10 * TILE_SIZE * SCALE_FACTOR),  # x: desde columna 10
+        int(OFFSET_Y + 3 * TILE_SIZE * SCALE_FACTOR),   # y: desde fila 3
+        int(10 * TILE_SIZE * SCALE_FACTOR),             # ancho: 10 tiles
+        int(4 * TILE_SIZE * SCALE_FACTOR)               # alto: 4 tiles
     )
+
+    # Debug: mostrar la zona de combate para ayudar a diagnosticar spawn
+    print(f"[mapa_5] zona_combate={zona_combate} (OFFSET_X={OFFSET_X}, SCALE_FACTOR={SCALE_FACTOR})")
 
     fondo_escalado = pygame.transform.scale(fondo_mapa, (SCALED_WIDTH, SCALED_HEIGHT))
 
@@ -206,7 +215,16 @@ def ejecutar_mapa5(respect_saved: bool = True):
             # Configurar el enemigo y agregarlo al sistema de combate
             try:
                 # Aumentar el rango, ancho y alto de la hitbox del enemigo para cubrir todo su cuerpo
-                enemy.set_attack_hitbox(attack_range=45, attack_width=50, attack_height=int(enemy.rect.height * 0.9))
+                if hasattr(enemy, 'set_attack_hitbox'):
+                    enemy.set_attack_hitbox(attack_range=45, attack_width=50, attack_height=int(enemy.rect.height * 0.9))
+                else:
+                    # Fallback: asignar directamente si el método no existe
+                    try:
+                        enemy.attack_range = 45
+                        enemy.attack_width = 50
+                        enemy.attack_height = int(enemy.rect.height * 0.9)
+                    except Exception:
+                        pass
                 combat_system.add_enemy(enemy)
                 # Mostrar mensaje de inicio de combate
                 font = pygame.font.Font(None, 36)
@@ -263,13 +281,18 @@ def ejecutar_mapa5(respect_saved: bool = True):
                         print(f"[mapa_5] Error guardando estado de mapa5: {ex}")
                 # Si el enemigo existe y está vivo pero por alguna razón no está en la lista, agregarlo
                 elif enemy is not None and not getattr(enemy, 'is_dead', False):
-                    if enemy not in combat_system.enemies:
-                        combat_system.add_enemy(enemy)
-                        try:
-                            # Usar los mismos valores aumentados para la hitbox del enemigo
-                            enemy.set_attack_hitbox(attack_range=45, attack_width=50, attack_height=int(enemy.rect.height * 0.9))
-                        except Exception:
-                            pass
+                        if enemy not in combat_system.enemies:
+                            combat_system.add_enemy(enemy)
+                            try:
+                                # Usar los mismos valores aumentados para la hitbox del enemigo
+                                if hasattr(enemy, 'set_attack_hitbox'):
+                                    enemy.set_attack_hitbox(attack_range=45, attack_width=50, attack_height=int(enemy.rect.height * 0.9))
+                                else:
+                                    enemy.attack_range = 45
+                                    enemy.attack_width = 50
+                                    enemy.attack_height = int(enemy.rect.height * 0.9)
+                            except Exception:
+                                pass
 
             # Actualizar y dibujar enemigos solo si el combate está activo
             for enemy_instance in combat_system.enemies[:]:
