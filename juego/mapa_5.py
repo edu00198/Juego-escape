@@ -2,6 +2,7 @@ import pygame
 import sys
 import os
 import random
+import time
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from configuracion import ANCHO_PANTALLA, ALTO_PANTALLA, ESCALA_JUGADOR
@@ -233,7 +234,7 @@ def ejecutar_mapa5(respect_saved: bool = True):
 
         
         #Dibujar puertas (opcional para depuración)
-        pygame.draw.rect(pantalla, (0, 0, 255), puerta_4_entrada, 2)
+        #pygame.draw.rect(pantalla, (0, 0, 255), puerta_4_entrada, 2)
         pygame.draw.rect(pantalla, (0, 255, 255), puerta_4_salida, 2)
 
         # Manejo del combate
@@ -251,7 +252,21 @@ def ejecutar_mapa5(respect_saved: bool = True):
                 if pygame.Rect(enemy.rect).colliderect(jugador.rect):
                     if combat_player.take_damage(enemy.attack_power, current_time):
                         print("Game Over")
-                        running = False
+                        pantalla = pygame.display.set_mode((ANCHO_PANTALLA, ALTO_PANTALLA))
+                        pantalla.fill((0, 0, 0))
+                                        
+                        BLANCO = (255, 255, 255)
+                        # Fuente más chica
+                        fuente = pygame.font.SysFont("Arial", 48, bold=True)
+                        time.sleep(3)  # Pausa breve antes de mostrar el mensaje
+
+                    
+                        texto = fuente.render("¡Haz muerto!", True, BLANCO)
+                        rect_texto = texto.get_rect(center=(ANCHO_PANTALLA // 2, ALTO_PANTALLA // 4))
+                        pantalla.blit(texto, rect_texto)
+
+                        return
+
                     enemy.last_attack = current_time
 
         # Debug: Dibujar zona de combate para visualización
@@ -322,10 +337,10 @@ def ejecutar_mapa5(respect_saved: bool = True):
                 # Ajusta este valor (imagen_vida_dy) para subir/bajar la imagen.
                 imagen_vida_dy = 20
                 pos_y = by - ih + imagen_vida_dy
-                pantalla.blit(imagen_vida, (pos_x, pos_y))
+                pantalla.blit(imagen_vida, (pos_x, pos_y*3))
             except Exception as e:
                 # Fallback: dibujar en la esquina si algo falla
-                pantalla.blit(imagen_vida, (10, 10))
+                pantalla.blit(imagen_vida, (20, 60))
         
         # Solo mostrar la barra de vida y enemigos si el combate está activo
         if combate_activo:
@@ -384,8 +399,8 @@ def ejecutar_mapa5(respect_saved: bool = True):
                             running = False
                         enemy_instance.last_attack = current_time
 
-        #if imagen_escalada:
-            #pantalla.blit(imagen_escalada, (0, 0))  # Después la imagen → queda arriba del jugador
+       
+        pantalla.blit(imagen_escalada, (0, 0))  # Después la imagen → queda arriba del jugador
 
         # Debug: dibujar área de ataque cuando el jugador está atacando
             # (Debug attack rect removed)
@@ -394,10 +409,10 @@ def ejecutar_mapa5(respect_saved: bool = True):
         clock.tick(60)
 
         # Transiciones de mapa
-        if jugador.rect.colliderect(puerta_4_salida):
-            print("Transición al siguiente mapa")
-            running = False  # Aquí puedes llamar al siguiente mapa si lo tienes
-        # Ya no se permite volver al mapa anterior ni cerrar la ejecución si se toca la entrada
+        if jugador.rect.colliderect(puerta_4_salida) and mapa5_enemigo_muerto == True:
+            print("Transición al minijuego de engranajes")
+            from juego.mapa_final import ejecutar_mapa_ganador
+            ejecutar_mapa_ganador()
 
     pygame.quit()
     sys.exit()

@@ -9,7 +9,7 @@ from intro_y_menu.menu.settings import settings_menu
 # We'll import menus() locally when needed to prevent circular import errors.
 from assets.mapas.fondo import resume_button, help_button, settings_button, save_button, quit_button, menu_pause
 from .save_system import save_game, list_saves
-
+NEGRO = (0, 0, 0)   
 # ==========================
 # MENÚ DE PAUSA
 # ==========================
@@ -41,7 +41,7 @@ def pause_menu(pantalla, mapa_actual=1, state=None):
     except Exception as e:
         print(f"No se pudo cargar el fondo: {e}")
         fondo = pygame.Surface((ANCHO_PANTALLA, ALTO_PANTALLA))
-        fondo.fill(BLANCO)
+        fondo.fill(NEGRO)
 
     # --- CONTENEDOR CENTRAL (menu_pause) ---
     try:
@@ -91,7 +91,8 @@ def pause_menu(pantalla, mapa_actual=1, state=None):
                     selected_index = (selected_index + 1) % len(buttons)
                 elif event.key == pygame.K_UP:
                     selected_index = (selected_index - 1) % len(buttons)
-                elif event.key == pygame.K_ESCAPE:
+
+                elif event.key == pygame.K_ESCAPE and not mapa_actual == 7:
                     return  # vuelve al juego
                 elif event.key == pygame.K_RETURN:
                     # --- Acción del botón seleccionado ---

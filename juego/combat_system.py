@@ -7,23 +7,15 @@ class CombatSystem:
     def __init__(self):
         self.enemies = []
         self.projectiles = []
-<<<<<<< Updated upstream
-        self.hit_effects = []  # Efectos de impacto visuales
-
-=======
         self.hit_effects = []
         self.damage_numbers = []  # Números flotantes de daño
         
->>>>>>> Stashed changes
     def add_enemy(self, enemy):
         self.enemies.append(enemy)
 
     def remove_enemy(self, enemy):
         if enemy in self.enemies:
             self.enemies.remove(enemy)
-<<<<<<< Updated upstream
-
-=======
     
     def add_damage_number(self, x, y, damage, is_critical=False):
         """Agregar número de daño flotante"""
@@ -36,7 +28,6 @@ class CombatSystem:
             'is_critical': is_critical
         })
     
->>>>>>> Stashed changes
     def add_hit_effect(self, x, y, effect_type="impact"):
         """Agregar efecto visual de impacto"""
         self.hit_effects.append({
@@ -49,16 +40,11 @@ class CombatSystem:
 
     def update_effects(self, current_time):
         """Actualizar y limpiar efectos de combate"""
-<<<<<<< Updated upstream
-        self.hit_effects = [e for e in self.hit_effects if current_time - e['time'] < e['duration']]
-
-=======
         self.hit_effects = [e for e in self.hit_effects 
                            if current_time - e['time'] < e['duration']]
         self.damage_numbers = [d for d in self.damage_numbers
                               if current_time - d['time'] < d['duration']]
     
->>>>>>> Stashed changes
     def draw_effects(self, screen, camera_offset_x=0, camera_offset_y=0):
         """Dibujar efectos visuales y números de daño"""
         current_time = pygame.time.get_ticks()
@@ -69,48 +55,6 @@ class CombatSystem:
             progress = elapsed / effect['duration']
 
             if effect['type'] == "impact":
-<<<<<<< Updated upstream
-                radius = int(10 + progress * 20)
-                color = (255, int(150 * (1 - progress)), 0)
-                pygame.draw.circle(screen, color,
-                                   (int(effect['x'] + camera_offset_x), int(effect['y'] + camera_offset_y)),
-                                   radius, 2)
-            elif effect['type'] == "heal":
-                offset_y = int(progress * -30)
-                pygame.draw.circle(screen, (0, 255, 0),
-                                   (int(effect['x'] + camera_offset_x), int(effect['y'] + camera_offset_y + offset_y)),
-                                   3)
-            elif effect['type'] == "crit":
-                size = int(5 + progress * 5)
-                pygame.draw.polygon(screen, (255, 255, 0),
-                                    [(int(effect['x'] + camera_offset_x), int(effect['y'] + camera_offset_y - size)),
-                                     (int(effect['x'] + camera_offset_x + size), int(effect['y'] + camera_offset_y)),
-                                     (int(effect['x'] + camera_offset_x), int(effect['y'] + camera_offset_y + size)),
-                                     (int(effect['x'] + camera_offset_x - size), int(effect['y'] + camera_offset_y))], 2)
-
-
-class HitEffect:
-    """Efecto visual simple para impactos"""
-
-    def __init__(self, x, y, lifetime=300):
-        self.x = x
-        self.y = y
-        self.lifetime = lifetime
-        self.creation_time = pygame.time.get_ticks()
-
-    def is_alive(self):
-        return pygame.time.get_ticks() - self.creation_time < self.lifetime
-
-    def draw(self, screen, camera_offset_x=0, camera_offset_y=0):
-        elapsed = pygame.time.get_ticks() - self.creation_time
-        progress = elapsed / self.lifetime
-        radius = int(10 + progress * 15)
-        color = (255, 100, 0)
-        pygame.draw.circle(screen, color,
-                           (int(self.x + camera_offset_x), int(self.y + camera_offset_y)),
-                           radius, 2)
-
-=======
                 radius = int(15 + progress * 25)
                 alpha = int(255 * (1 - progress))
                 color = (255, int(150 * (1 - progress)), 0)
@@ -174,7 +118,6 @@ class HitEffect:
             pos = (int(dmg['x'] + camera_offset_x - text.get_width() // 2),
                    int(dmg['y'] + camera_offset_y + offset_y))
             screen.blit(text, pos)
->>>>>>> Stashed changes
 
 class Enemy:
     def __init__(self, x, y, health=100, difficulty=1.0):
@@ -182,27 +125,6 @@ class Enemy:
         self.y = y
         self.health = health
         self.max_health = health
-<<<<<<< Updated upstream
-        self.scale = 3  # Mismo tamaño que en el cuatro en raya
-
-        # Velocidad ligeramente reducida por defecto
-        self.speed = 2.0
-        self.attack_range = 40
-        self.attack_power = 10
-
-        # Inicializar last_attack para evitar ataques inmediatos
-        self.last_attack = pygame.time.get_ticks()
-        self.attack_cooldown = 2500  # ms (2.5 segundos entre ataques)
-
-        # Knockback
-        self.knockback_velocity_x = 0
-        self.knockback_velocity_y = 0
-        self.is_knocked_back = False
-        self.knockback_duration = 300
-        self.knockback_end_time = 0
-        self.knockback_resistance = 0.85
-
-=======
         self.scale = 3
         self.rect = pygame.Rect(x, y, 32 * self.scale, 32 * self.scale)
         
@@ -216,7 +138,6 @@ class Enemy:
         self.last_attack = pygame.time.get_ticks()
         self.attack_cooldown = max(1500, int(2500 / difficulty))  # Más rápido con mayor dificultad
         
->>>>>>> Stashed changes
         # Sistema de knockback mejorado
         self.knockback_velocity_x = 0
         self.knockback_velocity_y = 0
@@ -228,47 +149,7 @@ class Enemy:
         # Cargar sprites
         self.load_sprites()
 
-<<<<<<< Updated upstream
-        # Inicializar rect basado en el sprite cargado (fallback seguro)
-        # Si hay una animación disponible, usar el primer frame como tamaño; si no, usar un tamaño por defecto
-        try:
-            first_image = None
-            # Preferir idle/down si existe
-            if self.animations.get("idle", {}).get("down"):
-                lst = self.animations["idle"]["down"]
-                if lst:
-                    first_image = lst[0]
-            # Si no hay idle/down, buscar cualquier frame cargado
-            if first_image is None:
-                for state in self.animations.values():
-                    if isinstance(state, dict):
-                        for dir_list in state.values():
-                            if dir_list:
-                                first_image = dir_list[0]
-                                break
-                        if first_image:
-                            break
-
-            if first_image:
-                w, h = first_image.get_width(), first_image.get_height()
-            else:
-                # fallback razonable (32px * scale)
-                w, h = 32 * self.scale, 32 * self.scale
-        except Exception:
-            w, h = 32 * self.scale, 32 * self.scale
-
-
-        # Crear el rect en la posición inicial
-        self.rect = pygame.Rect(int(self.x), int(self.y), int(w), int(h))
-
-        # Protección breve tras aparecer para evitar que el enemigo "nazca encima" del jugador
-        self.spawn_time = pygame.time.get_ticks()
-        self.spawn_protection_time = 800  # ms durante los cuales no perseguirá activamente al jugador
-
-        # Flag de muerte
-=======
         # Estados
->>>>>>> Stashed changes
         self.is_dead = False
         self.death_animation_played = False
         self.is_stunned = False
@@ -281,15 +162,8 @@ class Enemy:
         self.state = "idle"
         self.direction = "down"
         self.is_moving = False
-<<<<<<< Updated upstream
-
-        # Parámetros de hitbox de ataque (ajustables)
-        # attack_width: profundidad/alcance del área en la dirección que mira
-        # attack_height: tamaño perpendicular (alto para ataques verticales o ancho para horizontales)
-=======
         
         # Hitbox de ataque
->>>>>>> Stashed changes
         self.attack_width = int(self.attack_range * 0.8)
         self.attack_height = int(self.rect.height * 0.6)
         
@@ -722,16 +596,6 @@ class Enemy:
         if self.state == "death":
             return
 
-<<<<<<< Updated upstream
-        # Dibujar rectángulo del área de ataque (debug) — solo si está habilitado explícitamente
-        try:
-            if getattr(self, 'show_attack_debug', False):
-                attack_rect = self.get_attack_rect()
-                # dibujar como contorno rojo
-                pygame.draw.rect(screen, (255, 0, 0), attack_rect.move(camera_offset_x, camera_offset_y), 2)
-        except Exception:
-            pass
-=======
         # Dibujar indicador de telegrafía (advertencia de ataque)
         if self.is_telegraphing:
             progress = (current_time - self.telegraph_time) / self.telegraph_duration
@@ -740,7 +604,6 @@ class Enemy:
             s = pygame.Surface((attack_rect.width, attack_rect.height), pygame.SRCALPHA)
             s.fill((255, 0, 0, alpha))
             screen.blit(s, (attack_rect.x + camera_offset_x, attack_rect.y + camera_offset_y))
->>>>>>> Stashed changes
         
         # Barra de vida
         health_bar_width = int(self.rect.width * 0.8)

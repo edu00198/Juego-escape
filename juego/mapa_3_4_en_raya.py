@@ -123,7 +123,7 @@ def ejecutar_mapa4_en_raya():
 
         pantalla.fill((0, 0, 0))
         pantalla.blit(fondo_escalado, (OFFSET_X, OFFSET_Y))
-        pygame.draw.rect(pantalla, (0, 0, 255), puerta, 2)
+        #pygame.draw.rect(pantalla, (0, 0, 255), puerta, 2)
 
         jugador.dibujar(pantalla, offset_x, offset_y)
         pantalla.blit(imagen_escalada, pos_tablero)

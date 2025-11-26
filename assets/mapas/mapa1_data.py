@@ -91,7 +91,7 @@ l_roturs_en_las_paredes = [
 l_hitbox_mapa_1 = [
   [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
   [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-  [1,1,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,1],
+  [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
   [1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
   [1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
   [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
@@ -225,5 +225,5 @@ puerta_1 = pygame.Rect(
     OFFSET_X + 10 * TILE_SIZE * SCALE_FACTOR,  # posicion x (10)
     OFFSET_Y + 1 * TILE_SIZE * SCALE_FACTOR,   # posición y del tile 8
     TILE_SIZE * 2 * SCALE_FACTOR,              # Ancho (2 tiles)
-    TILE_SIZE * 2 * SCALE_FACTOR                   # 1 tile de alto
+    TILE_SIZE * 2.3 * SCALE_FACTOR                   # 1 tile de alto
 )

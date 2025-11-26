@@ -124,15 +124,12 @@ def ejecutar_mapa1():
     # Historia inicial
     intro_texts = [
     "…¿Dónde… estoy?",
-    "Solo escuchás gotas cayendo. Las paredes están húmedas, el aire… pesado.",
-    "???: Despertaste al fin. Pocos recuerdan su nombre aquí.",
+    "Las paredes húmedas, el aire… pesado.",
+    "???: veo que despertaste.",
     "Jugador: ¿Quién habla? Muéstrate.",
-    "???: No temas. Soy la voz de lo que fue este lugar.",
-    "???: Todos los que entran buscan escapar, pero solo los que escuchan… encuentran la salida.",
-    "Jugador: ¿La salida? ¿Dónde está?",
-    "???: Más allá de estas puertas, cada una custodiada por pruebas y mentiras.",
-    "Jugador: Entonces seguiré adelante.",
-    "???: Recordá esto, aventurero: no todo lo que brilla te ayudará… y no todo lo que calla está muerto."
+    "???: No temas. Todos buscan escapar",
+    "Jugador: ¿Donde esta la salida? ",
+    "???: Más allá de estas puertas, pero no todo lo que brilla esoro"
 ]
 
 
@@ -314,8 +311,7 @@ def ejecutar_mapa1():
                 if not dialog_system.active:
                     dialog_system.start_dialog(
                         [
-                            "La puerta está sellada.",
-                            "Necesitas encontrar la llave y abrir el cofre antes de continuar..."
+                            "La puerta está sellada. Encuentra la llave y abre el cofre para continuar..."
                         ],
                         "Puerta Cerrada"
                     )

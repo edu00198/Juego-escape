@@ -139,12 +139,10 @@ def ejecutar_mapa2_con_estado(state=None,x = 0, y= 0):
     dialog_system = DialogSystem(pantalla)
     congrat_texts = [
         "El aire se vuelve más denso mientras avanzás.",
-        "Las antorchas parecen encenderse solas, una a una, marcando el camino.",
         "???: Veo que lograste abrir la puerta...",
-        "Jugador: Seguí tu voz. No me dejas muchas opciones.",
+        "Jugador: Seguí tu voz.",
         "???: La salida está más cerca... pero también lo está aquello que la protege.",
         "Jugador: ¿Aquello?",
-        "???: No lo nombres. Aquí, las cosas que se nombran despiertan.",
         "Un silencio pesado llena el pasillo. El eco de tus pasos se mezcla con un susurro distante."
     ]
 
@@ -172,7 +170,7 @@ def ejecutar_mapa2_con_estado(state=None,x = 0, y= 0):
         pantalla.fill((0, 0, 0)) # elfondo
         pantalla.blit(fondo_escalado, (OFFSET_X, OFFSET_Y))
         # Dibujo condicional según posición del jugador
-        if float(jugador.sprite_pos.y) + float(jugador.rect.height) < 300: 
+        if float(jugador.sprite_pos.y) + float(jugador.rect.height) < 307: 
             jugador.dibujar(pantalla, offset_x, offset_y)
             pantalla.blit(imagen_escalada, (0, 0))
         else: 
