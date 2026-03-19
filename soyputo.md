@@ -1,0 +1,1 @@
+Lo admito, soy gay.
